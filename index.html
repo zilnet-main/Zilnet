@@ -1,13 +1,1186 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zilnet</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#ffffff">
+<title>Zilnet</title>
+
+<style>
+:root {
+    --bg: #ffffff;
+    --surface: #f7f7f8;
+    --surface-2: #eeeeef;
+    --text: #111111;
+    --muted: #707070;
+    --line: #dddddd;
+    --accent: #111111;
+}
+
+[data-theme="dark"] {
+    --bg: #0b0b0c;
+    --surface: #151516;
+    --surface-2: #202022;
+    --text: #f5f5f5;
+    --muted: #999999;
+    --line: #2c2c2e;
+    --accent: #ffffff;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+body {
+    min-height: 100vh;
+    background: var(--bg);
+    color: var(--text);
+}
+
+button,
+input {
+    font: inherit;
+}
+
+button {
+    color: inherit;
+}
+
+/* ---------- LOGIN ---------- */
+
+.auth-screen {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+}
+
+.auth-box {
+    width: 100%;
+    max-width: 420px;
+    text-align: center;
+}
+
+.logo {
+    font-size: 34px;
+    font-weight: 800;
+    letter-spacing: -1.5px;
+    color: var(--text);
+}
+
+.tagline {
+    color: var(--muted);
+    margin-top: 8px;
+    margin-bottom: 32px;
+}
+
+.auth-input {
+    width: 100%;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    color: var(--text);
+    border-radius: 12px;
+    padding: 14px;
+    margin-bottom: 10px;
+    outline: none;
+}
+
+.primary-btn {
+    width: 100%;
+    border: 0;
+    background: var(--accent);
+    color: var(--bg);
+    border-radius: 12px;
+    padding: 14px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.secondary-btn {
+    width: 100%;
+    border: 1px solid var(--line);
+    background: transparent;
+    color: var(--text);
+    border-radius: 12px;
+    padding: 14px;
+    font-weight: 700;
+    margin-top: 10px;
+    cursor: pointer;
+}
+
+.demo-note {
+    color: var(--muted);
+    font-size: 12px;
+    margin-top: 18px;
+}
+
+/* ---------- APP ---------- */
+
+.app {
+    display: none;
+    min-height: 100vh;
+    padding-bottom: 78px;
+}
+
+.topbar {
+    height: 64px;
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 18px;
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: color-mix(in srgb, var(--bg) 94%, transparent);
+    backdrop-filter: blur(16px);
+}
+
+.top-logo {
+    font-size: 23px;
+    font-weight: 800;
+    letter-spacing: -1px;
+}
+
+.top-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.icon-btn {
+    width: 40px;
+    height: 40px;
+    border: 0;
+    background: transparent;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    color: var(--text);
+}
+
+.line-icon {
+    width: 23px;
+    height: 23px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+/* ---------- CONTENT ---------- */
+
+.content {
+    width: 100%;
+    max-width: 680px;
+    margin: auto;
+}
+
+.stories {
+    padding: 18px 16px 14px;
+    border-bottom: 1px solid var(--line);
+}
+
+.section-title {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .08em;
+    color: var(--muted);
+    margin-bottom: 14px;
+}
+
+.story-row {
+    display: flex;
+    gap: 18px;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+.story-row::-webkit-scrollbar {
+    display: none;
+}
+
+.story {
+    min-width: 64px;
+    text-align: center;
+    cursor: pointer;
+}
+
+.story-ring {
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    padding: 2px;
+    border: 1.5px solid var(--text);
+    margin: auto;
+}
+
+.story-ring.seen {
+    border-color: var(--line);
+}
+
+.avatar {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: var(--surface-2);
+    font-weight: 700;
+    overflow: hidden;
+}
+
+.story-name {
+    margin-top: 7px;
+    font-size: 11px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ---------- POSTS ---------- */
+
+.post {
+    border-bottom: 1px solid var(--line);
+}
+
+.post-head {
+    display: flex;
+    align-items: center;
+    padding: 15px 16px;
+    gap: 10px;
+}
+
+.post-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: var(--surface-2);
+    display: grid;
+    place-items: center;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.post-author {
+    flex: 1;
+}
+
+.post-author strong {
+    display: block;
+    font-size: 14px;
+}
+
+.post-author span {
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.post-image {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    background: var(--surface);
+    display: grid;
+    place-items: center;
+    font-size: 40px;
+}
+
+.post:nth-child(2) .post-image {
+    aspect-ratio: 4 / 5;
+}
+
+.post-actions {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+}
+
+.post-actions .icon-btn {
+    width: 40px;
+}
+
+.save {
+    margin-left: auto;
+}
+
+.post-info {
+    padding: 0 16px 18px;
+}
+
+.likes {
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 7px;
+}
+
+.caption {
+    font-size: 14px;
+    line-height: 1.45;
+}
+
+.caption strong {
+    margin-right: 5px;
+}
+
+.comments {
+    display: block;
+    color: var(--muted);
+    font-size: 13px;
+    margin-top: 8px;
+}
+
+/* ---------- BOTTOM NAV ---------- */
+
+.bottom-nav {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 64px;
+    border-top: 1px solid var(--line);
+    background: color-mix(in srgb, var(--bg) 94%, transparent);
+    backdrop-filter: blur(18px);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    z-index: 30;
+}
+
+.nav-btn {
+    width: 54px;
+    height: 54px;
+    border: 0;
+    background: transparent;
+    display: grid;
+    place-items: center;
+    color: var(--muted);
+    cursor: pointer;
+}
+
+.nav-btn.active {
+    color: var(--text);
+}
+
+.create-btn {
+    width: 42px;
+    height: 42px;
+    border: 1.5px solid var(--text);
+    border-radius: 13px;
+    display: grid;
+    place-items: center;
+}
+
+/* ---------- PANELS ---------- */
+
+.panel {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    background: var(--bg);
+    overflow-y: auto;
+}
+
+.panel.active {
+    display: block;
+}
+
+.panel-header {
+    height: 64px;
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    gap: 12px;
+    position: sticky;
+    top: 0;
+    background: var(--bg);
+    z-index: 2;
+}
+
+.panel-header h2 {
+    font-size: 18px;
+}
+
+.panel-body {
+    padding: 20px 16px;
+    max-width: 680px;
+    margin: auto;
+}
+
+.search-box {
+    width: 100%;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    border-radius: 12px;
+    padding: 13px 14px;
+    color: var(--text);
+    outline: none;
+    margin-bottom: 22px;
+}
+
+.categories {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.category {
+    padding: 9px 13px;
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    font-size: 13px;
+}
+
+.profile {
+    padding-bottom: 40px;
+}
+
+.profile-head {
+    display: flex;
+    gap: 18px;
+    align-items: center;
+    padding: 24px 16px;
+}
+
+.profile-avatar {
+    width: 86px;
+    height: 86px;
+    border-radius: 50%;
+    background: var(--surface-2);
+    display: grid;
+    place-items: center;
+    font-size: 25px;
+    font-weight: 700;
+}
+
+.profile-info {
+    flex: 1;
+}
+
+.profile-info h2 {
+    font-size: 20px;
+}
+
+.profile-info p {
+    color: var(--muted);
+    font-size: 13px;
+    margin-top: 5px;
+}
+
+.profile-stats {
+    display: flex;
+    gap: 22px;
+    margin-top: 12px;
+    font-size: 13px;
+}
+
+.profile-actions {
+    padding: 0 16px 20px;
+    display: flex;
+    gap: 8px;
+}
+
+.profile-actions button {
+    flex: 1;
+    border: 1px solid var(--line);
+    background: transparent;
+    color: var(--text);
+    padding: 10px;
+    border-radius: 9px;
+}
+
+.settings-list {
+    border-top: 1px solid var(--line);
+}
+
+.setting {
+    width: 100%;
+    border: 0;
+    border-bottom: 1px solid var(--line);
+    background: transparent;
+    color: var(--text);
+    padding: 18px 4px;
+    text-align: left;
+    display: flex;
+    justify-content: space-between;
+    cursor: pointer;
+}
+
+.setting span {
+    color: var(--muted);
+}
+
+.chat-search {
+    margin-bottom: 12px;
+}
+
+.chat-item {
+    padding: 15px 4px;
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.chat-avatar {
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    background: var(--surface-2);
+    display: grid;
+    place-items: center;
+    font-weight: 700;
+}
+
+.chat-info {
+    flex: 1;
+}
+
+.chat-info strong {
+    display: block;
+}
+
+.chat-info span {
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.close-panel {
+    margin-right: 4px;
+}
+
+/* ---------- RESPONSIVE ---------- */
+
+@media (min-width: 800px) {
+    .bottom-nav {
+        width: 520px;
+        left: 50%;
+        right: auto;
+        transform: translateX(-50%);
+        bottom: 14px;
+        border: 1px solid var(--line);
+        border-radius: 20px;
+    }
+
+    .app {
+        padding-bottom: 100px;
+    }
+
+    .topbar {
+        padding-left: calc((100% - 650px) / 2);
+        padding-right: calc((100% - 650px) / 2);
+    }
+}
+</style>
 </head>
 
 <body>
-    <h1>Welcome to Zilnet</h1>
-    <p>A platform for human talent and human-created work.</p>
+
+<!-- LOGIN -->
+<section class="auth-screen" id="authScreen">
+    <div class="auth-box">
+        <div class="logo">ZILNET</div>
+        <p class="tagline">Human talent. Real work. Real opportunities.</p>
+
+        <input class="auth-input" type="text" placeholder="Username or email">
+        <input class="auth-input" type="password" placeholder="Password">
+
+        <button class="primary-btn" onclick="login()">Log in</button>
+        <button class="secondary-btn" onclick="login()">Create account</button>
+
+        <p class="demo-note">Prototype mode — real authentication comes next.</p>
+    </div>
+</section>
+
+
+<!-- APP -->
+<div class="app" id="app">
+
+    <header class="topbar">
+        <div class="top-logo">ZILNET</div>
+
+        <div class="top-actions">
+
+            <!-- CREATE -->
+            <button class="icon-btn" aria-label="Create" onclick="openCreate()">
+                <svg class="line-icon" viewBox="0 0 24 24">
+                    <path d="M12 5v14M5 12h14"/>
+                </svg>
+            </button>
+
+            <!-- NOTIFICATIONS -->
+            <button class="icon-btn" aria-label="Notifications">
+                <svg class="line-icon" viewBox="0 0 24 24">
+                    <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/>
+                    <path d="M10 21h4"/>
+                </svg>
+            </button>
+
+        </div>
+    </header>
+
+
+    <!-- HOME -->
+    <main class="content">
+
+        <section class="stories">
+            <div class="section-title">CREATOR MOMENTS</div>
+
+            <div class="story-row">
+
+                <div class="story">
+                    <div class="story-ring">
+                        <div class="avatar">A</div>
+                    </div>
+                    <div class="story-name">Alex</div>
+                </div>
+
+                <div class="story">
+                    <div class="story-ring">
+                        <div class="avatar">M</div>
+                    </div>
+                    <div class="story-name">Maya</div>
+                </div>
+
+                <div class="story">
+                    <div class="story-ring">
+                        <div class="avatar">R</div>
+                    </div>
+                    <div class="story-name">Rafi</div>
+                </div>
+
+                <div class="story">
+                    <div class="story-ring seen">
+                        <div class="avatar">N</div>
+                    </div>
+                    <div class="story-name">Nova</div>
+                </div>
+
+                <div class="story">
+                    <div class="story-ring">
+                        <div class="avatar">S</div>
+                    </div>
+                    <div class="story-name">Sara</div>
+                </div>
+
+            </div>
+        </section>
+
+
+        <!-- POST 1 -->
+        <article class="post">
+
+            <div class="post-head">
+                <div class="post-avatar">M</div>
+
+                <div class="post-author">
+                    <strong>Maya Chen</strong>
+                    <span>Digital Artist</span>
+                </div>
+
+                <button class="icon-btn">
+                    <svg class="line-icon" viewBox="0 0 24 24">
+                        <circle cx="5" cy="12" r="1"/>
+                        <circle cx="12" cy="12" r="1"/>
+                        <circle cx="19" cy="12" r="1"/>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="post-image">Artwork</div>
+
+            <div class="post-actions">
+
+                <button class="icon-btn">
+                    <svg class="line-icon" viewBox="0 0 24 24">
+                        <path d="M20.8 8.7c0 5.5-8.8 10.2-8.8 10.2S3.2 14.2 3.2 8.7A4.7 4.7 0 0 1 12 6.1a4.7 4.7 0 0 1 8.8 2.6z"/>
+                    </svg>
+                </button>
+
+                <button class="icon-btn">
+                    <svg class="line-icon" viewBox="0 0 24 24">
+                        <path d="M21 11.5a8 8 0 0 1-8.5 8 8.8 8.8 0 0 1-4-.9L4 20l1.5-3.5A7.7 7.7 0 0 1 3 11.5a8 8 0 0 1 9-8 8 8 0 0 1 9 8z"/>
+                    </svg>
+                </button>
+
+                <button class="icon-btn">
+                    <svg class="line-icon" viewBox="0 0 24 24">
+                        <path d="M5 12h13"/>
+                        <path d="M13 6l6 6-6 6"/>
+                    </svg>
+                </button>
+
+                <button class="icon-btn save">
+                    <svg class="line-icon" viewBox="0 0 24 24">
+                        <path d="M6 4h12v17l-6-4-6 4z"/>
+                    </svg>
+                </button>
+
+            </div>
+
+            <div class="post-info">
+                <div class="likes">128 likes</div>
+
+                <div class="caption">
+                    <strong>Maya Chen</strong>
+                    Exploring light, texture and digital form.
+                </div>
+
+                <span class="comments">View all 12 comments</span>
+            </div>
+
+        </article>
+
+
+        <!-- POST 2 -->
+        <article class="post">
+
+            <div class="post-head">
+                <div class="post-avatar">A</div>
+
+                <div class="post-author">
+                    <strong>Alex Rivera</strong>
+                    <span>3D Artist · Blender</span>
+                </div>
+
+                <button class="icon-btn">
+                    <svg class="line-icon" viewBox="0 0 24 24">
+                        <circle cx="5" cy="12" r="1"/>
+                        <circle cx="12" cy="12" r="1"/>
+                        <circle cx="19" cy="12" r="1"/>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="post-image">3D Work</div>
+
+            <div class="post-actions">
+
+                <button class="icon-btn">
+                    <svg class="line-icon" viewBox="0 0 24 24">
+                        <path d="M20.8 8.7c0 5.5-8.8 10.2-8.8 10.2S3.2 14.2 3.2 8.7A4.7 4.7 0 0 1 12 6.1a4.7 4.7 0 0 1 8.8 2.6z"/>
+                    </svg>
+                </button>
+
+                <button class="icon-btn">
+                    <svg class="line-icon" viewBox="0 0 24 24">
+                        <path d="M21 11.5a8 8 0 0 1-8.5 8 8.8 8.8 0 0 1-4-.9L4 20l1.5-3.5A7.7 7.7 0 0 1 3 11.5a8 8 0 0 1 9-8 8 8 0 0 1 9 8z"/>
+                    </svg>
+                </button>
+
+                <button class="icon-btn">
+                    <svg class="line-icon" viewBox="0 0 24 24">
+                        <path d="M5 12h13"/>
+                        <path d="M13 6l6 6-6 6"/>
+                    </svg>
+                </button>
+
+                <button class="icon-btn save">
+                    <svg class="line-icon" viewBox="0 0 24 24">
+                        <path d="M6 4h12v17l-6-4-6 4z"/>
+                    </svg>
+                </button>
+
+            </div>
+
+            <div class="post-info">
+                <div class="likes">86 likes</div>
+
+                <div class="caption">
+                    <strong>Alex Rivera</strong>
+                    New environment study.
+                </div>
+
+                <span class="comments">View all 5 comments</span>
+            </div>
+
+        </article>
+
+    </main>
+
+
+    <!-- BOTTOM NAV -->
+    <nav class="bottom-nav">
+
+        <!-- HOME -->
+        <button class="nav-btn active" onclick="showHome()" aria-label="Home">
+            <svg class="line-icon" viewBox="0 0 24 24">
+                <path d="M3 11l9-8 9 8"/>
+                <path d="M5 10v10h14V10"/>
+            </svg>
+        </button>
+
+        <!-- DISCOVER -->
+        <button class="nav-btn" onclick="openDiscover()" aria-label="Discover">
+            <svg class="line-icon" viewBox="0 0 24 24">
+                <circle cx="11" cy="11" r="7"/>
+                <path d="M16.5 16.5L21 21"/>
+            </svg>
+        </button>
+
+        <!-- CREATE -->
+        <button class="nav-btn" onclick="openCreate()" aria-label="Create">
+            <span class="create-btn">
+                <svg class="line-icon" viewBox="0 0 24 24">
+                    <path d="M12 5v14M5 12h14"/>
+                </svg>
+            </span>
+        </button>
+
+        <!-- CHAT -->
+        <button class="nav-btn" onclick="openChat()" aria-label="Chat">
+            <svg class="line-icon" viewBox="0 0 24 24">
+                <path d="M20 11.5a7.5 7.5 0 0 1-8 7.5 8.4 8.4 0 0 1-3.8-.9L4 20l1.5-3.3A7.3 7.3 0 0 1 4 11.5 7.5 7.5 0 0 1 12 4a7.5 7.5 0 0 1 8 7.5z"/>
+            </svg>
+        </button>
+
+        <!-- PROFILE -->
+        <button class="nav-btn" onclick="openProfile()" aria-label="Profile">
+            <svg class="line-icon" viewBox="0 0 24 24">
+                <circle cx="12" cy="8" r="4"/>
+                <path d="M4 21c.8-4 3.3-6 8-6s7.2 2 8 6"/>
+            </svg>
+        </button>
+
+    </nav>
+</div>
+
+
+<!-- DISCOVER PANEL -->
+<section class="panel" id="discoverPanel">
+
+    <div class="panel-header">
+        <button class="icon-btn close-panel" onclick="closePanels()">
+            <svg class="line-icon" viewBox="0 0 24 24">
+                <path d="M15 5l-7 7 7 7"/>
+            </svg>
+        </button>
+
+        <h2>Discover</h2>
+    </div>
+
+    <div class="panel-body">
+
+        <input class="search-box" placeholder="Search people, skills or work">
+
+        <div class="section-title">CATEGORIES</div>
+
+        <div class="categories">
+            <div class="category">Art</div>
+            <div class="category">Photography</div>
+            <div class="category">Film</div>
+            <div class="category">3D</div>
+            <div class="category">Programming</div>
+            <div class="category">Music</div>
+            <div class="category">Writing</div>
+            <div class="category">Graphic Design</div>
+            <div class="category">Science</div>
+            <div class="category">Technology</div>
+            <div class="category">Business</div>
+            <div class="category">Engineering</div>
+        </div>
+
+    </div>
+</section>
+
+
+<!-- CHAT PANEL -->
+<section class="panel" id="chatPanel">
+
+    <div class="panel-header">
+
+        <button class="icon-btn close-panel" onclick="closePanels()">
+            <svg class="line-icon" viewBox="0 0 24 24">
+                <path d="M15 5l-7 7 7 7"/>
+            </svg>
+        </button>
+
+        <h2>Chats</h2>
+
+        <button class="icon-btn" aria-label="New chat">
+            <svg class="line-icon" viewBox="0 0 24 24">
+                <path d="M12 5v14M5 12h14"/>
+            </svg>
+        </button>
+
+    </div>
+
+    <div class="panel-body">
+
+        <input class="search-box chat-search" placeholder="Search chats">
+
+        <div class="chat-item">
+            <div class="chat-avatar">M</div>
+            <div class="chat-info">
+                <strong>Maya Chen</strong>
+                <span>That portfolio looks great.</span>
+            </div>
+        </div>
+
+        <div class="chat-item">
+            <div class="chat-avatar">A</div>
+            <div class="chat-info">
+                <strong>Alex Rivera</strong>
+                <span>Sent you a file</span>
+            </div>
+        </div>
+
+        <div class="chat-item">
+            <div class="chat-avatar">Z</div>
+            <div class="chat-info">
+                <strong>Design Team</strong>
+                <span>Rafi: New project idea</span>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+
+<!-- PROFILE PANEL -->
+<section class="panel" id="profilePanel">
+
+    <div class="panel-header">
+
+        <h2 style="flex:1;">Profile</h2>
+
+        <button class="icon-btn" onclick="openSettings()" aria-label="Settings">
+            <svg class="line-icon" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="3"/>
+                <path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-1.8 1.8-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6v.1h-2.5V20a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1-1.8-1.8.1-.1A1.7 1.7 0 0 0 8.1 15a1.7 1.7 0 0 0-1.6-1H6v-2.5h.5a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1 1.8-1.8.1.1a1.7 1.7 0 0 0 1.9.3 1.7 1.7 0 0 0 1-1.6V5h2.5v.5a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1 1.8 1.8-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1h.1V14h-.1a1.7 1.7 0 0 0-1.6 1z"/>
+            </svg>
+        </button>
+
+    </div>
+
+    <div class="profile">
+
+        <div class="profile-head">
+
+            <div class="profile-avatar">F</div>
+
+            <div class="profile-info">
+                <h2>Your Name</h2>
+                <p>Creator · Designer</p>
+
+                <div class="profile-stats">
+                    <span><b>0</b> posts</span>
+                    <span><b>0</b> followers</span>
+                    <span><b>0</b> following</span>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="profile-actions">
+            <button>Edit profile</button>
+            <button>Share profile</button>
+        </div>
+
+    </div>
+</section>
+
+
+<!-- SETTINGS PANEL -->
+<section class="panel" id="settingsPanel">
+
+    <div class="panel-header">
+
+        <button class="icon-btn close-panel" onclick="openProfile()">
+            <svg class="line-icon" viewBox="0 0 24 24">
+                <path d="M15 5l-7 7 7 7"/>
+            </svg>
+        </button>
+
+        <h2>Settings</h2>
+
+    </div>
+
+    <div class="panel-body">
+
+        <div class="settings-list">
+
+            <button class="setting">
+                Account
+                <span>›</span>
+            </button>
+
+            <button class="setting">
+                Privacy
+                <span>›</span>
+            </button>
+
+            <button class="setting">
+                Notifications
+                <span>›</span>
+            </button>
+
+            <button class="setting">
+                Security
+                <span>›</span>
+            </button>
+
+            <button class="setting" onclick="toggleTheme()">
+                Appearance
+                <span id="themeLabel">Dark / Light</span>
+            </button>
+
+            <button class="setting">
+                Language
+                <span>›</span>
+            </button>
+
+            <button class="setting">
+                Accessibility
+                <span>›</span>
+            </button>
+
+            <button class="setting">
+                Help
+                <span>›</span>
+            </button>
+
+            <button class="setting" onclick="logout()">
+                Log out
+                <span>›</span>
+            </button>
+
+        </div>
+
+    </div>
+</section>
+
+
+<!-- CREATE PANEL -->
+<section class="panel" id="createPanel">
+
+    <div class="panel-header">
+
+        <button class="icon-btn close-panel" onclick="closePanels()">
+            <svg class="line-icon" viewBox="0 0 24 24">
+                <path d="M15 5l-7 7 7 7"/>
+            </svg>
+        </button>
+
+        <h2>Create</h2>
+
+    </div>
+
+    <div class="panel-body">
+
+        <button class="setting">
+            Create post
+            <span>›</span>
+        </button>
+
+        <button class="setting">
+            Create Story
+            <span>›</span>
+        </button>
+
+        <button class="setting">
+            Upload portfolio work
+            <span>›</span>
+        </button>
+
+    </div>
+</section>
+
+
+<script>
+
+const authScreen = document.getElementById("authScreen");
+const app = document.getElementById("app");
+
+function login() {
+    authScreen.style.display = "none";
+    app.style.display = "block";
+}
+
+function logout() {
+    app.style.display = "none";
+    authScreen.style.display = "flex";
+    closePanels();
+}
+
+function closePanels() {
+    document.querySelectorAll(".panel").forEach(panel => {
+        panel.classList.remove("active");
+    });
+}
+
+function openDiscover() {
+    closePanels();
+    document.getElementById("discoverPanel").classList.add("active");
+}
+
+function openChat() {
+    closePanels();
+    document.getElementById("chatPanel").classList.add("active");
+}
+
+function openProfile() {
+    closePanels();
+    document.getElementById("profilePanel").classList.add("active");
+}
+
+function openSettings() {
+    closePanels();
+    document.getElementById("settingsPanel").classList.add("active");
+}
+
+function openCreate() {
+    closePanels();
+    document.getElementById("createPanel").classList.add("active");
+}
+
+function showHome() {
+    closePanels();
+    window.scrollTo({top: 0, behavior: "smooth"});
+}
+
+function toggleTheme() {
+
+    const html = document.documentElement;
+
+    if (html.getAttribute("data-theme") === "dark") {
+        html.removeAttribute("data-theme");
+        localStorage.setItem("zilnet-theme", "light");
+    } else {
+        html.setAttribute("data-theme", "dark");
+        localStorage.setItem("zilnet-theme", "dark");
+    }
+
+    updateThemeColor();
+}
+
+function updateThemeColor() {
+
+    const dark =
+        document.documentElement.getAttribute("data-theme") === "dark";
+
+    document
+        .querySelector('meta[name="theme-color"]')
+        .setAttribute("content", dark ? "#0b0b0c" : "#ffffff");
+}
+
+if (localStorage.getItem("zilnet-theme") === "dark") {
+    document.documentElement.setAttribute("data-theme", "dark");
+}
+
+updateThemeColor();
+
+</script>
+
 </body>
 </html>
