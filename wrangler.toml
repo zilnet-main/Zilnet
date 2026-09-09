@@ -7,4 +7,4 @@ directory = "./"
 [[d1_databases]]
 binding = "DB"
 database_name = "zilnet-db"
-database_id = "YOUR_DATABASE_ID"
+database_id = "69f8b11c-1474-4db5-af80-ecd0dc17714d"
