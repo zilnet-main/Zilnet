@@ -688,7 +688,7 @@ button {
                     <span>Digital Artist</span>
                 </div>
 
-                <button class="icon-btn">
+                <button class="icon-btn like-btn" onclick="toggleLike(this)">
                     <svg class="line-icon" viewBox="0 0 24 24">
                         <circle cx="5" cy="12" r="1"/>
                         <circle cx="12" cy="12" r="1"/>
@@ -753,7 +753,7 @@ button {
                     <span>3D Artist · Blender</span>
                 </div>
 
-                <button class="icon-btn">
+                <button class="icon-btn like-btn" onclick="toggleLike(this)">
                     <svg class="line-icon" viewBox="0 0 24 24">
                         <circle cx="5" cy="12" r="1"/>
                         <circle cx="12" cy="12" r="1"/>
@@ -1180,6 +1180,28 @@ if (localStorage.getItem("zilnet-theme") === "dark") {
 
 updateThemeColor();
 
+function toggleLike(button) {
+    const post = button.closest('.post');
+    const likesText = post.querySelector('.likes');
+    const heart = button.querySelector('svg');
+
+    const liked = button.classList.toggle('liked');
+
+    let count = parseInt(likesText.textContent);
+
+    if (liked) {
+        count++;
+        heart.style.fill = '#ff2d75';
+        heart.style.stroke = '#ff2d75';
+    } else {
+        count--;
+        heart.style.fill = 'none';
+        heart.style.stroke = 'currentColor';
+    }
+
+    likesText.textContent = count + ' likes';
+}
+    
 </script>
 
 </body>
