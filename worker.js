@@ -1,11 +1,22 @@
 export default {
   async fetch(request, env) {
-    const result = await env.DB
-      .prepare("SELECT 1 AS connected")
-      .first();
+    const url = new URL(request.url);
 
-    return new Response(JSON.stringify(result), {
-      headers: { "Content-Type": "application/json" }
-    });
+    if (url.pathname === "/api/test-db") {
+      try {
+        const result = await env.DB
+          .prepare("SELECT 1 AS connected")
+          .first();
+
+        return Response.json(result);
+      } catch (error) {
+        return Response.json(
+          { error: error.message },
+          { status: 500 }
+        );
+      }
+    }
+
+    return env.ASSETS.fetch(request);
   }
 };
