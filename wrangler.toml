@@ -10,7 +10,3 @@ binding = "ASSETS"
 binding = "DB"
 database_name = "zilnet-db"
 database_id = "69f8b11c-1474-4db5-af80-ecd0dc17714d"
-
-[[r2_buckets]]
-binding = "MEDIA"
-bucket_name = "zilnet-media"
