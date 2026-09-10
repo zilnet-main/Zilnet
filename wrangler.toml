@@ -1,7 +1,8 @@
 name = "zilnet"
 compatibility_date = "2026-09-09"
 
-pages_build_output_dir = "./"
+[assets]
+directory = "./"
 
 [[d1_databases]]
 binding = "DB"
