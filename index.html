@@ -1270,10 +1270,26 @@ function toggleLike(button) {
             );
         });
 
-        function sendComment() {
+        async function sendComment() {
             const text = input.value.trim();
 
             if (!text) return;
+            const response = await fetch('/api/comments', {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+        post_id: 1,
+        user_id: 1,
+        content: text
+    })
+});
+
+if (!response.ok) {
+    alert('Failed to save comment');
+    return;
+}
 
             const comment = document.createElement('div');
 
