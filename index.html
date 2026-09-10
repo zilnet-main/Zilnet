@@ -1530,6 +1530,1325 @@ HTML + CSS + PAGE STRUCTURE
 PART 2 and PART 3 go below this script.
 DO NOT create another <html>, <head>, or <body>.
 */
+const state={
+  me:null,
+  page:"home",
+  searchTimer:null,
+  feed:[],
+  stories:[],
+  reels:[],
+  chats:[]
+};
+const $=id=>document.getElementById(id);
+function esc(value){
+  return String(value??"")
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
+}
+function avatar(user,size=42){
+  const src=user?.avatar_url||user?.avatarUrl||"";
+  const name=user?.display_name||user?.displayName||user?.username||"U";
+  if(src){
+    return `<img class="avatar" style="width:${size}px;height:${size}px"
+      src="${esc(src)}" alt="${esc(name)}"
+      onerror="this.style.display='none';this.nextElementSibling.style.display='grid'">`;
+  }
+  return `<span class="avatar fallback"
+    style="width:${size}px;height:${size}px">${esc(name.charAt(0).toUpperCase())}</span>`;
+}
+function timeAgo(date){
+  const t=new Date(date).getTime();
+  if(!Number.isFinite(t))return "";
+  const sec=Math.max(0,Math.floor((Date.now()-t)/1000));
+  if(sec<60)return "now";
+  if(sec<3600)return Math.floor(sec/60)+"m";
+  if(sec<86400)return Math.floor(sec/3600)+"h";
+  if(sec<604800)return Math.floor(sec/86400)+"d";
+  return new Date(date).toLocaleDateString([],{
+    day:"numeric",
+    month:"short"
+  });
+}
+async function api(path,opt={}){
+  const options={...opt,credentials:"include",headers:{...(opt.headers||{})}};
+  if(options.body && !(options.body instanceof FormData)){
+    options.headers["Content-Type"]="application/json";
+  }
+  const res=await fetch("/api"+path,options);
+  let data=null;
+  const type=res.headers.get("content-type")||"";
+  if(type.includes("application/json")){
+    data=await res.json().catch(()=>null);
+  }else{
+    data=await res.text().catch(()=>"");
+  }
+  if(!res.ok){
+    throw new Error(
+      typeof data==="object" && data?.error
+        ? data.error
+        : `Request failed (${res.status})`
+    );
+  }
+  return data;
+}
+function toast(message,type=""){
+  const el=$("toast");
+  if(!el)return;
+  el.textContent=message;
+  el.className="toast "+type;
+  clearTimeout(window.__toastTimer);
+  window.__toastTimer=setTimeout(()=>{
+    el.className="toast hidden";
+  },2600);
+}
+function setLoading(el,text="Loading…"){
+  if(el)el.innerHTML=`<div class="loading">${esc(text)}</div>`;
+}
+function showAuth(){
+  $("auth")?.classList.remove("hidden");
+  $("app")?.classList.add("hidden");
+}
+function showApp(){
+  $("auth")?.classList.add("hidden");
+  $("app")?.classList.remove("hidden");
+  if(state.me){
+    const composerAvatar=$("composerAvatar");
+    if(composerAvatar){
+      composerAvatar.innerHTML=avatar(state.me,42);
+    }
+    const topAvatar=$("topAvatar");
+    if(topAvatar){
+      topAvatar.innerHTML=avatar(state.me,38);
+    }
+  }
+  loadHome();
+  loadSuggestions();
+  loadSkills();
+}
+async function submitAuth(mode){
+  const username=$("authUsername")?.value.trim();
+  const password=$("authPassword")?.value;
+  if(!username||!password){
+    toast("Enter your username and password","error");
+    return;
+  }
+  const button=$("authSubmit");
+  if(button){
+    button.disabled=true;
+    button.textContent=mode==="login"?"Signing in…":"Creating…";
+  }
+  try{
+    const data=await api(mode==="login"?"/login":"/signup",{
+      method:"POST",
+      body:JSON.stringify(
+        mode==="login"
+          ? {username,password}
+          : {
+              username,
+              password,
+              email:$("authEmail")?.value.trim()||""
+            }
+      )
+    });
+    state.me=data?.user||data||null;
+    const me=await api("/me");
+    state.me=me?.user||me;
+    showApp();
+    toast(mode==="login"?"Welcome back":"Account created","success");
+  }catch(err){
+    toast(err.message||"Authentication failed","error");
+  }finally{
+    if(button){
+      button.disabled=false;
+      button.textContent=mode==="login"?"Log in":"Create account";
+    }
+  }
+}
+async function logout(){
+  try{
+    await api("/logout",{method:"POST"});
+  }catch(e){}
+  state.me=null;
+  state.feed=[];
+  showAuth();
+  toast("Logged out");
+}
+function go(page){
+  state.page=page;
+  document.querySelectorAll("[id^='page-']").forEach(el=>{
+    el.classList.add("hidden");
+  });
+  const target=$("page-"+page);
+  if(target)target.classList.remove("hidden");
+  document.querySelectorAll("[data-page]").forEach(btn=>{
+    btn.classList.toggle("active",btn.dataset.page===page);
+  });
+  if(page==="home")loadHome();
+  if(page==="discover")loadDiscover();
+  if(page==="reels")loadReels();
+  if(page==="chat")loadChats();
+  if(page==="notifications")loadNotifications();
+  if(page==="profile" && state.me)loadProfile(state.me.username);
+}
+function switchAuth(mode){
+  const login=mode==="login";
+  $("loginForm")?.classList.toggle("hidden",!login);
+  $("signupForm")?.classList.toggle("hidden",login);
+  $("authTitle")&&( $("authTitle").textContent=login?"Welcome back":"Create your account");
+  $("authSwitch")&&( $("authSwitch").textContent=login?"Need an account? Sign up":"Already have an account? Log in");
+}
+function renderUserLine(user){
+  const username=user?.username||"user";
+  const display=user?.display_name||user?.displayName||username;
+  return `
+    <div class="user-line">
+      ${avatar(user,42)}
+      <div class="user-info">
+        <strong>${esc(display)}</strong>
+        <span>@${esc(username)}</span>
+      </div>
+    </div>
+  `;
+}
+function renderPost(post){
+  const id=post.id;
+  const user={
+    id:post.user_id,
+    username:post.username,
+    display_name:post.display_name,
+    avatar_url:post.avatar_url
+  };
+  const liked=!!(post.liked||post.is_liked);
+  const saved=!!(post.saved||post.is_saved);
+  const likes=Number(post.likes_count??post.like_count??0);
+  const comments=Number(post.comments_count??post.comment_count??0);
+  let media="";
+  if(post.media_url){
+    const type=(post.media_type||"").toLowerCase();
+    if(type.startsWith("video")){
+      media=`
+        <video class="post-media" controls playsinline preload="metadata"
+          src="${esc(post.media_url)}"></video>`;
+    }else{
+      media=`
+        <img class="post-media" loading="lazy"
+          src="${esc(post.media_url)}" alt="Post media">`;
+    }
+  }
+  return `
+    <article class="post-card" data-post-id="${esc(id)}">
+      <div class="post-head">
+        <button class="user-button" onclick="openProfile('${esc(post.username||"")}')">
+          ${avatar(user,44)}
+          <span>
+            <b>${esc(post.display_name||post.username||"User")}</b>
+            <small>@${esc(post.username||"user")} · ${esc(timeAgo(post.created_at))}</small>
+          </span>
+        </button>
+        <button class="icon-btn" onclick="postMenu(${Number(id)})">•••</button>
+      </div>
+      ${
+        post.content
+        ? `<div class="post-content">${esc(post.content).replace(/\n/g,"<br>")}</div>`
+        :""
+      }
+      ${media}
+      <div class="post-actions">
+        <button class="${liked?"active":""}" onclick="toggleLike(${Number(id)},this)">
+          ${liked?"♥":"♡"} <span>${likes}</span>
+        </button>
+        <button onclick="openComments(${Number(id)})">
+          ◯ <span>${comments}</span>
+        </button>
+        <button class="${saved?"active":""}" onclick="toggleSave(${Number(id)},this)">
+          ${saved?"▣":"□"}
+        </button>
+        <button onclick="copyPostLink(${Number(id)})">↗</button>
+      </div>
+    </article>
+  `;
+}
+async function loadHome(){
+  const feedEl=$("feed");
+  if(!feedEl)return;
+  setLoading(feedEl,"Loading your feed…");
+  try{
+    const data=await api("/feed");
+    const posts=Array.isArray(data)?data:(data?.posts||[]);
+    state.feed=posts;
+    renderFeed(posts);
+    await loadStories();
+  }catch(err){
+    feedEl.innerHTML=`
+      <div class="empty">
+        <b>Couldn't load your feed</b>
+        <span>${esc(err.message)}</span>
+        <button onclick="loadHome()">Retry</button>
+      </div>
+    `;
+  }
+}
+function renderFeed(posts){
+  const el=$("feed");
+  if(!el)return;
+  if(!posts.length){
+    el.innerHTML=`
+      <div class="empty">
+        <b>Your feed is empty</b>
+        <span>Follow people or create your first post.</span>
+        <button onclick="openCreatePost()">Create post</button>
+      </div>
+    `;
+    return;
+  }
+  el.innerHTML=posts.map(renderPost).join("");
+}
+async function loadStories(){
+  const el=$("stories");
+  if(!el)return;
+  try{
+    const data=await api("/stories/feed");
+    const stories=Array.isArray(data)?data:(data?.stories||[]);
+    state.stories=stories;
+    renderStories(stories);
+  }catch(e){
+    el.innerHTML="";
+  }
+}
+function renderStories(stories){
+  const el=$("stories");
+  if(!el)return;
+  const groups={};
+  for(const story of stories){
+    const uid=story.user_id;
+    if(!groups[uid])groups[uid]={
+      user_id:uid,
+      username:story.username,
+      display_name:story.display_name,
+      avatar_url:story.avatar_url,
+      stories:[]
+    };
+    groups[uid].stories.push(story);
+  }
+  const own=state.me
+    ? [{
+        user_id:state.me.id,
+        username:state.me.username,
+        display_name:state.me.display_name,
+        avatar_url:state.me.avatar_url,
+        stories:groups[state.me.id]?.stories||[]
+      }]
+    : [];
+  const others=Object.values(groups)
+    .filter(x=>String(x.user_id)!==String(state.me?.id));
+  const all=[...own,...others];
+  el.innerHTML=`
+    <div class="stories-track">
+      ${
+        state.me
+        ? `
+          <button class="story-item create-story" onclick="openCreateStory()">
+            <div class="story-avatar add-story">
+              ${avatar(state.me,56)}
+              <i>+</i>
+            </div>
+            <span>Your story</span>
+          </button>
+        `
+        :""
+      }
+      ${all
+        .filter(Boolean)
+        .map(group=>`
+          <button class="story-item" onclick="openStoryGroup(${JSON.stringify(group.user_id)})">
+            <div class="story-avatar ${group.stories.length?"has-story":""}">
+              ${avatar(group,56)}
+            </div>
+            <span>${esc(group.user_id==state.me?.id?"You":group.username||"User")}</span>
+          </button>
+        `).join("")}
+    </div>
+  `;
+}
+function openStoryGroup(userId){
+  const group=state.stories.filter(
+    s=>String(s.user_id)===String(userId)
+  );
+  if(!group.length)return;
+  let index=0;
+  const render=()=>{
+    const s=group[index];
+    let body="";
+    if(s.media_url){
+      const type=(s.media_type||"").toLowerCase();
+      body=type.startsWith("video")
+        ? `<video class="story-view-media" controls autoplay playsinline src="${esc(s.media_url)}"></video>`
+        : `<img class="story-view-media" src="${esc(s.media_url)}" alt="Story">`;
+    }
+    if(s.content){
+      body+=`<div class="story-text">${esc(s.content)}</div>`;
+    }
+    openModal(`
+      <div class="story-view">
+        <div class="story-progress">
+          ${group.map((_,i)=>`<span class="${i<=index?"on":""}"></span>`).join("")}
+        </div>
+        ${body}
+        <div class="story-view-controls">
+          <button onclick="storyPrevious()">‹</button>
+          <button onclick="storyNext()">›</button>
+        </div>
+      </div>
+    `);
+    window.storyPrevious=()=>{
+      if(index>0){
+        index--;
+        render();
+      }
+    };
+    window.storyNext=()=>{
+      if(index<group.length-1){
+        index++;
+        render();
+      }else{
+        closeModal();
+      }
+    };
+  };
+  render();
+}
+async function toggleLike(id,button){
+  try{
+    const data=await api(`/posts/${id}/like`,{method:"POST"});
+    const liked=!!(data?.liked??data?.is_liked);
+    const count=Number(data?.likes_count??data?.count??0);
+    button.classList.toggle("active",liked);
+    button.innerHTML=`${liked?"♥":"♡"} <span>${count}</span>`;
+  }catch(err){
+    toast(err.message||"Couldn't update like","error");
+  }
+}
+async function toggleSave(id,button){
+  try{
+    const data=await api(`/posts/${id}/save`,{method:"POST"});
+    const saved=!!(data?.saved??data?.is_saved);
+    button.classList.toggle("active",saved);
+    button.textContent=saved?"▣":"□";
+    toast(saved?"Post saved":"Post unsaved","success");
+  }catch(err){
+    toast(err.message||"Couldn't save post","error");
+  }
+}
+async function openComments(id){
+  try{
+    const data=await api(`/posts/${id}/comments`);
+    const comments=Array.isArray(data)?data:(data?.comments||[]);
+    openModal(`
+      <div class="comments-modal">
+        <div class="modal-title">
+          <h3>Comments</h3>
+          <button onclick="closeModal()">×</button>
+        </div>
+        <div class="comments-list">
+          ${
+            comments.length
+            ? comments.map(c=>`
+              <div class="comment">
+                ${avatar({
+                  username:c.username,
+                  display_name:c.display_name,
+                  avatar_url:c.avatar_url
+                },36)}
+                <div>
+                  <b>${esc(c.display_name||c.username||"User")}</b>
+                  <p>${esc(c.content)}</p>
+                  <small>${esc(timeAgo(c.created_at))}</small>
+                </div>
+              </div>
+            `).join("")
+            : `<div class="empty">No comments yet.</div>`
+          }
+        </div>
+        <form class="comment-form" onsubmit="submitComment(event,${Number(id)})">
+          <input id="commentInput" maxlength="2000"
+            placeholder="Write a comment…" autocomplete="off">
+          <button>Send</button>
+        </form>
+      </div>
+    `);
+  }catch(err){
+    toast(err.message||"Couldn't load comments","error");
+  }
+}
+async function submitComment(event,id){
+  event.preventDefault();
+  const input=$("commentInput");
+  const content=input?.value.trim();
+  if(!content)return;
+  try{
+    await api(`/posts/${id}/comments`,{
+      method:"POST",
+      body:JSON.stringify({content})
+    });
+    await openComments(id);
+    const post=state.feed.find(p=>String(p.id)===String(id));
+    if(post){
+      post.comments_count=Number(post.comments_count||0)+1;
+    }
+    toast("Comment added","success");
+  }catch(err){
+    toast(err.message||"Couldn't add comment","error");
+  }
+}
+async function copyPostLink(id){
+  const url=`${location.origin}/?post=${encodeURIComponent(id)}`;
+  try{
+    await navigator.clipboard.writeText(url);
+    toast("Post link copied","success");
+  }catch(e){
+    prompt("Copy this link:",url);
+  }
+}
+function postMenu(id){
+  const post=state.feed.find(p=>String(p.id)===String(id));
+  const mine=String(post?.user_id)===String(state.me?.id);
+  openModal(`
+    <div class="action-sheet">
+      <button onclick="copyPostLink(${Number(id)});closeModal()">Copy post link</button>
+      ${mine?`<button class="danger" onclick="deletePost(${Number(id)})">Delete post</button>`:""}
+      <button onclick="closeModal()">Cancel</button>
+    </div>
+  `);
+}
+async function deletePost(id){
+  closeModal();
+  if(!confirm("Delete this post?"))return;
+  try{
+    await api(`/posts/${id}`,{method:"DELETE"});
+    state.feed=state.feed.filter(p=>String(p.id)!==String(id));
+    renderFeed(state.feed);
+    toast("Post deleted","success");
+  }catch(err){
+    toast(err.message||"Couldn't delete post","error");
+  }
+}
+function openModal(html){
+  const modal=$("modal");
+  const card=$("modalCard");
+  if(!modal||!card)return;
+  card.innerHTML=html;
+  modal.classList.remove("hidden");
+  document.body.classList.add("modal-open");
+}
+function closeModal(){
+  $("modal")?.classList.add("hidden");
+  document.body.classList.remove("modal-open");
+}
+$("modal")?.addEventListener("click",e=>{
+  if(e.target.id==="modal")closeModal();
+});
+document.addEventListener("keydown",e=>{
+  if(e.key==="Escape")closeModal();
+});
+function openCreatePost(){
+  openModal(`
+    <div class="create-modal">
+      <div class="modal-title">
+        <h3>Create post</h3>
+        <button onclick="closeModal()">×</button>
+      </div>
+      <textarea id="newPostText" maxlength="5000"
+        placeholder="What's happening?"></textarea>
+      <input id="newPostFile" type="file"
+        accept="image/*,video/*">
+      <div class="modal-actions">
+        <button onclick="closeModal()">Cancel</button>
+        <button class="primary" onclick="publishPost()">Post</button>
+      </div>
+    </div>
+  `);
+}
+async function publishPost(){
+  const text=$("newPostText")?.value.trim();
+  const file=$("newPostFile")?.files?.[0];
+  if(!text && !file){
+    toast("Write something or choose media","error");
+    return;
+  }
+  try{
+    let media_url="";
+    let media_type="";
+    if(file){
+      const form=new FormData();
+      form.append("file",file);
+      const uploaded=await api("/upload",{
+        method:"POST",
+        body:form
+      });
+      media_url=uploaded?.url||uploaded?.media_url||uploaded?.mediaUrl||"";
+      media_type=uploaded?.media_type||uploaded?.mediaType||file.type;
+      if(!media_url)throw new Error("Upload did not return a media URL");
+    }
+    await api("/posts",{
+      method:"POST",
+      body:JSON.stringify({
+        content:text,
+        media_url,
+        media_type
+      })
+    });
+    closeModal();
+    toast("Post published","success");
+    await loadHome();
+  }catch(err){
+    toast(err.message||"Couldn't publish post","error");
+  }
+}
+function openCreateStory(){
+  openModal(`
+    <div class="create-modal">
+      <div class="modal-title">
+        <h3>Add story</h3>
+        <button onclick="closeModal()">×</button>
+      </div>
+      <textarea id="newStoryText" maxlength="2000"
+        placeholder="Add a story…"></textarea>
+      <input id="newStoryFile" type="file"
+        accept="image/*,video/*">
+      <div class="modal-actions">
+        <button onclick="closeModal()">Cancel</button>
+        <button class="primary" onclick="publishStory()">Share</button>
+      </div>
+    </div>
+  `);
+}
+async function publishStory(){
+  const text=$("newStoryText")?.value.trim();
+  const file=$("newStoryFile")?.files?.[0];
+  if(!text&&!file){
+    toast("Add text or media","error");
+    return;
+  }
+  try{
+    let media_url="";
+    let media_type="";
+    if(file){
+      const form=new FormData();
+      form.append("file",file);
+      const uploaded=await api("/upload",{
+        method:"POST",
+        body:form
+      });
+      media_url=uploaded?.url||uploaded?.media_url||"";
+      media_type=uploaded?.media_type||file.type;
+    }
+    await api("/stories",{
+      method:"POST",
+      body:JSON.stringify({
+        content:text,
+        text:text,
+        media_url,
+        media_type
+      })
+    });
+    closeModal();
+    toast("Story shared","success");
+    await loadStories();
+  }catch(err){
+    toast(err.message||"Couldn't share story","error");
+  }
+}
+async function loadDiscover(){
+  const el=$("discoverResults");
+  if(!el)return;
+  setLoading(el,"Loading people…");
+  try{
+    const data=await api("/search?q=");
+    const users=Array.isArray(data)?data:(data?.users||[]);
+    renderDiscover(users);
+  }catch(e){
+    el.innerHTML=`<div class="empty">Search for people above.</div>`;
+  }
+}
+function renderDiscover(users){
+  const el=$("discoverResults");
+  if(!el)return;
+  if(!users.length){
+    el.innerHTML=`<div class="empty">No people found.</div>`;
+    return;
+  }
+  el.innerHTML=users.map(user=>`
+    <div class="user-result">
+      <button onclick="openProfile('${esc(user.username||"")}')">
+        ${avatar(user,48)}
+        <span>
+          <b>${esc(user.display_name||user.username||"User")}</b>
+          <small>@${esc(user.username||"user")}</small>
+        </span>
+      </button>
+      ${
+        String(user.id)!==String(state.me?.id)
+        ? `<button onclick="toggleFollow(${Number(user.id)},this)">
+            ${user.following?"Following":"Follow"}
+           </button>`
+        :""
+      }
+    </div>
+  `).join("");
+}
+async function searchUsers(){
+  const input=$("searchInput");
+  const q=input?.value.trim()||"";
+  clearTimeout(state.searchTimer);
+  if(!q){
+    $("searchResults")?.classList.add("hidden");
+    return;
+  }
+  state.searchTimer=setTimeout(async()=>{
+    try{
+      const data=await api(`/search?q=${encodeURIComponent(q)}`);
+      const users=Array.isArray(data)?data:(data?.users||[]);
+      const el=$("searchResults");
+      if(!el)return;
+      el.classList.remove("hidden");
+      el.innerHTML=users.length
+        ? users.slice(0,8).map(user=>`
+            <button class="search-result"
+              onclick="openProfile('${esc(user.username||"")}');hideSearch()">
+              ${avatar(user,38)}
+              <span>
+                <b>${esc(user.display_name||user.username||"User")}</b>
+                <small>@${esc(user.username||"user")}</small>
+              </span>
+            </button>
+          `).join("")
+        : `<div class="search-empty">No users found.</div>`;
+    }catch(err){
+      toast(err.message||"Search failed","error");
+    }
+  },250);
+}
+function hideSearch(){
+  $("searchResults")?.classList.add("hidden");
+  const input=$("searchInput");
+  if(input)input.blur();
+}
+async function toggleFollow(id,button){
+  try{
+    const data=await api(`/users/${id}/follow`,{method:"POST"});
+    const following=!!(data?.following??data?.is_following);
+    button.textContent=following?"Following":"Follow";
+    button.classList.toggle("active",following);
+  }catch(err){
+    toast(err.message||"Couldn't update follow","error");
+  }
+}
+async function loadSuggestions(){
+  const el=$("suggestions");
+  if(!el)return;
+  try{
+    const data=await api("/search?q=");
+    const users=(Array.isArray(data)?data:(data?.users||[]))
+      .filter(u=>String(u.id)!==String(state.me?.id))
+      .slice(0,5);
+    el.innerHTML=users.map(user=>`
+      <div class="suggestion">
+        ${avatar(user,40)}
+        <div>
+          <b>${esc(user.display_name||user.username)}</b>
+          <small>@${esc(user.username)}</small>
+        </div>
+        <button onclick="toggleFollow(${Number(user.id)},this)">
+          ${user.following?"Following":"Follow"}
+        </button>
+      </div>
+    `).join("");
+  }catch(e){
+    el.innerHTML="";
+  }
+}
+async function loadSkills(){
+  const el=$("skills");
+  if(!el)return;
+  try{
+    const data=await api("/search?q=");
+    const users=(Array.isArray(data)?data:(data?.users||[]));
+    const skills=[];
+    users.forEach(u=>{
+      if(u.skills){
+        String(u.skills).split(",").forEach(s=>{
+          const x=s.trim();
+          if(x&&!skills.includes(x))skills.push(x);
+        });
+      }
+    });
+    el.innerHTML=skills.slice(0,12)
+      .map(s=>`<span class="skill-chip">${esc(s)}</span>`)
+      .join("");
+  }catch(e){
+    el.innerHTML="";
+  }
+}
+
+/* =========================
+   ZILNET — PART 3/3
+   ========================= */
+async function openProfile(username){
+  if(!username)return;
+  go("profile");
+  await loadProfile(username);
+}
+async function loadProfile(username){
+  const el=$("profileContent");
+  if(!el)return;
+  setLoading(el,"Loading profile…");
+  try{
+    const data=await api(`/users/${encodeURIComponent(username)}`);
+    const user=data?.user||data;
+    if(!user)throw new Error("User not found");
+    renderProfile(user);
+  }catch(err){
+    el.innerHTML=`
+      <div class="empty">
+        <b>Profile unavailable</b>
+        <span>${esc(err.message)}</span>
+      </div>
+    `;
+  }
+}
+function renderProfile(user){
+  const el=$("profileContent");
+  if(!el)return;
+  const own=String(user.id)===String(state.me?.id);
+  const followers=Number(
+    user.followers_count??user.follower_count??0
+  );
+  const following=Number(
+    user.following_count??0
+  );
+  const postsCount=Number(
+    user.posts_count??user.post_count??0
+  );
+  el.innerHTML=`
+    <div class="profile-card">
+      <div class="profile-cover"></div>
+      <div class="profile-main">
+        <div class="profile-avatar">
+          ${avatar(user,96)}
+        </div>
+        <div class="profile-top">
+          <div>
+            <h2>${esc(user.display_name||user.username||"User")}</h2>
+            <span>@${esc(user.username||"user")}</span>
+          </div>
+          ${
+            own
+            ? `<button class="secondary" onclick="editProfile()">Edit profile</button>`
+            : `
+              <button class="primary"
+                onclick="toggleFollow(${Number(user.id)},this)">
+                ${user.following?"Following":"Follow"}
+              </button>
+            `
+          }
+        </div>
+        ${
+          user.bio
+          ? `<p class="profile-bio">${esc(user.bio)}</p>`
+          :""
+        }
+        <div class="profile-stats">
+          <div><b>${postsCount}</b><span>Posts</span></div>
+          <div><b>${followers}</b><span>Followers</span></div>
+          <div><b>${following}</b><span>Following</span></div>
+        </div>
+        ${
+          user.skills
+          ? `
+            <div class="profile-skills">
+              ${String(user.skills)
+                .split(",")
+                .map(s=>s.trim())
+                .filter(Boolean)
+                .map(s=>`<span class="skill-chip">${esc(s)}</span>`)
+                .join("")}
+            </div>
+          `
+          :""
+        }
+      </div>
+    </div>
+  `;
+  loadUserPosts(user.id);
+}
+async function loadUserPosts(userId){
+  const el=$("profilePosts");
+  if(!el)return;
+  setLoading(el,"Loading posts…");
+  try{
+    /*
+      The feed endpoint already returns the public post stream.
+      Filter it for this profile so we don't depend on a nonexistent
+      /api/users/:id/posts endpoint.
+    */
+    const data=await api("/feed");
+    const posts=Array.isArray(data)?data:(data?.posts||[]);
+    const mine=posts.filter(
+      p=>String(p.user_id)===String(userId)
+    );
+    if(!mine.length){
+      el.innerHTML=`<div class="empty">No posts yet.</div>`;
+      return;
+    }
+    el.innerHTML=mine.map(renderPost).join("");
+  }catch(err){
+    el.innerHTML=`
+      <div class="empty">
+        <span>Couldn't load posts.</span>
+      </div>
+    `;
+  }
+}
+function editProfile(){
+  if(!state.me)return;
+  openModal(`
+    <div class="edit-profile-modal">
+      <div class="modal-title">
+        <h3>Edit profile</h3>
+        <button onclick="closeModal()">×</button>
+      </div>
+      <label>
+        Display name
+        <input id="editDisplayName"
+          maxlength="80"
+          value="${esc(state.me.display_name||"")}">
+      </label>
+      <label>
+        Bio
+        <textarea id="editBio"
+          maxlength="500"
+          placeholder="Tell people about yourself…">${esc(state.me.bio||"")}</textarea>
+      </label>
+      <label>
+        Skills
+        <input id="editSkills"
+          maxlength="500"
+          placeholder="Coding, Design, Gaming"
+          value="${esc(state.me.skills||"")}">
+      </label>
+      <label>
+        Profile picture
+        <input id="editAvatar"
+          type="file"
+          accept="image/*">
+      </label>
+      <div class="modal-actions">
+        <button onclick="closeModal()">Cancel</button>
+        <button class="primary" onclick="saveProfile()">Save changes</button>
+      </div>
+    </div>
+  `);
+}
+async function saveProfile(){
+  const display_name=$("editDisplayName")?.value.trim()||"";
+  const bio=$("editBio")?.value.trim()||"";
+  const skills=$("editSkills")?.value.trim()||"";
+  const file=$("editAvatar")?.files?.[0];
+  try{
+    let avatar_url=state.me?.avatar_url||"";
+    if(file){
+      const form=new FormData();
+      form.append("file",file);
+      const uploaded=await api("/upload",{
+        method:"POST",
+        body:form
+      });
+      avatar_url=
+        uploaded?.url||
+        uploaded?.media_url||
+        uploaded?.mediaUrl||
+        "";
+      if(!avatar_url){
+        throw new Error("Profile image upload failed");
+      }
+    }
+    const data=await api("/profile/update",{
+      method:"POST",
+      body:JSON.stringify({
+        display_name,
+        bio,
+        skills,
+        ...(file?{avatar_url}: {})
+      })
+    });
+    state.me=data?.user||data||state.me;
+    const me=await api("/me");
+    state.me=me?.user||me;
+    closeModal();
+    showApp();
+    go("profile");
+    await loadProfile(state.me.username);
+    toast("Profile updated","success");
+  }catch(err){
+    toast(err.message||"Couldn't update profile","error");
+  }
+}
+async function loadReels(){
+  const el=$("reelsFeed");
+  if(!el)return;
+  setLoading(el,"Loading reels…");
+  try{
+    const data=await api("/reels/feed");
+    const reels=Array.isArray(data)?data:(data?.reels||[]);
+    state.reels=reels;
+    if(!reels.length){
+      el.innerHTML=`
+        <div class="empty">
+          <b>No reels yet</b>
+          <span>Reels will appear here when people post them.</span>
+        </div>
+      `;
+      return;
+    }
+    el.innerHTML=reels.map(reel=>`
+      <article class="reel-card">
+        <video
+          src="${esc(reel.media_url||reel.video_url||"")}"
+          controls
+          playsinline
+          preload="metadata">
+        </video>
+        <div class="reel-info">
+          ${avatar({
+            username:reel.username,
+            display_name:reel.display_name,
+            avatar_url:reel.avatar_url
+          },42)}
+          <div>
+            <b>${esc(reel.display_name||reel.username||"User")}</b>
+            <small>@${esc(reel.username||"user")}</small>
+            ${
+              reel.caption
+              ? `<p>${esc(reel.caption)}</p>`
+              :""
+            }
+          </div>
+        </div>
+      </article>
+    `).join("");
+  }catch(err){
+    el.innerHTML=`
+      <div class="empty">
+        <b>Couldn't load reels</b>
+        <span>${esc(err.message)}</span>
+      </div>
+    `;
+  }
+}
+async function loadChats(){
+  const el=$("chatList");
+  if(!el)return;
+  setLoading(el,"Loading chats…");
+  try{
+    const data=await api("/chats");
+    const chats=Array.isArray(data)?data:(data?.chats||[]);
+    state.chats=chats;
+    if(!chats.length){
+      el.innerHTML=`
+        <div class="empty">
+          <b>No chats yet</b>
+          <span>Start a conversation with someone.</span>
+        </div>
+      `;
+      return;
+    }
+    el.innerHTML=chats.map(chat=>`
+      <button class="chat-row"
+        onclick="openChat(${Number(chat.id)})">
+        <div class="chat-avatar">
+          ${
+            chat.avatar_url
+            ? `<img src="${esc(chat.avatar_url)}" alt="">`
+            : `<span>${esc(
+                (chat.name||"Chat").charAt(0).toUpperCase()
+              )}</span>`
+          }
+        </div>
+        <div>
+          <b>${esc(chat.name||"Chat")}</b>
+          <small>${chat.is_group||chat.type==="group"?"Group":"Conversation"}</small>
+        </div>
+      </button>
+    `).join("");
+  }catch(err){
+    el.innerHTML=`
+      <div class="empty">
+        <b>Couldn't load chats</b>
+        <span>${esc(err.message)}</span>
+      </div>
+    `;
+  }
+}
+async function openChat(chatId){
+  const chat=state.chats.find(
+    c=>String(c.id)===String(chatId)
+  );
+  if(!chat)return;
+  openModal(`
+    <div class="chat-modal">
+      <div class="modal-title">
+        <h3>${esc(chat.name||"Chat")}</h3>
+        <button onclick="closeModal()">×</button>
+      </div>
+      <div id="messagesList" class="messages-list">
+        <div class="loading">Loading messages…</div>
+      </div>
+      <form class="message-form"
+        onsubmit="sendMessage(event,${Number(chatId)})">
+        <input id="messageInput"
+          maxlength="5000"
+          placeholder="Write a message…"
+          autocomplete="off">
+        <button>Send</button>
+      </form>
+    </div>
+  `);
+  await loadMessages(chatId);
+}
+async function loadMessages(chatId){
+  const el=$("messagesList");
+  if(!el)return;
+  try{
+    const data=await api(`/chats/${chatId}/messages`);
+    const messages=Array.isArray(data)
+      ?data
+      :(data?.messages||[]);
+    if(!messages.length){
+      el.innerHTML=`<div class="empty">No messages yet.</div>`;
+      return;
+    }
+    el.innerHTML=messages.map(m=>{
+      const mine=String(m.user_id)===String(state.me?.id);
+      return `
+        <div class="message ${mine?"mine":""}">
+          <div class="message-bubble">
+            ${esc(m.content||"")}
+          </div>
+          <small>${esc(timeAgo(m.created_at))}</small>
+        </div>
+      `;
+    }).join("");
+    el.scrollTop=el.scrollHeight;
+  }catch(err){
+    el.innerHTML=`<div class="empty">${esc(err.message)}</div>`;
+  }
+}
+async function sendMessage(event,chatId){
+  event.preventDefault();
+  const input=$("messageInput");
+  const content=input?.value.trim();
+  if(!content)return;
+  try{
+    await api(`/chats/${chatId}/messages`,{
+      method:"POST",
+      body:JSON.stringify({content})
+    });
+    input.value="";
+    await loadMessages(chatId);
+  }catch(err){
+    toast(err.message||"Couldn't send message","error");
+  }
+}
+async function loadNotifications(){
+  const el=$("notificationsList");
+  if(!el)return;
+  setLoading(el,"Loading notifications…");
+  try{
+    const data=await api("/notifications");
+    const notifications=Array.isArray(data)
+      ?data
+      :(data?.notifications||[]);
+    if(!notifications.length){
+      el.innerHTML=`
+        <div class="empty">
+          <b>No notifications</b>
+          <span>You're all caught up.</span>
+        </div>
+      `;
+      return;
+    }
+    el.innerHTML=notifications.map(n=>`
+      <div class="notification ${n.is_read?"":"unread"}">
+        ${avatar({
+          username:n.actor_username,
+          display_name:n.actor_display_name,
+          avatar_url:n.actor_avatar_url
+        },44)}
+        <div>
+          <b>${esc(n.actor_display_name||n.actor_username||"Someone")}</b>
+          <span>${esc(notificationText(n.type))}</span>
+          <small>${esc(timeAgo(n.created_at))}</small>
+        </div>
+      </div>
+    `).join("");
+    try{
+      await api("/notifications/read",{method:"POST"});
+    }catch(e){}
+  }catch(err){
+    el.innerHTML=`
+      <div class="empty">
+        <b>Couldn't load notifications</b>
+        <span>${esc(err.message)}</span>
+      </div>
+    `;
+  }
+}
+function notificationText(type){
+  switch(type){
+    case "like":
+    case "liked":
+      return "liked your post";
+    case "comment":
+    case "commented":
+      return "commented on your post";
+    case "follow":
+    case "followed":
+      return "started following you";
+    case "message":
+      return "sent you a message";
+    default:
+      return "interacted with you";
+  }
+}
+async function openPostFromUrl(){
+  const params=new URLSearchParams(location.search);
+  const postId=params.get("post");
+  if(!postId)return;
+  /*
+    First try the dedicated post endpoint.
+    If the Worker hasn't got it yet, fall back to the loaded feed.
+  */
+  try{
+    const data=await api(`/posts/${encodeURIComponent(postId)}`);
+    const post=data?.post||data;
+    if(post){
+      openModal(`
+        <div class="single-post-modal">
+          <div class="modal-title">
+            <h3>Post</h3>
+            <button onclick="closeModal()">×</button>
+          </div>
+          ${renderPost(post)}
+        </div>
+      `);
+      return;
+    }
+  }catch(e){}
+  const existing=state.feed.find(
+    p=>String(p.id)===String(postId)
+  );
+  if(existing){
+    openModal(`
+      <div class="single-post-modal">
+        <div class="modal-title">
+          <h3>Post</h3>
+          <button onclick="closeModal()">×</button>
+        </div>
+        ${renderPost(existing)}
+      </div>
+    `);
+    return;
+  }
+  toast("That post couldn't be found","error");
+}
+async function boot(){
+  try{
+    const data=await api("/me");
+    state.me=data?.user||data||null;
+  }catch(e){
+    state.me=null;
+  }
+  if(state.me){
+    showApp();
+  }else{
+    showAuth();
+  }
+  /*
+    Post links need the feed first when the dedicated endpoint
+    isn't available.
+  */
+  if(state.me && new URLSearchParams(location.search).has("post")){
+    setTimeout(openPostFromUrl,500);
+  }
+}
+/* =========================
+   GLOBAL EVENT HANDLERS
+   ========================= */
+document.addEventListener("click",event=>{
+  const searchBox=$("searchResults");
+  const input=$("searchInput");
+  if(
+    searchBox &&
+    !searchBox.contains(event.target) &&
+    event.target!==input
+  ){
+    searchBox.classList.add("hidden");
+  }
+});
+$("searchInput")?.addEventListener("input",searchUsers);
+$("authSubmit")?.addEventListener("click",()=>{
+  const mode=$("authMode")?.value||"login";
+  submitAuth(mode);
+});
+$("loginForm")?.addEventListener("submit",e=>{
+  e.preventDefault();
+  submitAuth("login");
+});
+$("signupForm")?.addEventListener("submit",e=>{
+  e.preventDefault();
+  submitAuth("signup");
+});
+/* Expose functions used by HTML onclick handlers. */
+Object.assign(window,{
+  api,
+  go,
+  logout,
+  switchAuth,
+  submitAuth,
+  openProfile,
+  loadProfile,
+  editProfile,
+  saveProfile,
+  openCreatePost,
+  publishPost,
+  openCreateStory,
+  publishStory,
+  toggleLike,
+  toggleSave,
+  openComments,
+  submitComment,
+  copyPostLink,
+  postMenu,
+  deletePost,
+  openModal,
+  closeModal,
+  toggleFollow,
+  loadHome,
+  loadDiscover,
+  loadReels,
+  loadChats,
+  loadNotifications,
+  openChat,
+  loadMessages,
+  sendMessage,
+  searchUsers,
+  openPostFromUrl
+});
+/* Start ZILNET */
+boot();
 
 </script>
 
