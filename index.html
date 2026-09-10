@@ -5985,3 +5985,649 @@ document.addEventListener(
 
     }
 );
+
+   /* =========================================================
+   PART 4 — ZILNET EXTRA FEATURES
+   Professional Black & White Build
+   ========================================================= */
+
+/* ---------- Helpers ---------- */
+
+function byId(id) {
+  return document.getElementById(id);
+}
+
+function escapeHTML(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+function showToast(message) {
+  if (typeof toast === "function") {
+    toast(message);
+    return;
+  }
+
+  const box = byId("toast");
+  if (!box) return;
+
+  box.textContent = message;
+  box.classList.remove("hidden");
+
+  clearTimeout(window.__zilnetToastTimer);
+
+  window.__zilnetToastTimer = setTimeout(() => {
+    box.classList.add("hidden");
+  }, 2500);
+}
+
+
+/* =========================================================
+   PROFILE LINK
+   ========================================================= */
+
+function getProfileUrl(username) {
+  const url = new URL(window.location.href);
+
+  url.search = "";
+  url.hash = "";
+
+  if (username) {
+    url.searchParams.set("user", username);
+  }
+
+  return url.toString();
+}
+
+async function copyProfileLink(username) {
+  try {
+    const target =
+      username ||
+      window.currentProfile?.username ||
+      window.currentUser?.username;
+
+    if (!target) {
+      showToast("Profile unavailable.");
+      return;
+    }
+
+    const link = getProfileUrl(target);
+
+    await navigator.clipboard.writeText(link);
+
+    showToast("Profile link copied.");
+  } catch (error) {
+    showToast("Couldn't copy the profile link.");
+  }
+}
+
+
+/* =========================================================
+   SHARE
+   ========================================================= */
+
+async function sharePost(postId) {
+  try {
+    const url = new URL(window.location.href);
+
+    url.search = "";
+    url.hash = "";
+
+    url.searchParams.set("post", postId);
+
+    if (navigator.share) {
+      await navigator.share({
+        title: "Zilnet",
+        text: "Check out this post on Zilnet.",
+        url: url.toString()
+      });
+    } else {
+      await navigator.clipboard.writeText(url.toString());
+      showToast("Post link copied.");
+    }
+  } catch (error) {
+    if (error?.name !== "AbortError") {
+      showToast("Couldn't share this post.");
+    }
+  }
+}
+
+
+/* =========================================================
+   SAVE POSTS
+   ========================================================= */
+
+const savedPosts = new Set(
+  JSON.parse(
+    localStorage.getItem("zilnet_saved_posts") || "[]"
+  )
+);
+
+function saveSavedPosts() {
+  localStorage.setItem(
+    "zilnet_saved_posts",
+    JSON.stringify([...savedPosts])
+  );
+}
+
+function toggleSavePost(postId, button) {
+  const id = String(postId);
+
+  if (savedPosts.has(id)) {
+    savedPosts.delete(id);
+
+    if (button) {
+      button.classList.remove("saved");
+      button.setAttribute("aria-label", "Save post");
+    }
+
+    showToast("Removed from saved.");
+  } else {
+    savedPosts.add(id);
+
+    if (button) {
+      button.classList.add("saved");
+      button.setAttribute("aria-label", "Remove from saved");
+    }
+
+    showToast("Post saved.");
+  }
+
+  saveSavedPosts();
+}
+
+function isPostSaved(postId) {
+  return savedPosts.has(String(postId));
+}
+
+
+/* =========================================================
+   COPY TEXT
+   ========================================================= */
+
+async function copyText(text) {
+  try {
+    await navigator.clipboard.writeText(String(text ?? ""));
+    showToast("Copied.");
+  } catch (error) {
+    showToast("Couldn't copy.");
+  }
+}
+
+
+/* =========================================================
+   SEARCH BY USERNAME / USER ID
+   ========================================================= */
+
+async function searchByUserId(value) {
+  const query = String(value ?? "").trim();
+
+  if (!query) {
+    showToast("Enter a username or user ID.");
+    return;
+  }
+
+  try {
+    const data = await api(
+      "/api/search?q=" + encodeURIComponent(query)
+    );
+
+    const results =
+      data?.users ||
+      data?.results ||
+      [];
+
+    const container =
+      byId("discoverResults") ||
+      byId("searchResults");
+
+    if (!container) return;
+
+    if (!results.length) {
+      container.innerHTML = `
+        <div class="card empty-state">
+          <strong>No users found</strong>
+          <span>Try another username or user ID.</span>
+        </div>
+      `;
+      return;
+    }
+
+    container.innerHTML = results.map(user => `
+      <div class="card search-user">
+        <div class="user-row">
+
+          <div class="avatar">
+            ${
+              user.avatar_url
+                ? `<img src="${escapeHTML(user.avatar_url)}" alt="">`
+                : escapeHTML(
+                    (user.display_name ||
+                     user.username ||
+                     "?")
+                    .charAt(0)
+                    .toUpperCase()
+                  )
+            }
+          </div>
+
+          <div class="user-info">
+            <strong>
+              ${escapeHTML(
+                user.display_name ||
+                user.username ||
+                "User"
+              )}
+            </strong>
+
+            <span>
+              @${escapeHTML(user.username || "")}
+            </span>
+          </div>
+
+          <button
+            class="secondary"
+            onclick="openUserProfile('${escapeHTML(user.username || "")}')">
+            View
+          </button>
+
+        </div>
+      </div>
+    `).join("");
+
+  } catch (error) {
+    showToast(error.message || "Search failed.");
+  }
+}
+
+
+/* =========================================================
+   OPEN USER PROFILE
+   ========================================================= */
+
+async function openUserProfile(username) {
+  if (!username) return;
+
+  try {
+    const data = await api(
+      "/api/users/" +
+      encodeURIComponent(username)
+    );
+
+    window.currentProfile = data.user || data;
+
+    if (typeof renderProfile === "function") {
+      renderProfile(window.currentProfile);
+    }
+
+    if (typeof showPage === "function") {
+      showPage("profile");
+    }
+
+  } catch (error) {
+    showToast(error.message || "Couldn't open profile.");
+  }
+}
+
+
+/* =========================================================
+   MEDIA VALIDATION
+   ========================================================= */
+
+function validateMediaFile(file) {
+  if (!file) return false;
+
+  const allowedTypes = [
+    "image/jpeg",
+    "image/png",
+    "image/webp",
+    "image/gif",
+    "video/mp4",
+    "video/webm",
+    "video/quicktime"
+  ];
+
+  if (!allowedTypes.includes(file.type)) {
+    showToast("Unsupported media type.");
+    return false;
+  }
+
+  const maxSize = 50 * 1024 * 1024;
+
+  if (file.size > maxSize) {
+    showToast("File is too large. Maximum is 50 MB.");
+    return false;
+  }
+
+  return true;
+}
+
+
+/* =========================================================
+   MEDIA PREVIEW
+   ========================================================= */
+
+function previewMedia(input, previewId) {
+  const file = input?.files?.[0];
+
+  if (!file) return;
+
+  if (!validateMediaFile(file)) {
+    input.value = "";
+    return;
+  }
+
+  const preview =
+    byId(previewId) ||
+    byId("mediaPreview");
+
+  if (!preview) return;
+
+  const url = URL.createObjectURL(file);
+
+  if (file.type.startsWith("video/")) {
+    preview.innerHTML = `
+      <video
+        src="${url}"
+        controls
+        playsinline
+        class="media-preview">
+      </video>
+    `;
+  } else {
+    preview.innerHTML = `
+      <img
+        src="${url}"
+        alt="Preview"
+        class="media-preview">
+    `;
+  }
+}
+
+
+/* =========================================================
+   CAMERA
+   ========================================================= */
+
+function openCamera() {
+  const input =
+    byId("cameraInput") ||
+    byId("postMediaInput");
+
+  if (!input) {
+    showToast("Camera input unavailable.");
+    return;
+  }
+
+  input.setAttribute("accept", "image/*,video/*");
+  input.setAttribute("capture", "environment");
+
+  input.click();
+}
+
+
+/* =========================================================
+   GALLERY
+   ========================================================= */
+
+function openGallery() {
+  const input =
+    byId("galleryInput") ||
+    byId("postMediaInput");
+
+  if (!input) {
+    showToast("Gallery input unavailable.");
+    return;
+  }
+
+  input.removeAttribute("capture");
+  input.setAttribute(
+    "accept",
+    "image/*,video/*"
+  );
+
+  input.click();
+}
+
+
+/* =========================================================
+   GENERIC MEDIA UPLOAD
+   ========================================================= */
+
+async function uploadMedia(file, type) {
+  if (!file || !validateMediaFile(file)) {
+    return null;
+  }
+
+  const formData = new FormData();
+
+  formData.append("file", file);
+  formData.append("type", type);
+
+  try {
+    const response = await fetch("/api/upload", {
+      method: "POST",
+      credentials: "include",
+      body: formData
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data?.error ||
+        "Upload failed."
+      );
+    }
+
+    return data;
+  } catch (error) {
+    showToast(error.message || "Upload failed.");
+    return null;
+  }
+}
+
+
+/* =========================================================
+   POST MEDIA
+   ========================================================= */
+
+async function uploadPostMedia(file) {
+  return uploadMedia(file, "post");
+}
+
+
+/* =========================================================
+   STORY MEDIA
+   ========================================================= */
+
+async function uploadStoryMedia(file) {
+  return uploadMedia(file, "story");
+}
+
+
+/* =========================================================
+   REEL MEDIA
+   ========================================================= */
+
+async function uploadReelMedia(file) {
+  return uploadMedia(file, "reel");
+}
+
+
+/* =========================================================
+   TEXT LIMIT
+   ========================================================= */
+
+function limitText(input, maxLength, counterId) {
+  if (!input) return;
+
+  if (input.value.length > maxLength) {
+    input.value =
+      input.value.substring(0, maxLength);
+  }
+
+  const counter = byId(counterId);
+
+  if (counter) {
+    counter.textContent =
+      input.value.length +
+      " / " +
+      maxLength;
+  }
+}
+
+
+/* =========================================================
+   ONLINE / OFFLINE STATUS
+   ========================================================= */
+
+window.addEventListener("online", () => {
+  showToast("You're back online.");
+});
+
+window.addEventListener("offline", () => {
+  showToast("You're offline.");
+});
+
+
+/* =========================================================
+   CLOSE MODAL WHEN CLICKING OUTSIDE
+   ========================================================= */
+
+document.addEventListener("click", event => {
+  const modal = byId("modal");
+
+  if (!modal) return;
+
+  if (
+    event.target === modal &&
+    !modal.classList.contains("hidden")
+  ) {
+    modal.classList.add("hidden");
+  }
+});
+
+
+/* =========================================================
+   ESC KEY
+   ========================================================= */
+
+document.addEventListener("keydown", event => {
+  if (event.key !== "Escape") return;
+
+  const modal = byId("modal");
+
+  if (modal) {
+    modal.classList.add("hidden");
+  }
+});
+
+
+/* =========================================================
+   URL ROUTING
+   ========================================================= */
+
+function handleZilnetUrl() {
+  const params =
+    new URLSearchParams(
+      window.location.search
+    );
+
+  const username =
+    params.get("user");
+
+  const postId =
+    params.get("post");
+
+  if (username) {
+    setTimeout(() => {
+      openUserProfile(username);
+    }, 500);
+  }
+
+  if (postId) {
+    setTimeout(() => {
+      if (typeof openPost === "function") {
+        openPost(postId);
+      }
+    }, 500);
+  }
+}
+
+window.addEventListener(
+  "popstate",
+  handleZilnetUrl
+);
+
+
+/* =========================================================
+   FILE INPUT PREVIEWS
+   ========================================================= */
+
+document.addEventListener("change", event => {
+  const input = event.target;
+
+  if (!(input instanceof HTMLInputElement)) {
+    return;
+  }
+
+  if (
+    input.type !== "file" ||
+    !input.files?.length
+  ) {
+    return;
+  }
+
+  const previewId =
+    input.dataset.preview;
+
+  if (previewId) {
+    previewMedia(
+      input,
+      previewId
+    );
+  }
+});
+
+
+/* =========================================================
+   AUTH FORM SAFETY
+   ========================================================= */
+
+document.addEventListener(
+  "submit",
+  event => {
+    const form = event.target;
+
+    if (
+      form instanceof HTMLFormElement &&
+      form.id !== "authForm"
+    ) {
+      event.preventDefault();
+    }
+  }
+);
+
+
+/* =========================================================
+   PAGE READY
+   ========================================================= */
+
+window.addEventListener(
+  "DOMContentLoaded",
+  () => {
+    handleZilnetUrl();
+
+    console.log(
+      "Zilnet Part 4 loaded successfully."
+    );
+  }
+);
+   </script>
+</body>
+</html>
