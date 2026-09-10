@@ -1451,3 +1451,2540 @@ function normalizeSkills(value) {
   return String(value || "")
     .slice(0, 1000);
 }
+
+// ============================================================
+// ZILNET — PART 2/3
+// POSTS + FEED + MEDIA + STORIES + REELS
+// ============================================================
+
+
+// ============================================================
+// FEED
+// ============================================================
+
+async function getFeed(user, env) {
+  const userId = Number(user.id);
+
+  const result = await env.DB.prepare(
+    `SELECT
+       p.id,
+       p.user_id,
+       p.content,
+       p.created_at,
+       p.media_url,
+       p.media_type,
+
+       u.username,
+       u.display_name,
+       u.avatar_url,
+
+       (SELECT COUNT(*)
+          FROM likes l
+         WHERE l.post_id = p.id) AS likes_count,
+
+       (SELECT COUNT(*)
+          FROM comments c
+         WHERE c.post_id = p.id) AS comments_count,
+
+       EXISTS(
+         SELECT 1
+           FROM likes l2
+          WHERE l2.post_id = p.id
+            AND l2.user_id = ?
+       ) AS liked,
+
+       EXISTS(
+         SELECT 1
+           FROM saved_posts sp
+          WHERE sp.post_id = CAST(p.id AS TEXT)
+            AND sp.user_id = ?
+       ) AS saved
+
+     FROM posts p
+     JOIN users u
+       ON u.id = p.user_id
+
+     WHERE
+       p.user_id = ?
+       OR p.user_id IN (
+         SELECT following_id
+         FROM follows
+         WHERE follower_id = ?
+       )
+
+     ORDER BY p.id DESC
+     LIMIT 100`
+  )
+    .bind(
+      userId,
+      String(userId),
+      userId,
+      userId
+    )
+    .all();
+
+  return json({
+    posts: (result.results || []).map(formatPost)
+  });
+}
+
+
+// ============================================================
+// CREATE POST
+// ============================================================
+
+async function createPost(request, user, env) {
+  const body = await readJSON(request);
+
+  const content =
+    body.content !== undefined
+      ? String(body.content).slice(0, 5000)
+      : "";
+
+  const mediaUrl =
+    body.mediaUrl !== undefined
+      ? String(body.mediaUrl).slice(0, 2000)
+      : String(body.media_url || "").slice(0, 2000);
+
+  const mediaType =
+    body.mediaType !== undefined
+      ? String(body.mediaType).slice(0, 100)
+      : String(body.media_type || "").slice(0, 100);
+
+  if (!content.trim() && !mediaUrl) {
+    throw new HttpError(
+      400,
+      "Post cannot be empty"
+    );
+  }
+
+  const result = await env.DB.prepare(
+    `INSERT INTO posts
+      (
+        user_id,
+        content,
+        media_url,
+        media_type
+      )
+     VALUES (?, ?, ?, ?)`
+  )
+    .bind(
+      Number(user.id),
+      content,
+      mediaUrl,
+      mediaType
+    )
+    .run();
+
+  const postId =
+    Number(result.meta.last_row_id);
+
+  const post = await getPostRow(
+    postId,
+    env
+  );
+
+  return json(
+    {
+      post: formatPost(post)
+    },
+    201
+  );
+}
+
+
+// ============================================================
+// GET SINGLE POST
+// ============================================================
+
+async function getPost(
+  postId,
+  user,
+  env
+) {
+  if (!Number.isInteger(postId) || postId <= 0) {
+    throw new HttpError(
+      400,
+      "Invalid post ID"
+    );
+  }
+
+  const post = await env.DB.prepare(
+    `SELECT
+       p.id,
+       p.user_id,
+       p.content,
+       p.created_at,
+       p.media_url,
+       p.media_type,
+
+       u.username,
+       u.display_name,
+       u.avatar_url,
+
+       (SELECT COUNT(*)
+          FROM likes l
+         WHERE l.post_id = p.id) AS likes_count,
+
+       (SELECT COUNT(*)
+          FROM comments c
+         WHERE c.post_id = p.id) AS comments_count,
+
+       EXISTS(
+         SELECT 1
+           FROM likes l2
+          WHERE l2.post_id = p.id
+            AND l2.user_id = ?
+       ) AS liked,
+
+       EXISTS(
+         SELECT 1
+           FROM saved_posts sp
+          WHERE sp.post_id = CAST(p.id AS TEXT)
+            AND sp.user_id = ?
+       ) AS saved
+
+     FROM posts p
+     JOIN users u
+       ON u.id = p.user_id
+
+     WHERE p.id = ?
+
+     LIMIT 1`
+  )
+    .bind(
+      Number(user.id),
+      String(user.id),
+      postId
+    )
+    .first();
+
+  if (!post) {
+    throw new HttpError(
+      404,
+      "Post not found"
+    );
+  }
+
+  return json({
+    post: formatPost(post)
+  });
+}
+
+
+// ============================================================
+// DELETE POST
+// ============================================================
+
+async function deletePost(
+  postId,
+  user,
+  env
+) {
+  if (!Number.isInteger(postId) || postId <= 0) {
+    throw new HttpError(
+      400,
+      "Invalid post ID"
+    );
+  }
+
+  const post = await env.DB.prepare(
+    `SELECT id, user_id
+     FROM posts
+     WHERE id = ?
+     LIMIT 1`
+  )
+    .bind(postId)
+    .first();
+
+  if (!post) {
+    throw new HttpError(
+      404,
+      "Post not found"
+    );
+  }
+
+  if (
+    Number(post.user_id) !== Number(user.id)
+  ) {
+    throw new HttpError(
+      403,
+      "You can only delete your own posts"
+    );
+  }
+
+  // Delete dependent rows first.
+  await env.DB.prepare(
+    `DELETE FROM comments
+     WHERE post_id = ?`
+  )
+    .bind(postId)
+    .run();
+
+  await env.DB.prepare(
+    `DELETE FROM likes
+     WHERE post_id = ?`
+  )
+    .bind(postId)
+    .run();
+
+  await env.DB.prepare(
+    `DELETE FROM saved_posts
+     WHERE post_id = ?`
+  )
+    .bind(String(postId))
+    .run();
+
+  await env.DB.prepare(
+    `DELETE FROM notifications
+     WHERE post_id = ?`
+  )
+    .bind(postId)
+    .run();
+
+  await env.DB.prepare(
+    `DELETE FROM posts
+     WHERE id = ?`
+  )
+    .bind(postId)
+    .run();
+
+  return json({
+    ok: true
+  });
+}
+
+
+// ============================================================
+// LIKE / UNLIKE
+// ============================================================
+
+async function toggleLike(
+  postId,
+  user,
+  env
+) {
+  const post = await env.DB.prepare(
+    `SELECT id, user_id
+     FROM posts
+     WHERE id = ?
+     LIMIT 1`
+  )
+    .bind(postId)
+    .first();
+
+  if (!post) {
+    throw new HttpError(
+      404,
+      "Post not found"
+    );
+  }
+
+  const userId = Number(user.id);
+
+  const existing = await env.DB.prepare(
+    `SELECT id
+     FROM likes
+     WHERE post_id = ?
+       AND user_id = ?
+     LIMIT 1`
+  )
+    .bind(
+      postId,
+      userId
+    )
+    .first();
+
+  if (existing) {
+    await env.DB.prepare(
+      `DELETE FROM likes
+       WHERE post_id = ?
+         AND user_id = ?`
+    )
+      .bind(
+        postId,
+        userId
+      )
+      .run();
+
+    return json({
+      liked: false,
+      likes_count: await getLikeCount(
+        postId,
+        env
+      )
+    });
+  }
+
+  await env.DB.prepare(
+    `INSERT OR IGNORE INTO likes
+      (
+        post_id,
+        user_id
+      )
+     VALUES (?, ?)`
+  )
+    .bind(
+      postId,
+      userId
+    )
+    .run();
+
+  if (
+    Number(post.user_id) !== userId
+  ) {
+    await createNotification(
+      env,
+      Number(post.user_id),
+      userId,
+      "like",
+      postId
+    );
+  }
+
+  return json({
+    liked: true,
+    likes_count: await getLikeCount(
+      postId,
+      env
+    )
+  });
+}
+
+
+// ============================================================
+// COMMENTS
+// ============================================================
+
+async function getComments(
+  postId,
+  env
+) {
+  const post = await env.DB.prepare(
+    `SELECT id
+     FROM posts
+     WHERE id = ?
+     LIMIT 1`
+  )
+    .bind(postId)
+    .first();
+
+  if (!post) {
+    throw new HttpError(
+      404,
+      "Post not found"
+    );
+  }
+
+  const result = await env.DB.prepare(
+    `SELECT
+       c.id,
+       c.post_id,
+       c.user_id,
+       c.content,
+       c.created_at,
+
+       u.username,
+       u.display_name,
+       u.avatar_url
+
+     FROM comments c
+     JOIN users u
+       ON u.id = c.user_id
+
+     WHERE c.post_id = ?
+
+     ORDER BY c.id ASC
+     LIMIT 200`
+  )
+    .bind(postId)
+    .all();
+
+  return json({
+    comments: result.results || []
+  });
+}
+
+
+async function createComment(
+  request,
+  postId,
+  user,
+  env
+) {
+  const body = await readJSON(request);
+
+  const content = String(
+    body.content || ""
+  )
+    .trim()
+    .slice(0, 2000);
+
+  if (!content) {
+    throw new HttpError(
+      400,
+      "Comment cannot be empty"
+    );
+  }
+
+  const post = await env.DB.prepare(
+    `SELECT id, user_id
+     FROM posts
+     WHERE id = ?
+     LIMIT 1`
+  )
+    .bind(postId)
+    .first();
+
+  if (!post) {
+    throw new HttpError(
+      404,
+      "Post not found"
+    );
+  }
+
+  const result = await env.DB.prepare(
+    `INSERT INTO comments
+      (
+        post_id,
+        user_id,
+        content
+      )
+     VALUES (?, ?, ?)`
+  )
+    .bind(
+      postId,
+      Number(user.id),
+      content
+    )
+    .run();
+
+  const commentId =
+    Number(result.meta.last_row_id);
+
+  if (
+    Number(post.user_id) !== Number(user.id)
+  ) {
+    await createNotification(
+      env,
+      Number(post.user_id),
+      Number(user.id),
+      "comment",
+      postId
+    );
+  }
+
+  const comment = await env.DB.prepare(
+    `SELECT
+       c.id,
+       c.post_id,
+       c.user_id,
+       c.content,
+       c.created_at,
+
+       u.username,
+       u.display_name,
+       u.avatar_url
+
+     FROM comments c
+     JOIN users u
+       ON u.id = c.user_id
+
+     WHERE c.id = ?
+
+     LIMIT 1`
+  )
+    .bind(commentId)
+    .first();
+
+  return json(
+    {
+      comment
+    },
+    201
+  );
+}
+
+
+// ============================================================
+// SAVE / UNSAVE POST
+// ============================================================
+
+async function toggleSave(
+  postId,
+  user,
+  env
+) {
+  const post = await env.DB.prepare(
+    `SELECT id
+     FROM posts
+     WHERE id = ?
+     LIMIT 1`
+  )
+    .bind(postId)
+    .first();
+
+  if (!post) {
+    throw new HttpError(
+      404,
+      "Post not found"
+    );
+  }
+
+  const userId =
+    String(user.id);
+
+  const existing = await env.DB.prepare(
+    `SELECT post_id
+     FROM saved_posts
+     WHERE post_id = ?
+       AND user_id = ?
+     LIMIT 1`
+  )
+    .bind(
+      String(postId),
+      userId
+    )
+    .first();
+
+  if (existing) {
+    await env.DB.prepare(
+      `DELETE FROM saved_posts
+       WHERE post_id = ?
+         AND user_id = ?`
+    )
+      .bind(
+        String(postId),
+        userId
+      )
+      .run();
+
+    return json({
+      saved: false
+    });
+  }
+
+  await env.DB.prepare(
+    `INSERT OR IGNORE INTO saved_posts
+      (
+        post_id,
+        user_id,
+        created_at
+      )
+     VALUES (?, ?, ?)`
+  )
+    .bind(
+      String(postId),
+      userId,
+      new Date().toISOString()
+    )
+    .run();
+
+  return json({
+    saved: true
+  });
+}
+
+
+// ============================================================
+// MEDIA UPLOAD
+// ============================================================
+
+async function uploadMedia(
+  request,
+  user,
+  env
+) {
+  if (!env.MEDIA) {
+    throw new HttpError(
+      503,
+      "Media storage is not configured"
+    );
+  }
+
+  const contentType =
+    request.headers.get(
+      "content-type"
+    ) || "";
+
+  if (
+    !contentType.toLowerCase()
+      .startsWith("multipart/form-data")
+  ) {
+    throw new HttpError(
+      400,
+      "Upload must use multipart/form-data"
+    );
+  }
+
+  const form =
+    await request.formData();
+
+  const file =
+    form.get("file") ||
+    form.get("media");
+
+  if (
+    !file ||
+    typeof file === "string" ||
+    typeof file.arrayBuffer !== "function"
+  ) {
+    throw new HttpError(
+      400,
+      "No file provided"
+    );
+  }
+
+  const maxBytes =
+    25 * 1024 * 1024;
+
+  if (
+    Number(file.size || 0) > maxBytes
+  ) {
+    throw new HttpError(
+      413,
+      "File is too large"
+    );
+  }
+
+  const type =
+    String(file.type || "")
+      .toLowerCase();
+
+  const allowedPrefixes = [
+    "image/",
+    "video/",
+    "audio/"
+  ];
+
+  if (
+    type &&
+    !allowedPrefixes.some(
+      prefix => type.startsWith(prefix)
+    )
+  ) {
+    throw new HttpError(
+      400,
+      "Unsupported media type"
+    );
+  }
+
+  const originalName =
+    String(
+      file.name || "upload"
+    )
+      .replace(/[^a-zA-Z0-9._-]/g, "_")
+      .slice(0, 100);
+
+  const extension =
+    getSafeExtension(
+      originalName,
+      type
+    );
+
+  const key =
+    `users/${Number(user.id)}/` +
+    `${Date.now()}-${randomId(12)}` +
+    `${extension}`;
+
+  await env.MEDIA.put(
+    key,
+    file.stream(),
+    {
+      httpMetadata: {
+        contentType:
+          type || "application/octet-stream",
+        contentDisposition:
+          `inline; filename="${originalName}"`
+      },
+      customMetadata: {
+        userId:
+          String(user.id)
+      }
+    }
+  );
+
+  return json(
+    {
+      key,
+      url:
+        `${new URL(request.url).origin}` +
+        `/media/${encodePath(key)}`,
+      media_url:
+        `${new URL(request.url).origin}` +
+        `/media/${encodePath(key)}`,
+      media_type:
+        type || "application/octet-stream"
+    },
+    201
+  );
+}
+
+
+// ============================================================
+// SERVE R2 MEDIA
+// ============================================================
+
+async function serveMedia(
+  path,
+  env
+) {
+  if (!env.MEDIA) {
+    return new Response(
+      "Media storage unavailable",
+      { status: 503 }
+    );
+  }
+
+  const key =
+    decodeURIComponent(
+      path.slice("/media/".length)
+    );
+
+  if (!key) {
+    return new Response(
+      "Not found",
+      { status: 404 }
+    );
+  }
+
+  const object =
+    await env.MEDIA.get(key);
+
+  if (!object) {
+    return new Response(
+      "Media not found",
+      { status: 404 }
+    );
+  }
+
+  const headers =
+    new Headers();
+
+  object.writeHttpMetadata(
+    headers
+  );
+
+  headers.set(
+    "etag",
+    object.httpEtag
+  );
+
+  headers.set(
+    "cache-control",
+    "public, max-age=31536000, immutable"
+  );
+
+  return new Response(
+    object.body,
+    {
+      status: 200,
+      headers
+    }
+  );
+}
+
+
+// ============================================================
+// STORIES
+// ============================================================
+
+async function getStoryFeed(
+  user,
+  env
+) {
+  const userId =
+    Number(user.id);
+
+  const result = await env.DB.prepare(
+    `SELECT
+       s.id,
+       s.user_id,
+       s.content,
+       s.media_url,
+       s.media_type,
+       s.created_at,
+
+       u.username,
+       u.display_name,
+       u.avatar_url
+
+     FROM stories s
+     JOIN users u
+       ON u.id = s.user_id
+
+     WHERE
+       datetime(s.created_at) >
+         datetime('now', '-24 hours')
+       AND (
+         s.user_id = ?
+         OR s.user_id IN (
+           SELECT following_id
+           FROM follows
+           WHERE follower_id = ?
+         )
+       )
+
+     ORDER BY s.id DESC`
+  )
+    .bind(
+      userId,
+      userId
+    )
+    .all();
+
+  return json({
+    stories:
+      result.results || []
+  });
+}
+
+
+async function createStory(
+  request,
+  user,
+  env
+) {
+  const body =
+    await readJSON(request);
+
+  const content =
+    body.content !== undefined
+      ? String(body.content).slice(0, 5000)
+      : String(body.text || "").slice(0, 5000);
+
+  const mediaUrl =
+    body.mediaUrl !== undefined
+      ? String(body.mediaUrl).slice(0, 2000)
+      : String(body.media_url || "").slice(0, 2000);
+
+  const mediaType =
+    body.mediaType !== undefined
+      ? String(body.mediaType).slice(0, 100)
+      : String(body.media_type || "").slice(0, 100);
+
+  if (!content.trim() && !mediaUrl) {
+    throw new HttpError(
+      400,
+      "Story cannot be empty"
+    );
+  }
+
+  const result = await env.DB.prepare(
+    `INSERT INTO stories
+      (
+        user_id,
+        content,
+        media_url,
+        media_type
+      )
+     VALUES (?, ?, ?, ?)`
+  )
+    .bind(
+      Number(user.id),
+      content,
+      mediaUrl,
+      mediaType
+    )
+    .run();
+
+  const storyId =
+    Number(result.meta.last_row_id);
+
+  const story =
+    await env.DB.prepare(
+      `SELECT
+         s.id,
+         s.user_id,
+         s.content,
+         s.media_url,
+         s.media_type,
+         s.created_at,
+
+         u.username,
+         u.display_name,
+         u.avatar_url
+
+       FROM stories s
+       JOIN users u
+         ON u.id = s.user_id
+
+       WHERE s.id = ?
+       LIMIT 1`
+    )
+      .bind(storyId)
+      .first();
+
+  return json(
+    {
+      story
+    },
+    201
+  );
+}
+
+
+// ============================================================
+// REELS
+// ============================================================
+
+async function getReels(
+  env
+) {
+  const result = await env.DB.prepare(
+    `SELECT
+       r.id,
+       r.user_id,
+       r.caption,
+       r.media_url,
+       r.created_at,
+
+       u.username,
+       u.display_name,
+       u.avatar_url
+
+     FROM reels r
+     JOIN users u
+       ON u.id = r.user_id
+
+     ORDER BY r.id DESC
+     LIMIT 100`
+  )
+    .all();
+
+  return json({
+    reels:
+      result.results || []
+  });
+}
+
+
+async function createReel(
+  request,
+  user,
+  env
+) {
+  const body =
+    await readJSON(request);
+
+  const caption =
+    String(
+      body.caption || ""
+    )
+      .slice(0, 2000);
+
+  const mediaUrl =
+    body.mediaUrl !== undefined
+      ? String(body.mediaUrl)
+      : String(
+          body.videoUrl ||
+          body.media_url ||
+          ""
+        );
+
+  if (!mediaUrl.trim()) {
+    throw new HttpError(
+      400,
+      "Reel media URL is required"
+    );
+  }
+
+  const result = await env.DB.prepare(
+    `INSERT INTO reels
+      (
+        user_id,
+        caption,
+        media_url
+      )
+     VALUES (?, ?, ?)`
+  )
+    .bind(
+      Number(user.id),
+      caption,
+      mediaUrl.slice(0, 2000)
+    )
+    .run();
+
+  const reelId =
+    Number(result.meta.last_row_id);
+
+  const reel =
+    await env.DB.prepare(
+      `SELECT
+         r.id,
+         r.user_id,
+         r.caption,
+         r.media_url,
+         r.created_at,
+
+         u.username,
+         u.display_name,
+         u.avatar_url
+
+       FROM reels r
+       JOIN users u
+         ON u.id = r.user_id
+
+       WHERE r.id = ?
+       LIMIT 1`
+    )
+      .bind(reelId)
+      .first();
+
+  return json(
+    {
+      reel
+    },
+    201
+  );
+}
+
+
+// ============================================================
+// POST / MEDIA HELPERS
+// ============================================================
+
+async function getPostRow(
+  postId,
+  env
+) {
+  return await env.DB.prepare(
+    `SELECT
+       p.id,
+       p.user_id,
+       p.content,
+       p.created_at,
+       p.media_url,
+       p.media_type,
+
+       u.username,
+       u.display_name,
+       u.avatar_url,
+
+       (SELECT COUNT(*)
+          FROM likes l
+         WHERE l.post_id = p.id) AS likes_count,
+
+       (SELECT COUNT(*)
+          FROM comments c
+         WHERE c.post_id = p.id) AS comments_count
+
+     FROM posts p
+     JOIN users u
+       ON u.id = p.user_id
+
+     WHERE p.id = ?
+
+     LIMIT 1`
+  )
+    .bind(postId)
+    .first();
+}
+
+
+function formatPost(post) {
+  if (!post) {
+    return null;
+  }
+
+  return {
+    id: Number(post.id),
+    user_id: Number(post.user_id),
+
+    content:
+      post.content || "",
+
+    created_at:
+      post.created_at || null,
+
+    media_url:
+      post.media_url || "",
+
+    media_type:
+      post.media_type || "",
+
+    user: {
+      id: Number(post.user_id),
+      username:
+        post.username || "",
+      display_name:
+        post.display_name || "",
+      avatar_url:
+        post.avatar_url || ""
+    },
+
+    likes_count:
+      Number(post.likes_count || 0),
+
+    comments_count:
+      Number(post.comments_count || 0),
+
+    liked:
+      Boolean(Number(post.liked || 0)),
+
+    saved:
+      Boolean(Number(post.saved || 0))
+  };
+}
+
+
+async function getLikeCount(
+  postId,
+  env
+) {
+  const row =
+    await env.DB.prepare(
+      `SELECT COUNT(*) AS count
+       FROM likes
+       WHERE post_id = ?`
+    )
+      .bind(postId)
+      .first();
+
+  return Number(
+    row?.count || 0
+  );
+}
+
+
+// ============================================================
+// MEDIA NAME HELPERS
+// ============================================================
+
+function getSafeExtension(
+  filename,
+  contentType
+) {
+  const match =
+    filename.match(
+      /\.([a-zA-Z0-9]{1,10})$/
+    );
+
+  if (match) {
+    return "." +
+      match[1].toLowerCase();
+  }
+
+  const map = {
+    "image/jpeg": ".jpg",
+    "image/png": ".png",
+    "image/webp": ".webp",
+    "image/gif": ".gif",
+    "video/mp4": ".mp4",
+    "video/webm": ".webm",
+    "audio/mpeg": ".mp3",
+    "audio/wav": ".wav",
+    "audio/ogg": ".ogg"
+  };
+
+  return (
+    map[contentType] ||
+    ""
+  );
+}
+
+
+function encodePath(value) {
+  return value
+    .split("/")
+    .map(
+      part => encodeURIComponent(part)
+    )
+    .join("/");
+}
+
+// ============================================================
+// ZILNET — PART 3/3
+// CHATS + GROUPS + NOTIFICATIONS + SETTINGS + UTILITIES
+// ============================================================
+
+
+// ============================================================
+// CHATS
+// ============================================================
+
+async function getChats(user, env) {
+  const userId = Number(user.id);
+
+  const result = await env.DB.prepare(
+    `SELECT
+       c.id,
+       c.name,
+       c.is_group,
+       c.created_at,
+
+       (
+         SELECT m.content
+         FROM messages m
+         WHERE m.chat_id = c.id
+         ORDER BY m.id DESC
+         LIMIT 1
+       ) AS last_message,
+
+       (
+         SELECT m.created_at
+         FROM messages m
+         WHERE m.chat_id = c.id
+         ORDER BY m.id DESC
+         LIMIT 1
+       ) AS last_message_at
+
+     FROM chats c
+
+     JOIN chat_members cm
+       ON cm.chat_id = c.id
+
+     WHERE cm.user_id = ?
+
+     ORDER BY
+       COALESCE(last_message_at, c.created_at) DESC,
+       c.id DESC`
+  )
+    .bind(userId)
+    .all();
+
+  const chats = [];
+
+  for (const chat of result.results || []) {
+    const members = await env.DB.prepare(
+      `SELECT
+         u.id,
+         u.username,
+         u.display_name,
+         u.avatar_url
+
+       FROM chat_members cm
+       JOIN users u
+         ON u.id = cm.user_id
+
+       WHERE cm.chat_id = ?
+
+       ORDER BY cm.id ASC`
+    )
+      .bind(Number(chat.id))
+      .all();
+
+    chats.push({
+      id: Number(chat.id),
+      name: chat.name || "",
+      is_group: Number(chat.is_group || 0),
+      type:
+        Number(chat.is_group || 0) === 1
+          ? "group"
+          : "direct",
+      created_at: chat.created_at,
+
+      last_message:
+        chat.last_message || "",
+      last_message_at:
+        chat.last_message_at || null,
+
+      members: members.results || []
+    });
+  }
+
+  return json({
+    chats
+  });
+}
+
+
+// ============================================================
+// CREATE DIRECT CHAT
+// ============================================================
+
+async function createChat(
+  request,
+  user,
+  env
+) {
+  const body = await readJSON(request);
+
+  const targetId = parsePositiveInt(
+    body.userId ??
+    body.user_id ??
+    body.targetUserId ??
+    body.target_user_id
+  );
+
+  if (!targetId) {
+    throw new HttpError(
+      400,
+      "Valid user ID is required"
+    );
+  }
+
+  if (
+    targetId === Number(user.id)
+  ) {
+    throw new HttpError(
+      400,
+      "You cannot create a chat with yourself"
+    );
+  }
+
+  const target = await getUserById(
+    targetId,
+    env
+  );
+
+  if (!target) {
+    throw new HttpError(
+      404,
+      "User not found"
+    );
+  }
+
+  // Check target's message privacy.
+  const settings = await env.DB.prepare(
+    `SELECT message_privacy
+     FROM user_settings
+     WHERE user_id = ?
+     LIMIT 1`
+  )
+    .bind(String(targetId))
+    .first();
+
+  const privacy =
+    settings?.message_privacy ||
+    "everyone";
+
+  if (privacy === "nobody") {
+    throw new HttpError(
+      403,
+      "This user does not accept messages"
+    );
+  }
+
+  if (privacy === "followers") {
+    const follows = await env.DB.prepare(
+      `SELECT id
+       FROM follows
+       WHERE follower_id = ?
+         AND following_id = ?
+       LIMIT 1`
+    )
+      .bind(
+        Number(user.id),
+        targetId
+      )
+      .first();
+
+    if (!follows) {
+      throw new HttpError(
+        403,
+        "This user only accepts messages from followers"
+      );
+    }
+  }
+
+  // Find an existing two-person chat.
+  const existing = await env.DB.prepare(
+    `SELECT c.id
+     FROM chats c
+     JOIN chat_members cm1
+       ON cm1.chat_id = c.id
+     JOIN chat_members cm2
+       ON cm2.chat_id = c.id
+     WHERE c.is_group = 0
+       AND cm1.user_id = ?
+       AND cm2.user_id = ?
+       AND (
+         SELECT COUNT(*)
+         FROM chat_members cm3
+         WHERE cm3.chat_id = c.id
+       ) = 2
+     LIMIT 1`
+  )
+    .bind(
+      Number(user.id),
+      targetId
+    )
+    .first();
+
+  if (existing) {
+    return json({
+      chat: {
+        id: Number(existing.id),
+        is_group: 0,
+        type: "direct"
+      },
+      created: false
+    });
+  }
+
+  // Create the chat.
+  const chatResult = await env.DB.prepare(
+    `INSERT INTO chats
+      (
+        name,
+        is_group
+      )
+     VALUES ('', 0)`
+  )
+    .run();
+
+  const chatId =
+    Number(chatResult.meta.last_row_id);
+
+  if (!chatId) {
+    throw new HttpError(
+      500,
+      "Could not create chat"
+    );
+  }
+
+  await env.DB.prepare(
+    `INSERT INTO chat_members
+      (
+        chat_id,
+        user_id
+      )
+     VALUES (?, ?)`
+  )
+    .bind(
+      chatId,
+      Number(user.id)
+    )
+    .run();
+
+  await env.DB.prepare(
+    `INSERT INTO chat_members
+      (
+        chat_id,
+        user_id
+      )
+     VALUES (?, ?)`
+  )
+    .bind(
+      chatId,
+      targetId
+    )
+    .run();
+
+  return json(
+    {
+      chat: {
+        id: chatId,
+        name: "",
+        is_group: 0,
+        type: "direct"
+      },
+      created: true
+    },
+    201
+  );
+}
+
+
+// ============================================================
+// CHAT MEMBERSHIP CHECK
+// ============================================================
+
+async function requireChatMember(
+  chatId,
+  userId,
+  env
+) {
+  const member = await env.DB.prepare(
+    `SELECT
+       cm.id,
+       cm.chat_id,
+       cm.user_id
+     FROM chat_members cm
+     WHERE cm.chat_id = ?
+       AND cm.user_id = ?
+     LIMIT 1`
+  )
+    .bind(
+      Number(chatId),
+      Number(userId)
+    )
+    .first();
+
+  if (!member) {
+    throw new HttpError(
+      403,
+      "You are not a member of this chat"
+    );
+  }
+
+  return member;
+}
+
+
+// ============================================================
+// GET MESSAGES
+// ============================================================
+
+async function getMessages(
+  chatId,
+  user,
+  env
+) {
+  await requireChatMember(
+    chatId,
+    Number(user.id),
+    env
+  );
+
+  const result = await env.DB.prepare(
+    `SELECT
+       m.id,
+       m.chat_id,
+       m.user_id,
+       m.content,
+       m.media_url,
+       m.created_at,
+
+       u.username,
+       u.display_name,
+       u.avatar_url
+
+     FROM messages m
+     JOIN users u
+       ON u.id = m.user_id
+
+     WHERE m.chat_id = ?
+
+     ORDER BY m.id ASC
+     LIMIT 500`
+  )
+    .bind(Number(chatId))
+    .all();
+
+  return json({
+    messages: result.results || []
+  });
+}
+
+
+// ============================================================
+// SEND MESSAGE
+// ============================================================
+
+async function sendMessage(
+  request,
+  chatId,
+  user,
+  env
+) {
+  await requireChatMember(
+    chatId,
+    Number(user.id),
+    env
+  );
+
+  const body =
+    await readJSON(request);
+
+  const content =
+    String(
+      body.content || ""
+    )
+      .trim()
+      .slice(0, 5000);
+
+  const mediaUrl =
+    body.mediaUrl !== undefined
+      ? String(body.mediaUrl).slice(0, 2000)
+      : String(body.media_url || "").slice(0, 2000);
+
+  if (!content && !mediaUrl) {
+    throw new HttpError(
+      400,
+      "Message cannot be empty"
+    );
+  }
+
+  const result = await env.DB.prepare(
+    `INSERT INTO messages
+      (
+        chat_id,
+        user_id,
+        content,
+        media_url
+      )
+     VALUES (?, ?, ?, ?)`
+  )
+    .bind(
+      Number(chatId),
+      Number(user.id),
+      content,
+      mediaUrl
+    )
+    .run();
+
+  const messageId =
+    Number(result.meta.last_row_id);
+
+  const message =
+    await env.DB.prepare(
+      `SELECT
+         m.id,
+         m.chat_id,
+         m.user_id,
+         m.content,
+         m.media_url,
+         m.created_at,
+
+         u.username,
+         u.display_name,
+         u.avatar_url
+
+       FROM messages m
+       JOIN users u
+         ON u.id = m.user_id
+
+       WHERE m.id = ?
+
+       LIMIT 1`
+    )
+      .bind(messageId)
+      .first();
+
+  return json(
+    {
+      message
+    },
+    201
+  );
+}
+
+
+// ============================================================
+// CREATE GROUP
+// ============================================================
+
+async function createGroup(
+  request,
+  user,
+  env
+) {
+  const body =
+    await readJSON(request);
+
+  const name =
+    String(
+      body.name || ""
+    )
+      .trim()
+      .slice(0, 100);
+
+  if (!name) {
+    throw new HttpError(
+      400,
+      "Group name is required"
+    );
+  }
+
+  let inputMembers =
+    body.userIds ??
+    body.user_ids ??
+    body.members ??
+    [];
+
+  if (!Array.isArray(inputMembers)) {
+    throw new HttpError(
+      400,
+      "Members must be an array"
+    );
+  }
+
+  const memberIds = [
+    Number(user.id),
+    ...inputMembers
+      .map(parsePositiveInt)
+      .filter(Boolean)
+  ];
+
+  const uniqueIds = [
+    ...new Set(memberIds)
+  ];
+
+  // Maximum total group size = 50.
+  if (uniqueIds.length > 50) {
+    throw new HttpError(
+      400,
+      "A group can have at most 50 members"
+    );
+  }
+
+  // Verify every user exists.
+  for (const memberId of uniqueIds) {
+    const member =
+      await getUserById(
+        memberId,
+        env
+      );
+
+    if (!member) {
+      throw new HttpError(
+        400,
+        `User ${memberId} does not exist`
+      );
+    }
+  }
+
+  const result = await env.DB.prepare(
+    `INSERT INTO chats
+      (
+        name,
+        is_group
+      )
+     VALUES (?, 1)`
+  )
+    .bind(name)
+    .run();
+
+  const chatId =
+    Number(result.meta.last_row_id);
+
+  if (!chatId) {
+    throw new HttpError(
+      500,
+      "Could not create group"
+    );
+  }
+
+  for (const memberId of uniqueIds) {
+    await env.DB.prepare(
+      `INSERT INTO chat_members
+        (
+          chat_id,
+          user_id
+        )
+       VALUES (?, ?)`
+    )
+      .bind(
+        chatId,
+        memberId
+      )
+      .run();
+  }
+
+  return json(
+    {
+      chat: {
+        id: chatId,
+        name,
+        is_group: 1,
+        type: "group",
+        members: uniqueIds
+      }
+    },
+    201
+  );
+}
+
+
+// ============================================================
+// NOTIFICATIONS
+// ============================================================
+
+async function createNotification(
+  env,
+  userId,
+  actorId,
+  type,
+  postId
+) {
+  if (
+    !userId ||
+    !actorId ||
+    Number(userId) === Number(actorId)
+  ) {
+    return;
+  }
+
+  await env.DB.prepare(
+    `INSERT INTO notifications
+      (
+        user_id,
+        actor_id,
+        type,
+        post_id,
+        is_read
+      )
+     VALUES (?, ?, ?, ?, 0)`
+  )
+    .bind(
+      Number(userId),
+      Number(actorId),
+      String(type),
+      postId === null
+        ? null
+        : Number(postId)
+    )
+    .run();
+}
+
+
+async function getNotifications(
+  user,
+  env
+) {
+  const result = await env.DB.prepare(
+    `SELECT
+       n.id,
+       n.user_id,
+       n.actor_id,
+       n.type,
+       n.post_id,
+       n.created_at,
+       n.is_read,
+
+       u.username AS actor_username,
+       u.display_name AS actor_display_name,
+       u.avatar_url AS actor_avatar
+
+     FROM notifications n
+
+     LEFT JOIN users u
+       ON u.id = n.actor_id
+
+     WHERE n.user_id = ?
+
+     ORDER BY n.id DESC
+     LIMIT 100`
+  )
+    .bind(Number(user.id))
+    .all();
+
+  return json({
+    notifications:
+      result.results || []
+  });
+}
+
+
+async function markNotificationsRead(
+  user,
+  env
+) {
+  await env.DB.prepare(
+    `UPDATE notifications
+     SET is_read = 1
+     WHERE user_id = ?
+       AND is_read = 0`
+  )
+    .bind(Number(user.id))
+    .run();
+
+  return json({
+    ok: true
+  });
+}
+
+
+// ============================================================
+// SETTINGS
+// ============================================================
+
+async function getSettings(
+  user,
+  env
+) {
+  let settings =
+    await env.DB.prepare(
+      `SELECT
+         user_id,
+         theme,
+         profile_visibility,
+         message_privacy,
+         notification_settings
+
+       FROM user_settings
+
+       WHERE user_id = ?
+
+       LIMIT 1`
+    )
+      .bind(String(user.id))
+      .first();
+
+  if (!settings) {
+    await env.DB.prepare(
+      `INSERT OR IGNORE INTO user_settings
+        (
+          user_id,
+          theme,
+          profile_visibility,
+          message_privacy,
+          notification_settings
+        )
+       VALUES (?, 'system', 'public', 'everyone', '{}')`
+    )
+      .bind(String(user.id))
+      .run();
+
+    settings =
+      await env.DB.prepare(
+        `SELECT
+           user_id,
+           theme,
+           profile_visibility,
+           message_privacy,
+           notification_settings
+
+         FROM user_settings
+
+         WHERE user_id = ?
+
+         LIMIT 1`
+      )
+        .bind(String(user.id))
+        .first();
+  }
+
+  return json({
+    settings
+  });
+}
+
+
+async function updateSettings(
+  request,
+  user,
+  env
+) {
+  const body =
+    await readJSON(request);
+
+  const current =
+    await env.DB.prepare(
+      `SELECT
+         theme,
+         profile_visibility,
+         message_privacy,
+         notification_settings
+
+       FROM user_settings
+
+       WHERE user_id = ?
+
+       LIMIT 1`
+    )
+      .bind(String(user.id))
+      .first();
+
+  const theme =
+    body.theme !== undefined
+      ? normalizeTheme(body.theme)
+      : (
+          current?.theme ||
+          "system"
+        );
+
+  const profileVisibility =
+    body.profile_visibility !== undefined
+      ? normalizeProfileVisibility(
+          body.profile_visibility
+        )
+      : (
+          current?.profile_visibility ||
+          "public"
+        );
+
+  const messagePrivacy =
+    body.message_privacy !== undefined
+      ? normalizeMessagePrivacy(
+          body.message_privacy
+        )
+      : (
+          current?.message_privacy ||
+          "everyone"
+        );
+
+  let notificationSettings =
+    current?.notification_settings ||
+    "{}";
+
+  if (
+    body.notification_settings !== undefined
+  ) {
+    if (
+      typeof body.notification_settings ===
+      "string"
+    ) {
+      try {
+        JSON.parse(
+          body.notification_settings
+        );
+      } catch {
+        throw new HttpError(
+          400,
+          "Invalid notification settings JSON"
+        );
+      }
+
+      notificationSettings =
+        body.notification_settings;
+    } else {
+      try {
+        notificationSettings =
+          JSON.stringify(
+            body.notification_settings
+          );
+      } catch {
+        throw new HttpError(
+          400,
+          "Invalid notification settings"
+        );
+      }
+    }
+  }
+
+  await env.DB.prepare(
+    `INSERT INTO user_settings
+      (
+        user_id,
+        theme,
+        profile_visibility,
+        message_privacy,
+        notification_settings
+      )
+     VALUES (?, ?, ?, ?, ?)
+
+     ON CONFLICT(user_id)
+     DO UPDATE SET
+       theme = excluded.theme,
+       profile_visibility =
+         excluded.profile_visibility,
+       message_privacy =
+         excluded.message_privacy,
+       notification_settings =
+         excluded.notification_settings`
+  )
+    .bind(
+      String(user.id),
+      theme,
+      profileVisibility,
+      messagePrivacy,
+      notificationSettings
+    )
+    .run();
+
+  const settings =
+    await env.DB.prepare(
+      `SELECT
+         user_id,
+         theme,
+         profile_visibility,
+         message_privacy,
+         notification_settings
+
+       FROM user_settings
+
+       WHERE user_id = ?
+
+       LIMIT 1`
+    )
+      .bind(String(user.id))
+      .first();
+
+  return json({
+    settings
+  });
+}
+
+
+// ============================================================
+// SETTINGS VALIDATION
+// ============================================================
+
+function normalizeTheme(value) {
+  const theme =
+    String(value || "")
+      .trim()
+      .toLowerCase();
+
+  if (
+    ![
+      "system",
+      "light",
+      "dark"
+    ].includes(theme)
+  ) {
+    throw new HttpError(
+      400,
+      "Invalid theme"
+    );
+  }
+
+  return theme;
+}
+
+
+function normalizeProfileVisibility(
+  value
+) {
+  const visibility =
+    String(value || "")
+      .trim()
+      .toLowerCase();
+
+  if (
+    ![
+      "public",
+      "private"
+    ].includes(visibility)
+  ) {
+    throw new HttpError(
+      400,
+      "Invalid profile visibility"
+    );
+  }
+
+  return visibility;
+}
+
+
+function normalizeMessagePrivacy(
+  value
+) {
+  const privacy =
+    String(value || "")
+      .trim()
+      .toLowerCase();
+
+  if (
+    ![
+      "everyone",
+      "followers",
+      "nobody"
+    ].includes(privacy)
+  ) {
+    throw new HttpError(
+      400,
+      "Invalid message privacy"
+    );
+  }
+
+  return privacy;
+}
+
+
+// ============================================================
+// REQUEST / RESPONSE HELPERS
+// ============================================================
+
+async function readJSON(request) {
+  try {
+    const text =
+      await request.text();
+
+    if (!text.trim()) {
+      return {};
+    }
+
+    return JSON.parse(text);
+
+  } catch {
+    throw new HttpError(
+      400,
+      "Invalid JSON body"
+    );
+  }
+}
+
+
+function json(
+  data,
+  status = 200,
+  extraHeaders = {}
+) {
+  const headers =
+    new Headers({
+      "content-type":
+        "application/json; charset=utf-8",
+      ...corsHeaders(),
+      ...extraHeaders
+    });
+
+  return new Response(
+    JSON.stringify(data),
+    {
+      status,
+      headers
+    }
+  );
+}
+
+
+function corsHeaders() {
+  return {
+    "access-control-allow-origin": "*",
+    "access-control-allow-methods":
+      "GET,POST,PUT,PATCH,DELETE,OPTIONS",
+    "access-control-allow-headers":
+      "Content-Type, Authorization",
+    "access-control-expose-headers":
+      "Set-Cookie"
+  };
+}
+
+
+function handleError(error) {
+  console.error(error);
+
+  if (
+    error instanceof HttpError
+  ) {
+    return json(
+      {
+        error: error.message
+      },
+      error.status
+    );
+  }
+
+  return json(
+    {
+      error: "Internal server error"
+    },
+    500
+  );
+}
+
+
+class HttpError extends Error {
+  constructor(
+    status,
+    message
+  ) {
+    super(message);
+    this.name = "HttpError";
+    this.status = status;
+  }
+}
+
+
+// ============================================================
+// COOKIE HELPERS
+// ============================================================
+
+function getSessionToken(request) {
+  const cookie =
+    request.headers.get("Cookie") ||
+    "";
+
+  const match =
+    cookie.match(
+      /(?:^|;\s*)zilnet_session=([^;]+)/
+    );
+
+  if (match) {
+    return decodeURIComponent(
+      match[1]
+    );
+  }
+
+  const authorization =
+    request.headers.get(
+      "Authorization"
+    ) || "";
+
+  if (
+    authorization
+      .toLowerCase()
+      .startsWith("bearer ")
+  ) {
+    return authorization
+      .slice(7)
+      .trim();
+  }
+
+  return null;
+}
+
+
+function makeSessionCookie(
+  token
+) {
+  return [
+    `zilnet_session=${encodeURIComponent(token)}`,
+    "Path=/",
+    "HttpOnly",
+    "Secure",
+    "SameSite=Lax",
+    `Max-Age=${SESSION_DAYS * 86400}`
+  ].join("; ");
+}
+
+
+function clearSessionCookie() {
+  return [
+    "zilnet_session=",
+    "Path=/",
+    "HttpOnly",
+    "Secure",
+    "SameSite=Lax",
+    "Max-Age=0"
+  ].join("; ");
+}
+
+
+// ============================================================
+// CRYPTO / RANDOM HELPERS
+// ============================================================
+
+function randomToken() {
+  return randomId(48);
+}
+
+
+function randomId(length = 32) {
+  const bytes =
+    crypto.getRandomValues(
+      new Uint8Array(length)
+    );
+
+  return bytesToBase64Url(bytes);
+}
+
+
+function bytesToBase64Url(bytes) {
+  let binary = "";
+
+  for (const byte of bytes) {
+    binary += String.fromCharCode(
+      byte
+    );
+  }
+
+  return btoa(binary)
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/g, "");
+}
+
+
+function bytesToBase64(bytes) {
+  let binary = "";
+
+  for (const byte of bytes) {
+    binary += String.fromCharCode(
+      byte
+    );
+  }
+
+  return btoa(binary);
+}
+
+
+function base64ToBytes(value) {
+  const binary =
+    atob(value);
+
+  const bytes =
+    new Uint8Array(
+      binary.length
+    );
+
+  for (
+    let i = 0;
+    i < binary.length;
+    i++
+  ) {
+    bytes[i] =
+      binary.charCodeAt(i);
+  }
+
+  return bytes;
+}
+
+
+async function sha256(value) {
+  const data =
+    new TextEncoder().encode(
+      String(value)
+    );
+
+  const hash =
+    await crypto.subtle.digest(
+      "SHA-256",
+      data
+    );
+
+  return bytesToBase64Url(
+    new Uint8Array(hash)
+  );
+}
+
+
+function timingSafeEqual(
+  a,
+  b
+) {
+  if (
+    a.length !== b.length
+  ) {
+    return false;
+  }
+
+  let result = 0;
+
+  for (
+    let i = 0;
+    i < a.length;
+    i++
+  ) {
+    result |=
+      a[i] ^ b[i];
+  }
+
+  return result === 0;
+}
+
+
+// ============================================================
+// GENERAL HELPERS
+// ============================================================
+
+function parsePositiveInt(value) {
+  const number =
+    Number(value);
+
+  if (
+    !Number.isInteger(number) ||
+    number <= 0
+  ) {
+    return null;
+  }
+
+  return number;
+}
+
+
+async function countRows(
+  env,
+  sql,
+  ...values
+) {
+  const row =
+    await env.DB.prepare(sql)
+      .bind(...values)
+      .first();
+
+  return Number(
+    row?.count || 0
+  );
+}
+
+
+function getOrigin(request) {
+  return new URL(
+    request.url
+  ).origin;
+}
+
+
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
