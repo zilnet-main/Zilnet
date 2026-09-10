@@ -17,6 +17,6 @@ export default {
       }
     }
 
-    return new Response("Zilnet Worker is running");
+    return env.ASSETS.fetch(request);
   }
 };
