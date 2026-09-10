@@ -5376,3 +5376,570 @@ function cleanUser(user) {
 
   return copy;
 }
+
+/* =========================
+   PART 4 — ZILNET EXTRA FEATURES
+   ========================= */
+
+async function loadNotifications() {
+    try {
+        const data = await api('/api/notifications');
+
+        const list = document.getElementById('notificationList');
+        if (!list) return;
+
+        if (!data.notifications || !data.notifications.length) {
+            list.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-icon">♡</div>
+                    <h3>No notifications yet</h3>
+                    <p>When people interact with you, they'll appear here.</p>
+                </div>
+            `;
+            return;
+        }
+
+        list.innerHTML = data.notifications.map(n => `
+            <div class="notification-item">
+                <div class="notification-avatar">
+                    ${avatar(n.avatar_url, n.username)}
+                </div>
+
+                <div class="notification-text">
+                    <strong>${esc(n.username || 'Someone')}</strong>
+                    <span>${esc(n.message || '')}</span>
+                    <small>${formatDate(n.created_at)}</small>
+                </div>
+            </div>
+        `).join('');
+
+    } catch (error) {
+        console.error('Notifications:', error);
+    }
+}
+
+
+/* =========================
+   PRIVACY SETTINGS
+   ========================= */
+
+async function loadPrivacySettings() {
+    try {
+        const data = await api('/api/settings/privacy');
+
+        const toggle = document.getElementById('privateAccountToggle');
+
+        if (toggle && data.settings) {
+            toggle.checked = !!data.settings.is_private;
+        }
+
+    } catch (error) {
+        console.error('Privacy settings:', error);
+    }
+}
+
+
+async function savePrivacySettings() {
+    const toggle = document.getElementById('privateAccountToggle');
+
+    if (!toggle) return;
+
+    try {
+        await api('/api/settings/privacy', {
+            method: 'POST',
+            body: JSON.stringify({
+                is_private: toggle.checked
+            })
+        });
+
+        toast(
+            toggle.checked
+                ? 'Private account enabled'
+                : 'Public account enabled'
+        );
+
+    } catch (error) {
+        toast(error.message || 'Could not save settings');
+    }
+}
+
+
+/* =========================
+   PROFILE LINK
+   ========================= */
+
+async function copyProfileLink(userId) {
+    try {
+        const url =
+            `${location.origin}/?profile=${encodeURIComponent(userId)}`;
+
+        await navigator.clipboard.writeText(url);
+
+        toast('Profile link copied');
+
+    } catch (error) {
+        toast('Could not copy link');
+    }
+}
+
+
+/* =========================
+   SHARE POST
+   ========================= */
+
+async function sharePost(postId) {
+    const url =
+        `${location.origin}/?post=${encodeURIComponent(postId)}`;
+
+    try {
+        if (navigator.share) {
+            await navigator.share({
+                title: 'Zilnet',
+                text: 'Check this post on Zilnet',
+                url
+            });
+        } else {
+            await navigator.clipboard.writeText(url);
+            toast('Post link copied');
+        }
+
+    } catch (error) {
+        if (error.name !== 'AbortError') {
+            try {
+                await navigator.clipboard.writeText(url);
+                toast('Post link copied');
+            } catch {
+                toast('Could not share post');
+            }
+        }
+    }
+}
+
+
+/* =========================
+   SAVE POST
+   ========================= */
+
+const savedPosts = new Set();
+
+function toggleSavePost(postId, button) {
+    if (savedPosts.has(postId)) {
+        savedPosts.delete(postId);
+
+        button.classList.remove('saved');
+
+        toast('Removed from saved');
+
+    } else {
+        savedPosts.add(postId);
+
+        button.classList.add('saved');
+
+        toast('Saved');
+    }
+}
+
+
+/* =========================
+   COPY TEXT
+   ========================= */
+
+async function copyText(text) {
+    try {
+        await navigator.clipboard.writeText(text);
+        toast('Copied');
+    } catch {
+        toast('Could not copy');
+    }
+}
+
+
+/* =========================
+   SEARCH BY USER ID
+   ========================= */
+
+async function searchByUserId(userId) {
+    if (!userId || !userId.trim()) {
+        toast('Enter a user ID');
+        return;
+    }
+
+    try {
+        const data = await api(
+            `/api/search?q=${encodeURIComponent(userId.trim())}`
+        );
+
+        if (!data.users || !data.users.length) {
+            toast('No user found');
+            return;
+        }
+
+        const user = data.users[0];
+
+        if (typeof openUserProfile === 'function') {
+            openUserProfile(user.id);
+        }
+
+    } catch (error) {
+        toast(error.message || 'Search failed');
+    }
+}
+
+
+/* =========================
+   CAMERA
+   ========================= */
+
+function openCamera(type = 'post') {
+    const input =
+        document.getElementById(
+            type === 'story'
+                ? 'storyCameraInput'
+                : 'postCameraInput'
+        );
+
+    if (input) {
+        input.click();
+        return;
+    }
+
+    toast('Camera is not available on this device');
+}
+
+
+/* =========================
+   GALLERY
+   ========================= */
+
+function openGallery(type = 'post') {
+    const input =
+        document.getElementById(
+            type === 'story'
+                ? 'storyGalleryInput'
+                : 'postGalleryInput'
+        );
+
+    if (input) {
+        input.click();
+        return;
+    }
+
+    toast('Gallery is not available');
+}
+
+
+/* =========================
+   MEDIA PREVIEW
+   ========================= */
+
+function previewMedia(input, previewId) {
+    const preview = document.getElementById(previewId);
+
+    if (!preview || !input.files || !input.files.length) {
+        return;
+    }
+
+    const file = input.files[0];
+
+    if (!file.type.startsWith('image/') &&
+        !file.type.startsWith('video/')) {
+        toast('Please select an image or video');
+        input.value = '';
+        return;
+    }
+
+    const url = URL.createObjectURL(file);
+
+    preview.innerHTML = '';
+
+    if (file.type.startsWith('image/')) {
+        preview.innerHTML = `
+            <img
+                src="${url}"
+                alt="Preview"
+                style="
+                    width:100%;
+                    max-height:420px;
+                    object-fit:contain;
+                    border-radius:18px;
+                "
+            >
+        `;
+    } else {
+        preview.innerHTML = `
+            <video
+                src="${url}"
+                controls
+                playsinline
+                style="
+                    width:100%;
+                    max-height:420px;
+                    border-radius:18px;
+                "
+            ></video>
+        `;
+    }
+
+    preview.style.display = 'block';
+}
+
+
+/* =========================
+   FILE SIZE CHECK
+   ========================= */
+
+function validateMediaFile(file) {
+    if (!file) return false;
+
+    const maxSize = 50 * 1024 * 1024;
+
+    if (file.size > maxSize) {
+        toast('File is too large. Maximum size is 50 MB.');
+        return false;
+    }
+
+    const allowed = [
+        'image/jpeg',
+        'image/png',
+        'image/webp',
+        'image/gif',
+        'video/mp4',
+        'video/webm',
+        'video/quicktime'
+    ];
+
+    if (!allowed.includes(file.type)) {
+        toast('This file type is not supported');
+        return false;
+    }
+
+    return true;
+}
+
+
+/* =========================
+   POST MEDIA UPLOAD
+   ========================= */
+
+async function uploadPostMedia(file) {
+    if (!validateMediaFile(file)) return null;
+
+    const form = new FormData();
+
+    form.append('file', file);
+    form.append('type', 'post');
+
+    try {
+        const response = await fetch('/api/upload', {
+            method: 'POST',
+            body: form,
+            credentials: 'include'
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.error || 'Upload failed');
+        }
+
+        return data.url;
+
+    } catch (error) {
+        toast(error.message || 'Upload failed');
+        return null;
+    }
+}
+
+
+/* =========================
+   STORY MEDIA UPLOAD
+   ========================= */
+
+async function uploadStoryMedia(file) {
+    if (!validateMediaFile(file)) return null;
+
+    const form = new FormData();
+
+    form.append('file', file);
+    form.append('type', 'story');
+
+    try {
+        const response = await fetch('/api/upload', {
+            method: 'POST',
+            body: form,
+            credentials: 'include'
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.error || 'Upload failed');
+        }
+
+        return data.url;
+
+    } catch (error) {
+        toast(error.message || 'Upload failed');
+        return null;
+    }
+}
+
+
+/* =========================
+   REEL MEDIA UPLOAD
+   ========================= */
+
+async function uploadReelMedia(file) {
+    if (!validateMediaFile(file)) return null;
+
+    const form = new FormData();
+
+    form.append('file', file);
+    form.append('type', 'reel');
+
+    try {
+        const response = await fetch('/api/upload', {
+            method: 'POST',
+            body: form,
+            credentials: 'include'
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.error || 'Upload failed');
+        }
+
+        return data.url;
+
+    } catch (error) {
+        toast(error.message || 'Upload failed');
+        return null;
+    }
+}
+
+
+/* =========================
+   USER ID GENERATOR
+   ========================= */
+
+function generateUserId(username) {
+    if (!username) return '';
+
+    const clean =
+        username
+            .toLowerCase()
+            .replace(/[^a-z0-9]/g, '');
+
+    const random =
+        Math.floor(1000 + Math.random() * 9000);
+
+    return `${clean}_${random}`;
+}
+
+
+/* =========================
+   TEXT LIMITS
+   ========================= */
+
+function limitText(input, maxLength) {
+    if (!input) return;
+
+    if (input.value.length > maxLength) {
+        input.value = input.value.slice(0, maxLength);
+        toast(`Maximum ${maxLength} characters`);
+    }
+}
+
+
+/* =========================
+   ESCAPE KEY
+   ========================= */
+
+document.addEventListener('keydown', event => {
+
+    if (event.key === 'Escape') {
+
+        document
+            .querySelectorAll('.modal.open')
+            .forEach(modal => {
+                modal.classList.remove('open');
+            });
+
+    }
+
+});
+
+
+/* =========================
+   CLICK OUTSIDE MODAL
+   ========================= */
+
+document.addEventListener('click', event => {
+
+    const modal = event.target.closest('.modal');
+
+    if (!modal) return;
+
+    if (event.target === modal) {
+        modal.classList.remove('open');
+    }
+
+});
+
+
+/* =========================
+   URL ROUTING
+   ========================= */
+
+function handleURLRoute() {
+
+    const params = new URLSearchParams(location.search);
+
+    const profileId = params.get('profile');
+    const postId = params.get('post');
+
+    if (profileId && typeof openUserProfile === 'function') {
+        openUserProfile(profileId);
+        return;
+    }
+
+    if (postId) {
+        toast('Opening post...');
+    }
+}
+
+
+/* =========================
+   ONLINE / OFFLINE STATUS
+   ========================= */
+
+window.addEventListener('online', () => {
+    toast('Back online');
+});
+
+window.addEventListener('offline', () => {
+    toast('You are offline');
+});
+
+
+/* =========================
+   PREVENT ACCIDENTAL FORM RELOAD
+   ========================= */
+
+document.addEventListener('submit', event => {
+
+    const form = event.target;
+
+    if (!form.dataset.allowReload) {
+        event.preventDefault();
+    }
+
+});
+
+
+/* =========================
+   ZILNET READY
+   ========================= */
+
+console.log('Zilnet frontend loaded successfully');
