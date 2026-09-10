@@ -1,0 +1,1537 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#08080c">
+<title>ZILNET — Connect. Create. Discover.</title>
+
+<style>
+:root{
+  --bg:#08080c;
+  --surface:#101117;
+  --surface2:#151720;
+  --surface3:#1b1d27;
+  --text:#f7f7fb;
+  --muted:#9498a8;
+  --line:#272a36;
+  --accent:#8b5cf6;
+  --accent2:#ec4899;
+  --danger:#ff5d6c;
+  --success:#39d98a;
+  --radius:18px;
+  --nav:72px;
+  --shadow:0 14px 45px rgba(0,0,0,.28);
+}
+
+*{
+  box-sizing:border-box;
+  -webkit-tap-highlight-color:transparent;
+}
+
+html{
+  background:var(--bg);
+  scroll-behavior:smooth;
+}
+
+body{
+  margin:0;
+  min-height:100vh;
+  background:
+    radial-gradient(circle at 20% -10%,rgba(139,92,246,.18),transparent 32%),
+    radial-gradient(circle at 90% 0%,rgba(236,72,153,.10),transparent 28%),
+    var(--bg);
+  color:var(--text);
+  font-family:
+    Inter,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+}
+
+button,
+input,
+textarea,
+select{
+  font:inherit;
+}
+
+button{
+  cursor:pointer;
+}
+
+img,
+video{
+  max-width:100%;
+}
+
+.hidden{
+  display:none!important;
+}
+
+.app{
+  min-height:100vh;
+}
+
+/* =========================
+   AUTH
+========================= */
+
+.auth{
+  min-height:100vh;
+  display:grid;
+  place-items:center;
+  padding:22px;
+}
+
+.auth-card{
+  width:min(430px,100%);
+  padding:34px 26px;
+  border:1px solid var(--line);
+  background:rgba(16,17,23,.88);
+  border-radius:28px;
+  box-shadow:var(--shadow);
+  backdrop-filter:blur(24px);
+}
+
+.brand{
+  text-align:center;
+  font-weight:950;
+  font-size:42px;
+  line-height:1.05;
+  letter-spacing:-2.8px;
+  margin:0;
+  white-space:nowrap;
+}
+
+.brand span{
+  display:inline-block;
+  background:linear-gradient(110deg,#a78bfa,#ec4899);
+  -webkit-background-clip:text;
+  background-clip:text;
+  color:transparent;
+  letter-spacing:-1.5px;
+}
+
+.auth-sub{
+  text-align:center;
+  color:var(--muted);
+  margin:11px 0 28px;
+  font-size:14px;
+}
+
+.auth-tabs{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:5px;
+  padding:5px;
+  background:#0a0b10;
+  border-radius:14px;
+  margin-bottom:20px;
+}
+
+.auth-tabs button{
+  border:0;
+  border-radius:10px;
+  background:transparent;
+  color:var(--muted);
+  padding:11px;
+}
+
+.auth-tabs button.active{
+  background:var(--surface3);
+  color:var(--text);
+  font-weight:700;
+}
+
+.field{
+  margin:13px 0;
+}
+
+.field label{
+  display:block;
+  color:var(--muted);
+  font-size:13px;
+  margin-bottom:7px;
+}
+
+.field input,
+.field textarea,
+.field select{
+  width:100%;
+  border:1px solid var(--line);
+  border-radius:13px;
+  background:#0b0c11;
+  color:var(--text);
+  padding:13px 14px;
+  outline:none;
+  transition:.18s;
+}
+
+.field textarea{
+  min-height:105px;
+  resize:vertical;
+}
+
+.field input:focus,
+.field textarea:focus,
+.field select:focus{
+  border-color:rgba(139,92,246,.75);
+  box-shadow:0 0 0 3px rgba(139,92,246,.12);
+}
+
+.primary{
+  border:0;
+  border-radius:13px;
+  padding:13px 16px;
+  background:linear-gradient(110deg,var(--accent),var(--accent2));
+  color:white;
+  font-weight:800;
+  width:100%;
+}
+
+.secondary{
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:10px 14px;
+  background:var(--surface2);
+  color:var(--text);
+}
+
+.error,
+.ok{
+  border-radius:12px;
+  padding:11px 13px;
+  font-size:13px;
+  margin-top:12px;
+}
+
+.error{
+  background:rgba(255,93,108,.10);
+  border:1px solid rgba(255,93,108,.25);
+  color:#ff8d98;
+}
+
+.ok{
+  background:rgba(57,217,138,.09);
+  border:1px solid rgba(57,217,138,.22);
+  color:#74e8ad;
+}
+
+.link-btn{
+  border:0;
+  background:none;
+  color:#b99cff;
+  padding:8px 0;
+}
+
+/* =========================
+   TOP BAR
+========================= */
+
+.topbar{
+  position:sticky;
+  top:0;
+  z-index:50;
+  height:64px;
+  border-bottom:1px solid rgba(39,42,54,.85);
+  background:rgba(8,8,12,.82);
+  backdrop-filter:blur(20px);
+}
+
+.topbar-inner{
+  width:min(1180px,100%);
+  height:100%;
+  margin:auto;
+  padding:0 16px;
+  display:flex;
+  align-items:center;
+  gap:18px;
+}
+
+.logo-small{
+  font-weight:950;
+  font-size:24px;
+  letter-spacing:-1.5px;
+  background:linear-gradient(110deg,#a78bfa,#ec4899);
+  -webkit-background-clip:text;
+  background-clip:text;
+  color:transparent;
+  flex-shrink:0;
+}
+
+.search-box{
+  flex:1;
+  max-width:480px;
+  position:relative;
+}
+
+.search-box input{
+  width:100%;
+  border:1px solid var(--line);
+  background:#101117;
+  color:var(--text);
+  border-radius:13px;
+  padding:10px 14px 10px 39px;
+  outline:none;
+}
+
+.search-icon{
+  position:absolute;
+  left:14px;
+  top:50%;
+  transform:translateY(-50%);
+  color:var(--muted);
+}
+
+.top-actions{
+  margin-left:auto;
+  display:flex;
+  align-items:center;
+  gap:7px;
+}
+
+.icon-button{
+  width:40px;
+  height:40px;
+  border:1px solid var(--line);
+  border-radius:12px;
+  background:var(--surface);
+  color:var(--text);
+}
+
+/* =========================
+   MAIN LAYOUT
+========================= */
+
+.layout{
+  width:min(1180px,100%);
+  margin:auto;
+  padding:20px 16px calc(var(--nav) + 30px);
+  display:grid;
+  grid-template-columns:210px minmax(0,650px) 260px;
+  gap:20px;
+}
+
+.sidebar{
+  position:sticky;
+  top:84px;
+  height:max-content;
+}
+
+.side-nav{
+  display:flex;
+  flex-direction:column;
+  gap:5px;
+}
+
+.navbtn{
+  width:100%;
+  border:0;
+  background:transparent;
+  color:var(--muted);
+  border-radius:13px;
+  padding:12px 14px;
+  text-align:left;
+  font-weight:650;
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
+.navbtn:hover,
+.navbtn.active{
+  color:var(--text);
+  background:var(--surface2);
+}
+
+.navbtn.active{
+  box-shadow:inset 3px 0 0 var(--accent);
+}
+
+.nav-icon{
+  width:22px;
+  text-align:center;
+  font-size:18px;
+}
+
+.side-profile{
+  margin-top:20px;
+  border-top:1px solid var(--line);
+  padding-top:16px;
+}
+
+.profile-mini{
+  display:flex;
+  gap:10px;
+  align-items:center;
+}
+
+.profile-mini .avatar{
+  width:40px;
+  height:40px;
+}
+
+/* =========================
+   PAGE
+========================= */
+
+.page{
+  min-width:0;
+}
+
+.page-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin:4px 0 15px;
+}
+
+.page-head h1,
+.page-head h2{
+  margin:0;
+  font-size:23px;
+  letter-spacing:-.7px;
+}
+
+.page-sub{
+  color:var(--muted);
+  font-size:13px;
+  margin-top:4px;
+}
+
+/* =========================
+   CARDS
+========================= */
+
+.card{
+  border:1px solid var(--line);
+  background:rgba(16,17,23,.92);
+  border-radius:var(--radius);
+  box-shadow:0 7px 30px rgba(0,0,0,.12);
+}
+
+.composer{
+  padding:15px;
+  margin-bottom:15px;
+}
+
+.composer-top{
+  display:flex;
+  gap:11px;
+  align-items:center;
+}
+
+.composer-top input{
+  flex:1;
+  border:1px solid var(--line);
+  background:var(--surface2);
+  color:var(--text);
+  border-radius:13px;
+  padding:12px 14px;
+  outline:none;
+}
+
+.composer-actions{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-top:12px;
+}
+
+.composer-actions button{
+  border:0;
+  background:transparent;
+  color:var(--muted);
+  padding:8px 10px;
+  border-radius:10px;
+}
+
+.composer-actions button:hover{
+  background:var(--surface2);
+  color:var(--text);
+}
+
+/* =========================
+   AVATARS
+========================= */
+
+.avatar{
+  width:44px;
+  height:44px;
+  border-radius:50%;
+  object-fit:cover;
+  background:var(--surface3);
+  border:1px solid var(--line);
+  flex-shrink:0;
+}
+
+/* =========================
+   STORIES
+========================= */
+
+.stories-wrap{
+  margin-bottom:16px;
+  overflow:hidden;
+}
+
+.stories{
+  display:flex;
+  gap:11px;
+  overflow-x:auto;
+  padding:2px 2px 7px;
+  scrollbar-width:none;
+  scroll-behavior:auto;
+}
+
+.stories::-webkit-scrollbar{
+  display:none;
+}
+
+.story{
+  width:68px;
+  flex:0 0 68px;
+  text-align:center;
+  cursor:pointer;
+}
+
+.story-ring{
+  width:58px;
+  height:58px;
+  padding:2px;
+  margin:auto;
+  border-radius:50%;
+  background:linear-gradient(135deg,#8b5cf6,#ec4899);
+}
+
+.story-ring img{
+  width:100%;
+  height:100%;
+  border-radius:50%;
+  object-fit:cover;
+  border:3px solid var(--bg);
+}
+
+.story-name{
+  font-size:11px;
+  color:var(--muted);
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  margin-top:5px;
+}
+
+/* =========================
+   POSTS
+========================= */
+
+.post{
+  overflow:hidden;
+  margin-bottom:14px;
+}
+
+.post-head{
+  display:flex;
+  align-items:center;
+  gap:11px;
+  padding:14px 15px 10px;
+}
+
+.post-meta{
+  min-width:0;
+  flex:1;
+}
+
+.post-meta strong{
+  display:block;
+  font-size:14px;
+}
+
+.post-meta span{
+  color:var(--muted);
+  font-size:11px;
+  display:block;
+  margin-top:2px;
+}
+
+.more{
+  border:0;
+  background:transparent;
+  color:var(--muted);
+  font-size:21px;
+  width:35px;
+  height:35px;
+  border-radius:10px;
+}
+
+.more:hover{
+  background:var(--surface2);
+  color:var(--text);
+}
+
+.post-text{
+  padding:2px 15px 14px;
+  line-height:1.55;
+  font-size:15px;
+  white-space:pre-wrap;
+  overflow-wrap:anywhere;
+}
+
+.media{
+  width:100%;
+  display:block;
+  max-height:680px;
+  object-fit:cover;
+  background:#050509;
+}
+
+.actions{
+  display:flex;
+  align-items:center;
+  gap:2px;
+  padding:7px 9px;
+  border-top:1px solid rgba(39,42,54,.55);
+}
+
+.actions button{
+  border:0;
+  background:transparent;
+  color:var(--muted);
+  border-radius:10px;
+  padding:9px 10px;
+  font-size:13px;
+}
+
+.actions button:hover{
+  background:var(--surface2);
+  color:var(--text);
+}
+
+.actions button.liked{
+  color:#ff5b9a;
+}
+
+.comments{
+  border-top:1px solid var(--line);
+  padding:12px 14px;
+}
+
+.comment{
+  display:flex;
+  gap:9px;
+  margin-bottom:10px;
+}
+
+.comment .avatar{
+  width:30px;
+  height:30px;
+}
+
+.comment-body{
+  background:var(--surface2);
+  border-radius:11px;
+  padding:7px 10px;
+  font-size:13px;
+}
+
+.comment-input{
+  display:flex;
+  gap:7px;
+}
+
+.comment-input input{
+  min-width:0;
+  flex:1;
+  border:1px solid var(--line);
+  background:#0b0c11;
+  color:var(--text);
+  border-radius:10px;
+  padding:9px 11px;
+  outline:none;
+}
+
+/* =========================
+   RIGHTBAR
+========================= */
+
+.rightbar{
+  position:sticky;
+  top:84px;
+  height:max-content;
+}
+
+.right-card{
+  padding:15px;
+  margin-bottom:13px;
+}
+
+.right-title{
+  font-weight:750;
+  font-size:14px;
+  margin-bottom:12px;
+}
+
+.user-row{
+  display:flex;
+  align-items:center;
+  gap:9px;
+  padding:9px 0;
+}
+
+.user-row .avatar{
+  width:37px;
+  height:37px;
+}
+
+.user-row-info{
+  flex:1;
+  min-width:0;
+}
+
+.user-row-info strong{
+  display:block;
+  font-size:13px;
+  overflow:hidden;
+  white-space:nowrap;
+  text-overflow:ellipsis;
+}
+
+.user-row-info span{
+  display:block;
+  color:var(--muted);
+  font-size:11px;
+}
+
+.follow-btn{
+  border:1px solid rgba(139,92,246,.4);
+  background:rgba(139,92,246,.12);
+  color:#c4a9ff;
+  border-radius:9px;
+  padding:6px 9px;
+  font-size:11px;
+  font-weight:700;
+}
+
+/* =========================
+   DISCOVER
+========================= */
+
+.search-results{
+  display:flex;
+  flex-direction:column;
+  gap:9px;
+}
+
+.result-user{
+  display:flex;
+  align-items:center;
+  gap:11px;
+  padding:13px;
+}
+
+.result-user-info{
+  flex:1;
+  min-width:0;
+}
+
+.result-user-info strong{
+  display:block;
+}
+
+.result-user-info span{
+  display:block;
+  color:var(--muted);
+  font-size:12px;
+  margin-top:3px;
+}
+
+/* =========================
+   PROFILE
+========================= */
+
+.profile-cover{
+  height:145px;
+  background:
+    radial-gradient(circle at 20% 20%,rgba(139,92,246,.65),transparent 35%),
+    radial-gradient(circle at 85% 30%,rgba(236,72,153,.45),transparent 40%),
+    linear-gradient(135deg,#161226,#101117);
+}
+
+.profile-main{
+  padding:0 18px 20px;
+}
+
+.profile-avatar{
+  width:92px;
+  height:92px;
+  margin-top:-46px;
+  border:4px solid var(--surface);
+  border-radius:50%;
+  object-fit:cover;
+  background:var(--surface3);
+}
+
+.profile-info{
+  display:flex;
+  justify-content:space-between;
+  gap:15px;
+  align-items:flex-start;
+  margin-top:8px;
+}
+
+.profile-name{
+  margin:0;
+  font-size:22px;
+}
+
+.username{
+  color:var(--muted);
+  font-size:13px;
+}
+
+.bio{
+  line-height:1.5;
+  margin:13px 0;
+  white-space:pre-wrap;
+}
+
+.profile-stats{
+  display:flex;
+  gap:18px;
+  color:var(--muted);
+  font-size:13px;
+}
+
+.profile-stats b{
+  color:var(--text);
+}
+
+/* =========================
+   GRID
+========================= */
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:4px;
+}
+
+.grid-item{
+  aspect-ratio:1;
+  overflow:hidden;
+  background:var(--surface2);
+}
+
+.grid-item img,
+.grid-item video{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+/* =========================
+   MODAL
+========================= */
+
+.modal{
+  position:fixed;
+  inset:0;
+  z-index:100;
+  background:rgba(0,0,0,.68);
+  display:grid;
+  place-items:center;
+  padding:18px;
+  backdrop-filter:blur(8px);
+}
+
+.modal-card{
+  width:min(500px,100%);
+  max-height:min(88vh,760px);
+  overflow:auto;
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-radius:22px;
+  padding:18px;
+  box-shadow:var(--shadow);
+}
+
+.modal-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:14px;
+}
+
+.modal-head h3{
+  margin:0;
+}
+
+.close-btn{
+  width:36px;
+  height:36px;
+  border:0;
+  border-radius:10px;
+  background:var(--surface2);
+  color:var(--text);
+  font-size:20px;
+}
+
+/* =========================
+   TOAST
+========================= */
+
+.toast{
+  position:fixed;
+  left:50%;
+  bottom:92px;
+  transform:translateX(-50%);
+  z-index:200;
+  max-width:calc(100% - 30px);
+  background:#20222c;
+  border:1px solid var(--line);
+  color:var(--text);
+  padding:11px 15px;
+  border-radius:12px;
+  box-shadow:var(--shadow);
+  font-size:13px;
+}
+
+/* =========================
+   BOTTOM NAV
+========================= */
+
+.bottom-nav{
+  display:none;
+}
+
+/* =========================
+   LOADING
+========================= */
+
+.loading{
+  padding:35px;
+  text-align:center;
+  color:var(--muted);
+}
+
+.empty{
+  padding:40px 20px;
+  text-align:center;
+  color:var(--muted);
+}
+
+.empty strong{
+  display:block;
+  color:var(--text);
+  font-size:16px;
+  margin-bottom:5px;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media(max-width:950px){
+  .layout{
+    grid-template-columns:72px minmax(0,650px);
+    justify-content:center;
+  }
+
+  .sidebar{
+    width:72px;
+  }
+
+  .navbtn{
+    justify-content:center;
+    padding:12px;
+  }
+
+  .nav-label,
+  .side-profile{
+    display:none;
+  }
+
+  .rightbar{
+    display:none;
+  }
+}
+
+@media(max-width:700px){
+  :root{
+    --nav:67px;
+  }
+
+  .topbar{
+    height:58px;
+  }
+
+  .topbar-inner{
+    padding:0 12px;
+    gap:9px;
+  }
+
+  .logo-small{
+    font-size:20px;
+  }
+
+  .search-box{
+    max-width:none;
+  }
+
+  .top-actions{
+    display:none;
+  }
+
+  .layout{
+    display:block;
+    padding:10px 10px calc(var(--nav) + 18px);
+  }
+
+  .sidebar{
+    display:none;
+  }
+
+  .page-head h1,
+  .page-head h2{
+    font-size:21px;
+  }
+
+  .card{
+    border-radius:15px;
+  }
+
+  .composer{
+    padding:12px;
+  }
+
+  .bottom-nav{
+    position:fixed;
+    left:0;
+    right:0;
+    bottom:0;
+    height:var(--nav);
+    z-index:80;
+    display:flex;
+    justify-content:space-around;
+    align-items:center;
+    background:rgba(10,10,14,.94);
+    border-top:1px solid var(--line);
+    backdrop-filter:blur(20px);
+    padding-bottom:env(safe-area-inset-bottom);
+  }
+
+  .bottom-nav button{
+    border:0;
+    background:transparent;
+    color:var(--muted);
+    min-width:55px;
+    height:55px;
+    border-radius:13px;
+    font-size:21px;
+  }
+
+  .bottom-nav button span{
+    display:block;
+    font-size:10px;
+    margin-top:2px;
+  }
+
+  .bottom-nav button.active{
+    color:var(--text);
+    background:var(--surface2);
+  }
+
+  .brand{
+    font-size:38px;
+  }
+
+  .auth-card{
+    padding:28px 20px;
+  }
+
+  .profile-cover{
+    height:120px;
+  }
+
+  .profile-avatar{
+    width:78px;
+    height:78px;
+    margin-top:-39px;
+  }
+
+  .profile-info{
+    flex-direction:column;
+  }
+
+  .profile-info .secondary{
+    width:100%;
+  }
+
+  .actions{
+    overflow-x:auto;
+  }
+
+  .actions button{
+    white-space:nowrap;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<!-- =========================
+     AUTH
+========================= -->
+
+<section id="auth" class="auth">
+  <div class="auth-card">
+
+    <h1 class="brand"><span>ZILNET</span></h1>
+
+    <div class="auth-sub">
+      Connect. Create. Discover.
+    </div>
+
+    <div class="auth-tabs">
+      <button id="loginTab" class="active" onclick="setAuthMode('login')">
+        Log in
+      </button>
+
+      <button id="signupTab" onclick="setAuthMode('signup')">
+        Sign up
+      </button>
+    </div>
+
+    <form id="authForm" data-mode="login" onsubmit="submitAuth(event)">
+
+      <div id="nameField" class="field hidden">
+        <label>Display name</label>
+        <input id="displayName" autocomplete="name">
+      </div>
+
+      <div class="field">
+        <label>Username</label>
+        <input
+          id="username"
+          required
+          autocomplete="username"
+          autocapitalize="none"
+          spellcheck="false"
+        >
+      </div>
+
+      <div id="emailField" class="field hidden">
+        <label>Email</label>
+        <input
+          id="email"
+          type="email"
+          autocomplete="email"
+        >
+      </div>
+
+      <div class="field">
+        <label>Password</label>
+        <input
+          id="password"
+          type="password"
+          required
+          autocomplete="current-password"
+        >
+      </div>
+
+      <button id="authBtn" class="primary" type="submit">
+        Log in
+      </button>
+
+    </form>
+
+    <div id="authMsg"></div>
+
+    <div style="text-align:center;margin-top:10px">
+      <button class="link-btn" onclick="openForgotPassword()">
+        Forgot password?
+      </button>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- =========================
+     APP
+========================= -->
+
+<section id="app" class="app hidden">
+
+  <header class="topbar">
+    <div class="topbar-inner">
+
+      <div class="logo-small">ZILNET</div>
+
+      <div class="search-box">
+        <span class="search-icon">⌕</span>
+        <input
+          id="globalSearch"
+          placeholder="Search people and posts"
+          oninput="searchAll(this.value)"
+        >
+      </div>
+
+      <div class="top-actions">
+        <button class="icon-button" onclick="go('notifications')">
+          ♡
+        </button>
+
+        <button class="icon-button" onclick="go('profile')">
+          ◎
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+
+  <div class="layout">
+
+    <!-- DESKTOP SIDEBAR -->
+
+    <aside class="sidebar">
+
+      <nav class="side-nav">
+
+        <button class="navbtn active" data-page="home" onclick="go('home')">
+          <span class="nav-icon">⌂</span>
+          <span class="nav-label">Home</span>
+        </button>
+
+        <button class="navbtn" data-page="discover" onclick="go('discover')">
+          <span class="nav-icon">⌕</span>
+          <span class="nav-label">Discover</span>
+        </button>
+
+        <button class="navbtn" data-page="create" onclick="openCreate()">
+          <span class="nav-icon">＋</span>
+          <span class="nav-label">Create</span>
+        </button>
+
+        <button class="navbtn" data-page="reels" onclick="go('reels')">
+          <span class="nav-icon">▶</span>
+          <span class="nav-label">Reels</span>
+        </button>
+
+        <button class="navbtn" data-page="chat" onclick="go('chat')">
+          <span class="nav-icon">◌</span>
+          <span class="nav-label">Messages</span>
+        </button>
+
+        <button class="navbtn" data-page="notifications" onclick="go('notifications')">
+          <span class="nav-icon">♡</span>
+          <span class="nav-label">Notifications</span>
+        </button>
+
+        <button class="navbtn" data-page="profile" onclick="go('profile')">
+          <span class="nav-icon">◎</span>
+          <span class="nav-label">Profile</span>
+        </button>
+
+      </nav>
+
+      <div class="side-profile">
+
+        <div class="profile-mini">
+
+          <img
+            id="sideAvatar"
+            class="avatar"
+            src=""
+            alt=""
+          >
+
+          <div>
+            <strong id="sideName"></strong>
+            <div class="username" id="sideUsername"></div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </aside>
+
+
+    <!-- MAIN -->
+
+    <main class="page">
+
+      <!-- HOME -->
+
+      <section id="page-home">
+
+        <div class="page-head">
+          <div>
+            <h1>Home</h1>
+            <div class="page-sub">
+              See what's happening on Zilnet.
+            </div>
+          </div>
+        </div>
+
+
+        <div class="card composer">
+
+          <div class="composer-top">
+
+            <img
+              id="composerAvatar"
+              class="avatar"
+              src=""
+              alt=""
+            >
+
+            <input
+              readonly
+              onclick="openCreate()"
+              placeholder="Share something with Zilnet..."
+            >
+
+          </div>
+
+          <div class="composer-actions">
+
+            <button onclick="openCreate('post')">
+              ▣ Photo
+            </button>
+
+            <button onclick="openCreate('post')">
+              ✎ Post
+            </button>
+
+            <button onclick="openCreate('story')">
+              ◉ Story
+            </button>
+
+            <button onclick="openCreate('reel')">
+              ▶ Reel
+            </button>
+
+          </div>
+
+        </div>
+
+
+        <div class="stories-wrap">
+
+          <div id="stories" class="stories"></div>
+
+        </div>
+
+
+        <div id="feed">
+          <div class="loading">
+            Loading your feed...
+          </div>
+        </div>
+
+      </section>
+
+
+      <!-- DISCOVER -->
+
+      <section id="page-discover" class="hidden">
+
+        <div class="page-head">
+          <div>
+            <h1>Discover</h1>
+            <div class="page-sub">
+              Find people, skills and posts.
+            </div>
+          </div>
+        </div>
+
+        <div id="discoverResults">
+          <div class="empty">
+            <strong>Find people</strong>
+            Search for a username or skill.
+          </div>
+        </div>
+
+      </section>
+
+
+      <!-- REELS -->
+
+      <section id="page-reels" class="hidden">
+
+        <div class="page-head">
+          <div>
+            <h1>Reels</h1>
+            <div class="page-sub">
+              Short videos from the community.
+            </div>
+          </div>
+
+          <button class="secondary" onclick="openCreate('reel')">
+            ＋ Reel
+          </button>
+        </div>
+
+        <div id="reelsFeed"></div>
+
+      </section>
+
+
+      <!-- CHAT -->
+
+      <section id="page-chat" class="hidden">
+
+        <div class="page-head">
+          <div>
+            <h1>Messages</h1>
+            <div class="page-sub">
+              Your conversations.
+            </div>
+          </div>
+
+          <button class="secondary" onclick="newGroup()">
+            ＋ Group
+          </button>
+        </div>
+
+        <div id="chatList"></div>
+
+      </section>
+
+
+      <!-- NOTIFICATIONS -->
+
+      <section id="page-notifications" class="hidden">
+
+        <div class="page-head">
+          <div>
+            <h1>Notifications</h1>
+            <div class="page-sub">
+              Activity around your account.
+            </div>
+          </div>
+
+          <button class="secondary" onclick="markNotificationsRead()">
+            Mark read
+          </button>
+        </div>
+
+        <div id="notificationsList"></div>
+
+      </section>
+
+
+      <!-- PROFILE -->
+
+      <section id="page-profile" class="hidden">
+
+        <div id="profileView"></div>
+
+      </section>
+
+    </main>
+
+
+    <!-- RIGHT SIDEBAR -->
+
+    <aside class="rightbar">
+
+      <div class="card right-card">
+
+        <div class="right-title">
+          People to connect with
+        </div>
+
+        <div id="suggestions">
+          <div class="loading">Loading...</div>
+        </div>
+
+      </div>
+
+
+      <div class="card right-card">
+
+        <div class="right-title">
+          Explore skills
+        </div>
+
+        <div id="skills"></div>
+
+      </div>
+
+    </aside>
+
+  </div>
+
+
+  <!-- MOBILE NAV -->
+
+  <nav class="bottom-nav">
+
+    <button class="active" data-page="home" onclick="go('home')">
+      ⌂
+      <span>Home</span>
+    </button>
+
+    <button data-page="discover" onclick="go('discover')">
+      ⌕
+      <span>Discover</span>
+    </button>
+
+    <button data-page="create" onclick="openCreate()">
+      ＋
+      <span>Create</span>
+    </button>
+
+    <button data-page="reels" onclick="go('reels')">
+      ▶
+      <span>Reels</span>
+    </button>
+
+    <button data-page="profile" onclick="go('profile')">
+      ◎
+      <span>Profile</span>
+    </button>
+
+  </nav>
+
+</section>
+
+
+<!-- MODAL -->
+
+<div id="modal" class="modal hidden">
+  <div id="modalCard" class="modal-card"></div>
+</div>
+
+
+<!-- TOAST -->
+
+<div id="toast" class="toast hidden"></div>
+
+
+<script>
+
+/*
+============================================================
+ZILNET FRONTEND
+PART 1/3
+HTML + CSS + PAGE STRUCTURE
+============================================================
+
+PART 2 and PART 3 go below this script.
+DO NOT create another <html>, <head>, or <body>.
+*/
+
+</script>
+
+</body>
+</html>
