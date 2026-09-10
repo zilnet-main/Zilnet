@@ -3535,3 +3535,1844 @@ document.addEventListener(
 
   }
 );
+
+export default {
+  async fetch(request, env) {
+    const url = new URL(request.url);
+
+    try {
+      /* =========================
+         API ROUTER
+         ========================= */
+
+      if (url.pathname.startsWith("/api/")) {
+        return await handleAPI(request, env, url);
+      }
+
+      /* =========================
+         R2 MEDIA
+         ========================= */
+
+      if (url.pathname.startsWith("/media/")) {
+        if (!env.MEDIA) {
+          return new Response("Media storage not configured", {
+            status: 503
+          });
+        }
+
+        const key = decodeURIComponent(
+          url.pathname.slice("/media/".length)
+        );
+
+        const object = await env.MEDIA.get(key);
+
+        if (!object) {
+          return new Response("Not found", {
+            status: 404
+          });
+        }
+
+        const headers = new Headers();
+
+        object.writeHttpMetadata(headers);
+        headers.set("etag", object.httpEtag);
+        headers.set("cache-control", "public, max-age=31536000");
+
+        return new Response(object.body, {
+          headers
+        });
+      }
+
+      /* =========================
+         WEBSITE
+         ========================= */
+
+      return env.ASSETS.fetch(request);
+
+    } catch (error) {
+      console.error(error);
+
+      return Response.json(
+        {
+          error: "Internal server error"
+        },
+        {
+          status: 500
+        }
+      );
+    }
+  }
+};
+
+
+/* =========================================================
+   API
+   ========================================================= */
+
+async function handleAPI(request, env, url) {
+
+  const path = url.pathname;
+  const method = request.method;
+
+  /* =========================
+     DATABASE TEST
+     ========================= */
+
+  if (
+    path === "/api/test-db" &&
+    method === "GET"
+  ) {
+    const result =
+      await env.DB
+        .prepare("SELECT 1 AS connected")
+        .first();
+
+    return Response.json(result);
+  }
+
+
+  /* =========================
+     SIGN UP
+     ========================= */
+
+  if (
+    path === "/api/signup" &&
+    method === "POST"
+  ) {
+    const data = await request.json();
+
+    const username =
+      String(data.username || "")
+        .trim()
+        .toLowerCase();
+
+    const email =
+      data.email
+        ? String(data.email).trim().toLowerCase()
+        : null;
+
+    const displayName =
+      String(
+        data.display_name ||
+        username
+      ).trim();
+
+    const password =
+      String(data.password || "");
+
+    if (!/^[a-z0-9_.]{3,30}$/.test(username)) {
+      return Response.json(
+        {
+          error:
+            "Username must be 3–30 characters and use letters, numbers, _ or ."
+        },
+        { status: 400 }
+      );
+    }
+
+    if (password.length < 8) {
+      return Response.json(
+        {
+          error:
+            "Password must be at least 8 characters."
+        },
+        { status: 400 }
+      );
+    }
+
+    const existing =
+      await env.DB
+        .prepare(
+          "SELECT id FROM users WHERE username = ?"
+        )
+        .bind(username)
+        .first();
+
+    if (existing) {
+      return Response.json(
+        {
+          error: "Username already exists."
+        },
+        { status: 409 }
+      );
+    }
+
+    if (email) {
+      const existingEmail =
+        await env.DB
+          .prepare(
+            "SELECT id FROM users WHERE email = ?"
+          )
+          .bind(email)
+          .first();
+
+      if (existingEmail) {
+        return Response.json(
+          {
+            error: "Email already exists."
+          },
+          { status: 409 }
+        );
+      }
+    }
+
+    const salt =
+      crypto.randomUUID() +
+      crypto.randomUUID();
+
+    const passwordHash =
+      await hashPassword(password, salt);
+
+    const result =
+      await env.DB
+        .prepare(`
+          INSERT INTO users
+          (
+            username,
+            email,
+            display_name,
+            password_hash,
+            password_salt
+          )
+          VALUES (?, ?, ?, ?, ?)
+        `)
+        .bind(
+          username,
+          email,
+          displayName,
+          passwordHash,
+          salt
+        )
+        .run();
+
+    const userId =
+      result.meta.last_row_id;
+
+    const token =
+      await createSession(
+        env,
+        userId
+      );
+
+    return withCookie(
+      Response.json({
+        success: true,
+        user: {
+          id: userId,
+          username,
+          email,
+          display_name: displayName
+        }
+      }),
+      token
+    );
+  }
+
+
+  /* =========================
+     LOGIN
+     ========================= */
+
+  if (
+    path === "/api/login" &&
+    method === "POST"
+  ) {
+    const data = await request.json();
+
+    const username =
+      String(data.username || "")
+        .trim()
+        .toLowerCase();
+
+    const password =
+      String(data.password || "");
+
+    const user =
+      await env.DB
+        .prepare(`
+          SELECT *
+          FROM users
+          WHERE username = ?
+        `)
+        .bind(username)
+        .first();
+
+    if (!user) {
+      return Response.json(
+        {
+          error: "Invalid username or password."
+        },
+        { status: 401 }
+      );
+    }
+
+    const hash =
+      await hashPassword(
+        password,
+        user.password_salt
+      );
+
+    if (
+      hash !== user.password_hash
+    ) {
+      return Response.json(
+        {
+          error: "Invalid username or password."
+        },
+        { status: 401 }
+      );
+    }
+
+    const token =
+      await createSession(
+        env,
+        user.id
+      );
+
+    return withCookie(
+      Response.json({
+        success: true,
+        user: cleanUser(user)
+      }),
+      token
+    );
+  }
+
+
+  /* =========================
+     LOGOUT
+     ========================= */
+
+  if (
+    path === "/api/logout" &&
+    method === "POST"
+  ) {
+    const token =
+      getCookie(request, "zilnet_session");
+
+    if (token) {
+      await env.DB
+        .prepare(
+          "DELETE FROM sessions WHERE token = ?"
+        )
+        .bind(token)
+        .run();
+    }
+
+    return new Response(
+      JSON.stringify({
+        success: true
+      }),
+      {
+        headers: {
+          "content-type": "application/json",
+          "set-cookie":
+            "zilnet_session=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0"
+        }
+      }
+    );
+  }
+
+
+  /* =========================
+     CURRENT USER
+     ========================= */
+
+  if (
+    path === "/api/me" &&
+    method === "GET"
+  ) {
+    const user =
+      await requireUser(
+        request,
+        env
+      );
+
+    if (!user) {
+      return Response.json(
+        {
+          error: "Not logged in"
+        },
+        { status: 401 }
+      );
+    }
+
+    return Response.json({
+      user: cleanUser(user)
+    });
+  }
+
+
+  /* =========================
+     FEED
+     ========================= */
+
+  if (
+    path === "/api/feed" &&
+    method === "GET"
+  ) {
+    const user =
+      await getCurrentUser(
+        request,
+        env
+      );
+
+    const rows =
+      await env.DB
+        .prepare(`
+          SELECT
+            p.*,
+            u.username,
+            u.display_name,
+            u.avatar_url,
+
+            (
+              SELECT COUNT(*)
+              FROM likes l
+              WHERE l.post_id = p.id
+            ) AS like_count,
+
+            (
+              SELECT COUNT(*)
+              FROM comments c
+              WHERE c.post_id = p.id
+            ) AS comment_count
+
+          FROM posts p
+
+          JOIN users u
+            ON u.id = p.user_id
+
+          ORDER BY p.created_at DESC
+
+          LIMIT 100
+        `)
+        .all();
+
+    return Response.json({
+      posts: rows.results || []
+    });
+  }
+
+
+  /* =========================
+     CREATE POST
+     ========================= */
+
+  if (
+    path === "/api/posts" &&
+    method === "POST"
+  ) {
+    const user =
+      await requireUser(
+        request,
+        env
+      );
+
+    if (!user) {
+      return unauthorized();
+    }
+
+    const data =
+      await request.json();
+
+    const content =
+      String(data.content || "")
+        .trim();
+
+    if (!content) {
+      return Response.json(
+        {
+          error: "Post cannot be empty."
+        },
+        { status: 400 }
+      );
+    }
+
+    if (content.length > 5000) {
+      return Response.json(
+        {
+          error: "Post is too long."
+        },
+        { status: 400 }
+      );
+    }
+
+    const result =
+      await env.DB
+        .prepare(`
+          INSERT INTO posts
+          (
+            user_id,
+            content
+          )
+          VALUES (?, ?)
+        `)
+        .bind(
+          user.id,
+          content
+        )
+        .run();
+
+    return Response.json({
+      success: true,
+      post_id: result.meta.last_row_id
+    });
+  }
+
+
+  /* =========================
+     DELETE POST
+     ========================= */
+
+  if (
+    path.match(/^\/api\/posts\/\d+$/) &&
+    method === "DELETE"
+  ) {
+    const user =
+      await requireUser(
+        request,
+        env
+      );
+
+    if (!user) {
+      return unauthorized();
+    }
+
+    const id =
+      Number(
+        path.split("/").pop()
+      );
+
+    const result =
+      await env.DB
+        .prepare(`
+          DELETE FROM posts
+          WHERE id = ?
+          AND user_id = ?
+        `)
+        .bind(
+          id,
+          user.id
+        )
+        .run();
+
+    return Response.json({
+      success:
+        result.meta.changes > 0
+    });
+  }
+
+
+  /* =========================
+     LIKE POST
+     ========================= */
+
+  if (
+    path.match(/^\/api\/posts\/\d+\/like$/) &&
+    method === "POST"
+  ) {
+    const user =
+      await requireUser(
+        request,
+        env
+      );
+
+    if (!user) {
+      return unauthorized();
+    }
+
+    const postId =
+      Number(
+        path.split("/")[3]
+      );
+
+    const existing =
+      await env.DB
+        .prepare(`
+          SELECT id
+          FROM likes
+          WHERE post_id = ?
+          AND user_id = ?
+        `)
+        .bind(
+          postId,
+          user.id
+        )
+        .first();
+
+    if (existing) {
+
+      await env.DB
+        .prepare(`
+          DELETE FROM likes
+          WHERE post_id = ?
+          AND user_id = ?
+        `)
+        .bind(
+          postId,
+          user.id
+        )
+        .run();
+
+      return Response.json({
+        liked: false
+      });
+    }
+
+    await env.DB
+      .prepare(`
+        INSERT INTO likes
+        (
+          post_id,
+          user_id
+        )
+        VALUES (?, ?)
+      `)
+      .bind(
+        postId,
+        user.id
+      )
+      .run();
+
+    return Response.json({
+      liked: true
+    });
+  }
+
+
+  /* =========================
+     COMMENTS
+     ========================= */
+
+  if (
+    path === "/api/comments" &&
+    method === "POST"
+  ) {
+    const user =
+      await requireUser(
+        request,
+        env
+      );
+
+    if (!user) {
+      return unauthorized();
+    }
+
+    const data =
+      await request.json();
+
+    const postId =
+      Number(data.post_id);
+
+    const content =
+      String(data.content || "")
+        .trim();
+
+    if (!postId || !content) {
+      return Response.json(
+        {
+          error: "Invalid comment."
+        },
+        { status: 400 }
+      );
+    }
+
+    await env.DB
+      .prepare(`
+        INSERT INTO comments
+        (
+          post_id,
+          user_id,
+          content
+        )
+        VALUES (?, ?, ?)
+      `)
+      .bind(
+        postId,
+        user.id,
+        content
+      )
+      .run();
+
+    return Response.json({
+      success: true
+    });
+  }
+
+
+  if (
+    path.match(/^\/api\/posts\/\d+\/comments$/) &&
+    method === "GET"
+  ) {
+    const postId =
+      Number(
+        path.split("/")[3]
+      );
+
+    const result =
+      await env.DB
+        .prepare(`
+          SELECT
+            c.*,
+            u.username,
+            u.display_name,
+            u.avatar_url
+
+          FROM comments c
+
+          JOIN users u
+            ON u.id = c.user_id
+
+          WHERE c.post_id = ?
+
+          ORDER BY c.created_at ASC
+        `)
+        .bind(postId)
+        .all();
+
+    return Response.json({
+      comments:
+        result.results || []
+    });
+  }
+
+
+  /* =========================
+     SEARCH
+     ========================= */
+
+  if (
+    path === "/api/search" &&
+    method === "GET"
+  ) {
+    const q =
+      url.searchParams
+        .get("q") ||
+        "";
+
+    const search =
+      `%${q.trim()}%`;
+
+    const users =
+      await env.DB
+        .prepare(`
+          SELECT
+            id,
+            username,
+            display_name,
+            avatar_url,
+            bio
+          FROM users
+          WHERE username LIKE ?
+             OR display_name LIKE ?
+          LIMIT 30
+        `)
+        .bind(
+          search,
+          search
+        )
+        .all();
+
+    const posts =
+      await env.DB
+        .prepare(`
+          SELECT
+            p.id,
+            p.user_id,
+            p.content,
+            p.created_at,
+            u.username,
+            u.display_name,
+            u.avatar_url
+          FROM posts p
+          JOIN users u
+            ON u.id = p.user_id
+          WHERE p.content LIKE ?
+          ORDER BY p.created_at DESC
+          LIMIT 30
+        `)
+        .bind(search)
+        .all();
+
+    return Response.json({
+      users: users.results || [],
+      posts: posts.results || []
+    });
+  }
+
+
+  /* =========================
+     SUGGESTIONS
+     ========================= */
+
+  if (
+    path === "/api/suggestions" &&
+    method === "GET"
+  ) {
+    const user =
+      await getCurrentUser(
+        request,
+        env
+      );
+
+    let query = `
+      SELECT
+        id,
+        username,
+        display_name,
+        avatar_url
+      FROM users
+    `;
+
+    const params = [];
+
+    if (user) {
+      query += `
+        WHERE id != ?
+        AND id NOT IN (
+          SELECT following_id
+          FROM follows
+          WHERE follower_id = ?
+        )
+      `;
+
+      params.push(
+        user.id,
+        user.id
+      );
+    }
+
+    query += `
+      ORDER BY RANDOM()
+      LIMIT 10
+    `;
+
+    const statement =
+      env.DB.prepare(query);
+
+    const result =
+      params.length
+        ? await statement.bind(...params).all()
+        : await statement.all();
+
+    return Response.json({
+      users:
+        result.results || []
+    });
+  }
+
+
+  /* =========================
+     FOLLOW
+     ========================= */
+
+  if (
+    path.match(/^\/api\/users\/\d+\/follow$/) &&
+    method === "POST"
+  ) {
+    const user =
+      await requireUser(
+        request,
+        env
+      );
+
+    if (!user) {
+      return unauthorized();
+    }
+
+    const targetId =
+      Number(
+        path.split("/")[3]
+      );
+
+    if (
+      targetId === user.id
+    ) {
+      return Response.json(
+        {
+          error: "You cannot follow yourself."
+        },
+        { status: 400 }
+      );
+    }
+
+    const existing =
+      await env.DB
+        .prepare(`
+          SELECT id
+          FROM follows
+          WHERE follower_id = ?
+          AND following_id = ?
+        `)
+        .bind(
+          user.id,
+          targetId
+        )
+        .first();
+
+    if (existing) {
+
+      await env.DB
+        .prepare(`
+          DELETE FROM follows
+          WHERE follower_id = ?
+          AND following_id = ?
+        `)
+        .bind(
+          user.id,
+          targetId
+        )
+        .run();
+
+      return Response.json({
+        following: false
+      });
+    }
+
+    await env.DB
+      .prepare(`
+        INSERT INTO follows
+        (
+          follower_id,
+          following_id
+        )
+        VALUES (?, ?)
+      `)
+      .bind(
+        user.id,
+        targetId
+      )
+      .run();
+
+    return Response.json({
+      following: true
+    });
+  }
+
+
+  /* =========================
+     USER PROFILE
+     ========================= */
+
+  if (
+    path.match(/^\/api\/users\/\d+$/) &&
+    method === "GET"
+  ) {
+    const id =
+      Number(
+        path.split("/")[3]
+      );
+
+    const user =
+      await env.DB
+        .prepare(`
+          SELECT
+            id,
+            username,
+            email,
+            display_name,
+            bio,
+            avatar_url,
+            skills,
+            created_at,
+
+            (
+              SELECT COUNT(*)
+              FROM posts
+              WHERE posts.user_id = users.id
+            ) AS post_count,
+
+            (
+              SELECT COUNT(*)
+              FROM follows
+              WHERE following_id = users.id
+            ) AS follower_count,
+
+            (
+              SELECT COUNT(*)
+              FROM follows
+              WHERE follower_id = users.id
+            ) AS following_count
+
+          FROM users
+
+          WHERE id = ?
+        `)
+        .bind(id)
+        .first();
+
+    if (!user) {
+      return Response.json(
+        {
+          error: "User not found."
+        },
+        { status: 404 }
+      );
+    }
+
+    return Response.json({
+      user
+    });
+  }
+
+
+  /* =========================
+     EDIT PROFILE
+     ========================= */
+
+  if (
+    path === "/api/profile" &&
+    method === "PUT"
+  ) {
+    const user =
+      await requireUser(
+        request,
+        env
+      );
+
+    if (!user) {
+      return unauthorized();
+    }
+
+    const data =
+      await request.json();
+
+    const displayName =
+      String(
+        data.display_name ??
+        user.display_name ??
+        ""
+      ).trim();
+
+    const bio =
+      String(
+        data.bio ??
+        user.bio ??
+        ""
+      ).trim();
+
+    const skills =
+      String(
+        data.skills ??
+        user.skills ??
+        ""
+      ).trim();
+
+    await env.DB
+      .prepare(`
+        UPDATE users
+        SET
+          display_name = ?,
+          bio = ?,
+          skills = ?
+        WHERE id = ?
+      `)
+      .bind(
+        displayName,
+        bio,
+        skills,
+        user.id
+      )
+      .run();
+
+    return Response.json({
+      success: true
+    });
+  }
+
+
+  /* =========================
+     STORIES
+     ========================= */
+
+  if (
+    path === "/api/stories" &&
+    method === "GET"
+  ) {
+    const user =
+      await getCurrentUser(
+        request,
+        env
+      );
+
+    if (!user) {
+      return Response.json({
+        stories: []
+      });
+    }
+
+    const result =
+      await env.DB
+        .prepare(`
+          SELECT
+            s.*,
+            u.username,
+            u.display_name,
+            u.avatar_url
+
+          FROM stories s
+
+          JOIN users u
+            ON u.id = s.user_id
+
+          WHERE
+            s.user_id = ?
+
+            OR s.visibility = 'public'
+
+            OR (
+              s.visibility = 'followers'
+              AND EXISTS (
+                SELECT 1
+                FROM follows f
+                WHERE f.follower_id = ?
+                AND f.following_id = s.user_id
+              )
+            )
+
+          AND datetime(
+            s.created_at,
+            '+24 hours'
+          ) > datetime('now')
+
+          ORDER BY s.created_at DESC
+        `)
+        .bind(
+          user.id,
+          user.id
+        )
+        .all();
+
+    return Response.json({
+      stories:
+        result.results || []
+    });
+  }
+
+
+  /* =========================
+     CREATE STORY
+     ========================= */
+
+  if (
+    path === "/api/stories" &&
+    method === "POST"
+  ) {
+    const user =
+      await requireUser(
+        request,
+        env
+      );
+
+    if (!user) {
+      return unauthorized();
+    }
+
+    const data =
+      await request.json();
+
+    const content =
+      String(data.content || "")
+        .trim();
+
+    const visibility =
+      data.visibility === "followers"
+        ? "followers"
+        : "public";
+
+    if (!content) {
+      return Response.json(
+        {
+          error: "Story cannot be empty."
+        },
+        { status: 400 }
+      );
+    }
+
+    await env.DB
+      .prepare(`
+        INSERT INTO stories
+        (
+          user_id,
+          content,
+          visibility
+        )
+        VALUES (?, ?, ?)
+      `)
+      .bind(
+        user.id,
+        content,
+        visibility
+      )
+      .run();
+
+    return Response.json({
+      success: true
+    });
+  }
+
+
+  /* =========================
+     SINGLE STORY
+     ========================= */
+
+  if (
+    path.match(/^\/api\/stories\/\d+$/) &&
+    method === "GET"
+  ) {
+    const id =
+      Number(
+        path.split("/")[3]
+      );
+
+    const story =
+      await env.DB
+        .prepare(`
+          SELECT
+            s.*,
+            u.username,
+            u.display_name,
+            u.avatar_url
+
+          FROM stories s
+
+          JOIN users u
+            ON u.id = s.user_id
+
+          WHERE s.id = ?
+        `)
+        .bind(id)
+        .first();
+
+    if (!story) {
+      return Response.json(
+        {
+          error: "Story not found."
+        },
+        { status: 404 }
+      );
+    }
+
+    return Response.json({
+      story
+    });
+  }
+
+
+  /* =========================
+     REELS
+     ========================= */
+
+  if (
+    path === "/api/reels" &&
+    method === "GET"
+  ) {
+    const result =
+      await env.DB
+        .prepare(`
+          SELECT
+            r.*,
+            u.username,
+            u.display_name,
+            u.avatar_url
+
+          FROM reels r
+
+          JOIN users u
+            ON u.id = r.user_id
+
+          ORDER BY r.created_at DESC
+
+          LIMIT 100
+        `)
+        .all();
+
+    return Response.json({
+      reels:
+        result.results || []
+    });
+  }
+
+
+  /* =========================
+     CREATE REEL
+     ========================= */
+
+  if (
+    path === "/api/reels" &&
+    method === "POST"
+  ) {
+    const user =
+      await requireUser(
+        request,
+        env
+      );
+
+    if (!user) {
+      return unauthorized();
+    }
+
+    const data =
+      await request.json();
+
+    const mediaUrl =
+      String(
+        data.media_url || ""
+      ).trim();
+
+    const caption =
+      String(
+        data.caption || ""
+      ).trim();
+
+    if (!mediaUrl) {
+      return Response.json(
+        {
+          error: "Reel media is required."
+        },
+        { status: 400 }
+      );
+    }
+
+    await env.DB
+      .prepare(`
+        INSERT INTO reels
+        (
+          user_id,
+          media_url,
+          caption
+        )
+        VALUES (?, ?, ?)
+      `)
+      .bind(
+        user.id,
+        mediaUrl,
+        caption
+      )
+      .run();
+
+    return Response.json({
+      success: true
+    });
+  }
+
+
+  /* =========================
+     CHATS
+     ========================= */
+
+  if (
+    path === "/api/chats" &&
+    method === "GET"
+  ) {
+    const user =
+      await requireUser(
+        request,
+        env
+      );
+
+    if (!user) {
+      return unauthorized();
+    }
+
+    const result =
+      await env.DB
+        .prepare(`
+          SELECT
+            c.id,
+            c.name,
+            c.is_group,
+            c.created_at
+
+          FROM chats c
+
+          JOIN chat_members cm
+            ON cm.chat_id = c.id
+
+          WHERE cm.user_id = ?
+
+          ORDER BY c.created_at DESC
+        `)
+        .bind(user.id)
+        .all();
+
+    return Response.json({
+      chats:
+        result.results || []
+    });
+  }
+
+
+  /* =========================
+     CHAT MESSAGES
+     ========================= */
+
+  if (
+    path.match(/^\/api\/chats\/\d+\/messages$/) &&
+    method === "GET"
+  ) {
+    const user =
+      await requireUser(
+        request,
+        env
+      );
+
+    if (!user) {
+      return unauthorized();
+    }
+
+    const chatId =
+      Number(
+        path.split("/")[3]
+      );
+
+    const member =
+      await env.DB
+        .prepare(`
+          SELECT id
+          FROM chat_members
+          WHERE chat_id = ?
+          AND user_id = ?
+        `)
+        .bind(
+          chatId,
+          user.id
+        )
+        .first();
+
+    if (!member) {
+      return Response.json(
+        {
+          error: "Access denied."
+        },
+        { status: 403 }
+      );
+    }
+
+    const result =
+      await env.DB
+        .prepare(`
+          SELECT
+            m.*,
+            u.username,
+            u.display_name,
+            u.avatar_url
+
+          FROM messages m
+
+          JOIN users u
+            ON u.id = m.user_id
+
+          WHERE m.chat_id = ?
+
+          ORDER BY m.created_at ASC
+
+          LIMIT 200
+        `)
+        .bind(chatId)
+        .all();
+
+    return Response.json({
+      messages:
+        result.results || []
+    });
+  }
+
+
+  /* =========================
+     SEND MESSAGE
+     ========================= */
+
+  if (
+    path.match(/^\/api\/chats\/\d+\/messages$/) &&
+    method === "POST"
+  ) {
+    const user =
+      await requireUser(
+        request,
+        env
+      );
+
+    if (!user) {
+      return unauthorized();
+    }
+
+    const chatId =
+      Number(
+        path.split("/")[3]
+      );
+
+    const data =
+      await request.json();
+
+    const content =
+      String(
+        data.content || ""
+      ).trim();
+
+    if (!content) {
+      return Response.json(
+        {
+          error: "Message cannot be empty."
+        },
+        { status: 400 }
+      );
+    }
+
+    const member =
+      await env.DB
+        .prepare(`
+          SELECT id
+          FROM chat_members
+          WHERE chat_id = ?
+          AND user_id = ?
+        `)
+        .bind(
+          chatId,
+          user.id
+        )
+        .first();
+
+    if (!member) {
+      return Response.json(
+        {
+          error: "You are not a member of this chat."
+        },
+        { status: 403 }
+      );
+    }
+
+    await env.DB
+      .prepare(`
+        INSERT INTO messages
+        (
+          chat_id,
+          user_id,
+          content
+        )
+        VALUES (?, ?, ?)
+      `)
+      .bind(
+        chatId,
+        user.id,
+        content
+      )
+      .run();
+
+    return Response.json({
+      success: true
+    });
+  }
+
+
+  /* =========================
+     NOTIFICATIONS
+     ========================= */
+
+  if (
+    path === "/api/notifications" &&
+    method === "GET"
+  ) {
+    const user =
+      await requireUser(
+        request,
+        env
+      );
+
+    if (!user) {
+      return unauthorized();
+    }
+
+    const result =
+      await env.DB
+        .prepare(`
+          SELECT *
+          FROM notifications
+          WHERE user_id = ?
+          ORDER BY created_at DESC
+          LIMIT 50
+        `)
+        .bind(user.id)
+        .all();
+
+    return Response.json({
+      notifications:
+        result.results || []
+    });
+  }
+
+
+  /* =========================
+     PRIVACY SETTINGS
+     ========================= */
+
+  if (
+    path === "/api/settings/privacy" &&
+    method === "PUT"
+  ) {
+    const user =
+      await requireUser(
+        request,
+        env
+      );
+
+    if (!user) {
+      return unauthorized();
+    }
+
+    const data =
+      await request.json();
+
+    const isPrivate =
+      data.is_private ? 1 : 0;
+
+    await env.DB
+      .prepare(`
+        UPDATE users
+        SET is_private = ?
+        WHERE id = ?
+      `)
+      .bind(
+        isPrivate,
+        user.id
+      )
+      .run();
+
+    return Response.json({
+      success: true
+    });
+  }
+
+
+  return Response.json(
+    {
+      error: "API route not found."
+    },
+    {
+      status: 404
+    }
+  );
+}
+
+
+/* =========================================================
+   AUTH HELPERS
+   ========================================================= */
+
+async function getCurrentUser(
+  request,
+  env
+) {
+  const token =
+    getCookie(
+      request,
+      "zilnet_session"
+    );
+
+  if (!token) return null;
+
+  const result =
+    await env.DB
+      .prepare(`
+        SELECT
+          u.*
+        FROM sessions s
+
+        JOIN users u
+          ON u.id = s.user_id
+
+        WHERE s.token = ?
+
+        AND datetime(
+          s.expires_at
+        ) > datetime('now')
+      `)
+      .bind(token)
+      .first();
+
+  return result || null;
+}
+
+
+async function requireUser(
+  request,
+  env
+) {
+  return getCurrentUser(
+    request,
+    env
+  );
+}
+
+
+async function createSession(
+  env,
+  userId
+) {
+  const token =
+    crypto.randomUUID() +
+    crypto.randomUUID();
+
+  await env.DB
+    .prepare(`
+      INSERT INTO sessions
+      (
+        user_id,
+        token,
+        expires_at
+      )
+      VALUES (
+        ?,
+        ?,
+        datetime('now', '+30 days')
+      )
+    `)
+    .bind(
+      userId,
+      token
+    )
+    .run();
+
+  return token;
+}
+
+
+/* =========================================================
+   PASSWORD HASH
+   ========================================================= */
+
+async function hashPassword(
+  password,
+  salt
+) {
+  const encoder =
+    new TextEncoder();
+
+  const key =
+    await crypto.subtle.importKey(
+      "raw",
+      encoder.encode(password),
+      {
+        name: "PBKDF2"
+      },
+      false,
+      ["deriveBits"]
+    );
+
+  const bits =
+    await crypto.subtle.deriveBits(
+      {
+        name: "PBKDF2",
+        salt: encoder.encode(salt),
+        iterations: 100000,
+        hash: "SHA-256"
+      },
+      key,
+      256
+    );
+
+  return bytesToHex(
+    new Uint8Array(bits)
+  );
+}
+
+
+function bytesToHex(bytes) {
+  return [...bytes]
+    .map(
+      b =>
+        b.toString(16).padStart(2, "0")
+    )
+    .join("");
+}
+
+
+/* =========================================================
+   COOKIE
+   ========================================================= */
+
+function getCookie(
+  request,
+  name
+) {
+  const cookie =
+    request.headers.get("Cookie");
+
+  if (!cookie) return null;
+
+  const parts =
+    cookie.split(";");
+
+  for (const part of parts) {
+
+    const [key, ...value] =
+      part.trim().split("=");
+
+    if (key === name) {
+      return value.join("=");
+    }
+  }
+
+  return null;
+}
+
+
+function withCookie(
+  response,
+  token
+) {
+  const headers =
+    new Headers(
+      response.headers
+    );
+
+  headers.append(
+    "Set-Cookie",
+    [
+      `zilnet_session=${token}`,
+      "Path=/",
+      "HttpOnly",
+      "Secure",
+      "SameSite=Lax",
+      "Max-Age=2592000"
+    ].join("; ")
+  );
+
+  return new Response(
+    response.body,
+    {
+      status: response.status,
+      headers
+    }
+  );
+}
+
+
+function unauthorized() {
+  return Response.json(
+    {
+      error: "You must be logged in."
+    },
+    {
+      status: 401
+    }
+  );
+}
+
+
+/* =========================================================
+   REMOVE SENSITIVE USER DATA
+   ========================================================= */
+
+function cleanUser(user) {
+
+  const copy = {
+    ...user
+  };
+
+  delete copy.password_hash;
+  delete copy.password_salt;
+
+  return copy;
+}
