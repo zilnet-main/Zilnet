@@ -1,1 +1,2178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Zilnet</title>
+
+<style>
+/* =========================================================
+   ZILNET — PROFESSIONAL BLACK & WHITE UI
+   ========================================================= */
+
+:root {
+    --black: #000000;
+    --near-black: #0a0a0a;
+    --dark: #111111;
+    --dark-2: #171717;
+    --gray-1: #222222;
+    --gray-2: #333333;
+    --gray-3: #666666;
+    --gray-4: #999999;
+    --gray-5: #cccccc;
+    --gray-6: #e5e5e5;
+    --white: #ffffff;
+
+    --border: #252525;
+    --soft-border: #dddddd;
+
+    --radius: 18px;
+    --radius-small: 12px;
+
+    --sidebar-width: 250px;
+    --rightbar-width: 290px;
+}
+
+/* =========================
+   RESET
+   ========================= */
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    min-height: 100vh;
+    background: var(--black);
+    color: var(--white);
+    font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Roboto,
+        Helvetica,
+        Arial,
+        sans-serif;
+    overflow-x: hidden;
+}
+
+button,
+input,
+textarea,
+select {
+    font: inherit;
+}
+
+button {
+    border: 0;
+    cursor: pointer;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* =========================
+   SCROLLBAR
+   ========================= */
+
+::-webkit-scrollbar {
+    width: 7px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--black);
+}
+
+::-webkit-scrollbar-thumb {
+    background: #333;
+    border-radius: 20px;
+}
+
+/* =========================================================
+   AUTH
+   ========================================================= */
+
+.auth {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background:
+        radial-gradient(circle at 50% 0%, #202020 0%, #090909 38%, #000 75%);
+}
+
+.auth-card {
+    width: min(430px, 100%);
+    background: #0d0d0d;
+    border: 1px solid #292929;
+    border-radius: 26px;
+    padding: 34px;
+    box-shadow: 0 30px 100px rgba(0,0,0,.65);
+}
+
+.brand {
+    text-align: center;
+    margin-bottom: 28px;
+}
+
+.brand-logo {
+    width: 58px;
+    height: 58px;
+    margin: 0 auto 15px;
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--white);
+    color: var(--black);
+    font-size: 25px;
+    font-weight: 900;
+    letter-spacing: -2px;
+}
+
+.brand h1 {
+    font-size: 30px;
+    letter-spacing: -1px;
+}
+
+.brand p {
+    color: #888;
+    margin-top: 7px;
+    font-size: 14px;
+}
+
+/* =========================
+   AUTH TABS
+   ========================= */
+
+.tabs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 5px;
+    padding: 5px;
+    background: #151515;
+    border-radius: 13px;
+    margin-bottom: 24px;
+}
+
+.tabs button {
+    padding: 11px;
+    border-radius: 9px;
+    background: transparent;
+    color: #777;
+    font-weight: 700;
+}
+
+.tabs button.active {
+    background: var(--white);
+    color: var(--black);
+}
+
+/* =========================
+   FORMS
+   ========================= */
+
+.form-group {
+    margin-bottom: 16px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 7px;
+    color: #aaa;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.input {
+    width: 100%;
+    height: 48px;
+    border: 1px solid #303030;
+    border-radius: 12px;
+    background: #151515;
+    color: white;
+    outline: none;
+    padding: 0 14px;
+    transition: .2s ease;
+}
+
+.input:focus {
+    border-color: #888;
+    background: #191919;
+}
+
+textarea.input {
+    height: auto;
+    min-height: 110px;
+    padding: 13px 14px;
+    resize: vertical;
+}
+
+.primary {
+    min-height: 46px;
+    padding: 0 19px;
+    border-radius: 12px;
+    background: var(--white);
+    color: var(--black);
+    font-weight: 800;
+    transition: transform .15s ease, opacity .15s ease;
+}
+
+.primary:hover {
+    transform: translateY(-1px);
+}
+
+.primary:active {
+    transform: scale(.98);
+}
+
+.primary:disabled {
+    opacity: .5;
+    cursor: not-allowed;
+}
+
+.full {
+    width: 100%;
+}
+
+.auth-message {
+    min-height: 20px;
+    margin: 5px 0 12px;
+    color: #aaa;
+    text-align: center;
+    font-size: 13px;
+}
+
+.forgot {
+    display: block;
+    width: 100%;
+    margin-top: 14px;
+    background: transparent;
+    color: #999;
+    font-size: 13px;
+}
+
+/* =========================================================
+   APP SHELL
+   ========================================================= */
+
+.app {
+    min-height: 100vh;
+    background: var(--black);
+}
+
+.shell {
+    width: 100%;
+    max-width: 1500px;
+    min-height: 100vh;
+    margin: auto;
+    display: grid;
+    grid-template-columns:
+        var(--sidebar-width)
+        minmax(0, 1fr)
+        var(--rightbar-width);
+}
+
+/* =========================================================
+   SIDEBAR
+   ========================================================= */
+
+.sidebar {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    border-right: 1px solid var(--border);
+    padding: 24px 15px;
+    background: #050505;
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar-brand {
+    padding: 5px 12px 28px;
+    display: flex;
+    align-items: center;
+    gap: 11px;
+}
+
+.sidebar-brand-mark {
+    width: 37px;
+    height: 37px;
+    border-radius: 11px;
+    background: white;
+    color: black;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+}
+
+.sidebar-brand span {
+    font-size: 21px;
+    font-weight: 850;
+    letter-spacing: -.6px;
+}
+
+.nav {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.nav-btn {
+    width: 100%;
+    min-height: 48px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 0 13px;
+    border-radius: 13px;
+    background: transparent;
+    color: #999;
+    text-align: left;
+    transition: .18s ease;
+}
+
+.nav-btn:hover {
+    background: #151515;
+    color: white;
+}
+
+.nav-btn.active {
+    background: #1a1a1a;
+    color: white;
+}
+
+.nav-icon {
+    width: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.nav-label {
+    font-weight: 650;
+}
+
+.sidebar-bottom {
+    margin-top: auto;
+}
+
+.user-mini {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 12px;
+    border-radius: 14px;
+    background: #111;
+}
+
+.user-mini-info {
+    min-width: 0;
+}
+
+.user-mini-name {
+    font-weight: 750;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.user-mini-username {
+    color: #777;
+    font-size: 12px;
+}
+
+/* =========================================================
+   MAIN
+   ========================================================= */
+
+.main {
+    min-width: 0;
+    padding: 0 28px 80px;
+}
+
+.topbar {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(0,0,0,.88);
+    backdrop-filter: blur(18px);
+    border-bottom: 1px solid transparent;
+}
+
+.page-title {
+    font-size: 21px;
+    font-weight: 800;
+    letter-spacing: -.4px;
+}
+
+.top-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.icon-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    color: #aaa;
+    transition: .18s ease;
+}
+
+.icon-btn:hover {
+    background: #181818;
+    color: white;
+}
+
+/* =========================================================
+   PAGE SECTIONS
+   ========================================================= */
+
+.page {
+    width: 100%;
+    max-width: 720px;
+    margin: 0 auto;
+    padding-top: 20px;
+}
+
+.card {
+    background: #0c0c0c;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+}
+
+/* =========================================================
+   STORIES
+   ========================================================= */
+
+.stories-card {
+    padding: 16px;
+    margin-bottom: 18px;
+}
+
+.stories-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 15px;
+}
+
+.stories-title {
+    font-size: 14px;
+    font-weight: 800;
+}
+
+.stories-row {
+    display: flex;
+    gap: 13px;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+.stories-row::-webkit-scrollbar {
+    display: none;
+}
+
+.story {
+    min-width: 70px;
+    width: 70px;
+    background: transparent;
+    color: white;
+    text-align: center;
+}
+
+.story-avatar {
+    width: 62px;
+    height: 62px;
+    margin: 0 auto 7px;
+    border-radius: 50%;
+    padding: 2px;
+    background: white;
+}
+
+.story-avatar-inner {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: #171717;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.story-name {
+    font-size: 11px;
+    color: #999;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+/* =========================================================
+   CREATE / COMPOSER
+   ========================================================= */
+
+.composer {
+    padding: 18px;
+    margin-bottom: 18px;
+}
+
+.composer-top {
+    display: flex;
+    gap: 12px;
+}
+
+.composer-body {
+    flex: 1;
+}
+
+.composer textarea {
+    width: 100%;
+    min-height: 82px;
+    resize: none;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: white;
+    font-size: 15px;
+}
+
+.composer textarea::placeholder {
+    color: #666;
+}
+
+.composer-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid #202020;
+    padding-top: 13px;
+    margin-top: 8px;
+}
+
+.composer-tools {
+    display: flex;
+    gap: 4px;
+}
+
+/* =========================================================
+   AVATARS
+   ========================================================= */
+
+.avatar {
+    width: 43px;
+    height: 43px;
+    flex: 0 0 43px;
+    border-radius: 50%;
+    background: #222;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    font-size: 14px;
+    font-weight: 800;
+}
+
+.avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* =========================================================
+   POSTS
+   ========================================================= */
+
+.post {
+    padding: 18px;
+    margin-bottom: 15px;
+    background: #0c0c0c;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+}
+
+.post-header {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+}
+
+.post-user {
+    min-width: 0;
+    flex: 1;
+}
+
+.post-user-name {
+    font-weight: 750;
+    font-size: 14px;
+}
+
+.post-user-handle {
+    color: #777;
+    font-size: 12px;
+    margin-top: 2px;
+}
+
+.post-menu {
+    color: #777;
+}
+
+.post-content {
+    padding: 15px 2px;
+    font-size: 15px;
+    line-height: 1.65;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.post-media {
+    width: 100%;
+    overflow: hidden;
+    border-radius: 15px;
+    margin-bottom: 12px;
+    background: #050505;
+}
+
+.post-media img,
+.post-media video {
+    width: 100%;
+    display: block;
+    max-height: 650px;
+    object-fit: cover;
+}
+
+.post-meta {
+    color: #777;
+    font-size: 12px;
+    padding-bottom: 10px;
+}
+
+.post-actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    border-top: 1px solid #202020;
+    padding-top: 9px;
+}
+
+.post-action {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    background: transparent;
+    color: #888;
+    padding: 8px 10px;
+    border-radius: 9px;
+}
+
+.post-action:hover {
+    background: #171717;
+    color: white;
+}
+
+.post-action.liked {
+    color: white;
+}
+
+.post-action.saved {
+    color: white;
+}
+
+/* =========================================================
+   RIGHTBAR
+   ========================================================= */
+
+.rightbar {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    padding: 25px 18px;
+    border-left: 1px solid var(--border);
+}
+
+.right-card {
+    padding: 17px;
+    margin-bottom: 15px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: #0a0a0a;
+}
+
+.right-title {
+    font-size: 14px;
+    font-weight: 800;
+    margin-bottom: 15px;
+}
+
+.suggestion {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 9px 0;
+}
+
+.suggestion-info {
+    min-width: 0;
+    flex: 1;
+}
+
+.suggestion-name {
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.suggestion-username {
+    color: #666;
+    font-size: 11px;
+}
+
+/* =========================================================
+   SEARCH
+   ========================================================= */
+
+.search-box {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    height: 48px;
+    padding: 0 14px;
+    background: #111;
+    border: 1px solid #292929;
+    border-radius: 13px;
+    margin-bottom: 18px;
+}
+
+.search-box input {
+    flex: 1;
+    min-width: 0;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: white;
+}
+
+.search-box input::placeholder {
+    color: #666;
+}
+
+.search-result {
+    padding: 14px 0;
+    border-bottom: 1px solid #202020;
+}
+
+/* =========================================================
+   DISCOVER / SKILLS
+   ========================================================= */
+
+.section-heading {
+    font-size: 17px;
+    font-weight: 800;
+    margin: 25px 0 13px;
+}
+
+.skills-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.skill-chip {
+    padding: 8px 12px;
+    border-radius: 999px;
+    background: #151515;
+    border: 1px solid #292929;
+    color: #bbb;
+    font-size: 12px;
+}
+
+/* =========================================================
+   PROFILE
+   ========================================================= */
+
+.profile-header {
+    padding: 24px;
+}
+
+.profile-top {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+}
+
+.profile-avatar {
+    width: 88px;
+    height: 88px;
+    border-radius: 50%;
+    overflow: hidden;
+    background: #222;
+}
+
+.profile-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.profile-info {
+    min-width: 0;
+    flex: 1;
+}
+
+.profile-name {
+    font-size: 22px;
+    font-weight: 850;
+}
+
+.profile-username {
+    color: #777;
+    margin-top: 3px;
+}
+
+.profile-bio {
+    color: #aaa;
+    line-height: 1.5;
+    margin-top: 14px;
+}
+
+.profile-stats {
+    display: flex;
+    gap: 25px;
+    margin-top: 20px;
+}
+
+.profile-stat strong {
+    display: block;
+    font-size: 17px;
+}
+
+.profile-stat span {
+    color: #777;
+    font-size: 12px;
+}
+
+/* =========================================================
+   CHAT
+   ========================================================= */
+
+.chat-layout {
+    display: grid;
+    grid-template-columns: 270px minmax(0,1fr);
+    height: calc(100vh - 95px);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+}
+
+.chat-list {
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+}
+
+.chat-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 13px;
+    background: transparent;
+    color: white;
+    width: 100%;
+    text-align: left;
+}
+
+.chat-item:hover,
+.chat-item.active {
+    background: #151515;
+}
+
+.chat-window {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.chat-header {
+    padding: 15px;
+    border-bottom: 1px solid var(--border);
+    font-weight: 750;
+}
+
+.messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+}
+
+.message {
+    max-width: 75%;
+    margin-bottom: 10px;
+    padding: 10px 13px;
+    border-radius: 15px;
+    background: #191919;
+}
+
+.message.mine {
+    margin-left: auto;
+    background: white;
+    color: black;
+}
+
+.message-time {
+    margin-top: 4px;
+    font-size: 10px;
+    opacity: .55;
+}
+
+.message-form {
+    display: flex;
+    gap: 8px;
+    padding: 12px;
+    border-top: 1px solid var(--border);
+}
+
+.message-form input {
+    flex: 1;
+    min-width: 0;
+    height: 44px;
+    padding: 0 13px;
+    border-radius: 12px;
+    border: 1px solid #292929;
+    background: #111;
+    color: white;
+    outline: none;
+}
+
+/* =========================================================
+   REELS
+   ========================================================= */
+
+.reels-feed {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.reel {
+    position: relative;
+    overflow: hidden;
+    border-radius: 20px;
+    background: #080808;
+    border: 1px solid #222;
+}
+
+.reel video,
+.reel img {
+    width: 100%;
+    max-height: 760px;
+    display: block;
+    object-fit: cover;
+}
+
+/* =========================================================
+   EMPTY STATES
+   ========================================================= */
+
+.empty-state {
+    text-align: center;
+    padding: 55px 20px;
+    color: #777;
+}
+
+.empty-icon {
+    font-size: 30px;
+    color: #555;
+    margin-bottom: 10px;
+}
+
+.empty-state h3 {
+    color: #bbb;
+    margin-bottom: 7px;
+}
+
+.empty-state p {
+    font-size: 13px;
+}
+
+/* =========================================================
+   MODAL
+   ========================================================= */
+
+.modal {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(0,0,0,.78);
+    backdrop-filter: blur(12px);
+}
+
+.modal.hidden {
+    display: none;
+}
+
+.modal-card {
+    width: min(520px, 100%);
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 22px;
+    border-radius: 22px;
+    background: #101010;
+    border: 1px solid #303030;
+    box-shadow: 0 30px 100px rgba(0,0,0,.7);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.modal-title {
+    font-size: 18px;
+    font-weight: 800;
+}
+
+/* =========================================================
+   TOAST
+   ========================================================= */
+
+.toast {
+    position: fixed;
+    left: 50%;
+    bottom: 28px;
+    z-index: 200;
+    transform: translateX(-50%);
+    padding: 11px 17px;
+    border-radius: 12px;
+    background: white;
+    color: black;
+    font-size: 13px;
+    font-weight: 700;
+    box-shadow: 0 15px 40px rgba(0,0,0,.5);
+}
+
+.toast.hidden {
+    display: none;
+}
+
+/* =========================================================
+   MOBILE NAV
+   ========================================================= */
+
+.mobile-nav {
+    display: none;
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 1100px) {
+
+    .shell {
+        grid-template-columns:
+            var(--sidebar-width)
+            minmax(0,1fr);
+    }
+
+    .rightbar {
+        display: none;
+    }
+}
+
+@media (max-width: 760px) {
+
+    :root {
+        --sidebar-width: 0px;
+    }
+
+    .shell {
+        display: block;
+    }
+
+    .sidebar {
+        display: none;
+    }
+
+    .main {
+        padding: 0 13px 85px;
+    }
+
+    .topbar {
+        height: 62px;
+    }
+
+    .page {
+        padding-top: 12px;
+    }
+
+    .mobile-nav {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 80;
+        height: 65px;
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        background: rgba(5,5,5,.94);
+        backdrop-filter: blur(18px);
+        border-top: 1px solid #242424;
+    }
+
+    .mobile-nav button {
+        background: transparent;
+        color: #777;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        font-size: 10px;
+    }
+
+    .mobile-nav button.active {
+        color: white;
+    }
+
+    .mobile-nav-icon {
+        font-size: 20px;
+    }
+
+    .auth {
+        padding: 15px;
+    }
+
+    .auth-card {
+        padding: 25px 20px;
+        border-radius: 22px;
+    }
+
+    .chat-layout {
+        grid-template-columns: 1fr;
+        height: auto;
+        min-height: calc(100vh - 85px);
+    }
+
+    .chat-list {
+        display: none;
+    }
+
+    .profile-top {
+        align-items: flex-start;
+    }
+
+    .profile-avatar {
+        width: 72px;
+        height: 72px;
+    }
+}
+
+/* =========================================================
+   SMALL DEVICES
+   ========================================================= */
+
+@media (max-width: 430px) {
+
+    .post,
+    .composer,
+    .stories-card {
+        border-radius: 15px;
+    }
+
+    .profile-stats {
+        gap: 16px;
+    }
+
+    .primary {
+        padding: 0 15px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<!-- =======================================================
+     AUTH SCREEN
+     ======================================================= -->
+
+<div id="auth" class="auth">
+
+    <div class="auth-card">
+
+        <div class="brand">
+
+            <div class="brand-logo">
+                Z
+            </div>
+
+            <h1>Zilnet</h1>
+
+            <p>
+                Connect. Create. Discover.
+            </p>
+
+        </div>
+
+
+        <div class="tabs">
+
+            <button
+                id="loginTab"
+                class="active"
+                type="button"
+                onclick="setAuthMode('login')"
+            >
+                Log in
+            </button>
+
+            <button
+                id="signupTab"
+                type="button"
+                onclick="setAuthMode('signup')"
+            >
+                Create account
+            </button>
+
+        </div>
+
+
+        <form
+            id="authForm"
+            onsubmit="submitAuth(event)"
+        >
+
+            <div
+                id="displayNameGroup"
+                class="form-group hidden"
+            >
+
+                <label for="displayName">
+                    Display name
+                </label>
+
+                <input
+                    id="displayName"
+                    class="input"
+                    type="text"
+                    maxlength="60"
+                    autocomplete="name"
+                    placeholder="Your name"
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label for="username">
+                    Username
+                </label>
+
+                <input
+                    id="username"
+                    class="input"
+                    type="text"
+                    required
+                    minlength="3"
+                    maxlength="30"
+                    autocomplete="username"
+                    autocapitalize="none"
+                    placeholder="username"
+                >
+
+            </div>
+
+
+            <div
+                id="emailGroup"
+                class="form-group hidden"
+            >
+
+                <label for="email">
+                    Email
+                </label>
+
+                <input
+                    id="email"
+                    class="input"
+                    type="email"
+                    maxlength="120"
+                    autocomplete="email"
+                    placeholder="you@example.com"
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label for="password">
+                    Password
+                </label>
+
+                <input
+                    id="password"
+                    class="input"
+                    type="password"
+                    required
+                    minlength="8"
+                    autocomplete="current-password"
+                    placeholder="Minimum 8 characters"
+                >
+
+            </div>
+
+
+            <div
+                id="authMsg"
+                class="auth-message"
+                aria-live="polite"
+            ></div>
+
+
+            <button
+                id="authBtn"
+                class="primary full"
+                type="submit"
+            >
+                Continue
+            </button>
+
+
+            <button
+                id="forgotBtn"
+                class="forgot"
+                type="button"
+                onclick="openForgotPassword()"
+            >
+                Forgot password?
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<!-- =======================================================
+     MAIN APPLICATION
+     ======================================================= -->
+
+<div
+    id="app"
+    class="app hidden"
+>
+
+    <div class="shell">
+
+
+        <!-- =================================================
+             SIDEBAR
+             ================================================= -->
+
+        <aside class="sidebar">
+
+            <div class="sidebar-brand">
+
+                <div class="sidebar-brand-mark">
+                    Z
+                </div>
+
+                <span>
+                    Zilnet
+                </span>
+
+            </div>
+
+
+            <nav class="nav">
+
+                <button
+                    class="nav-btn active"
+                    id="navHome"
+                    type="button"
+                    onclick="goHome()"
+                >
+                    <span class="nav-icon">⌂</span>
+                    <span class="nav-label">Home</span>
+                </button>
+
+
+                <button
+                    class="nav-btn"
+                    id="navDiscover"
+                    type="button"
+                    onclick="goDiscover()"
+                >
+                    <span class="nav-icon">⌕</span>
+                    <span class="nav-label">Discover</span>
+                </button>
+
+
+                <button
+                    class="nav-btn"
+                    id="navCreate"
+                    type="button"
+                    onclick="goCreate()"
+                >
+                    <span class="nav-icon">＋</span>
+                    <span class="nav-label">Create</span>
+                </button>
+
+
+                <button
+                    class="nav-btn"
+                    id="navReels"
+                    type="button"
+                    onclick="goReels()"
+                >
+                    <span class="nav-icon">▶</span>
+                    <span class="nav-label">Reels</span>
+                </button>
+
+
+                <button
+                    class="nav-btn"
+                    id="navChat"
+                    type="button"
+                    onclick="goChat()"
+                >
+                    <span class="nav-icon">◌</span>
+                    <span class="nav-label">Messages</span>
+                </button>
+
+
+                <button
+                    class="nav-btn"
+                    id="navProfile"
+                    type="button"
+                    onclick="goProfile()"
+                >
+                    <span class="nav-icon">○</span>
+                    <span class="nav-label">Profile</span>
+                </button>
+
+
+                <button
+                    class="nav-btn"
+                    id="navSettings"
+                    type="button"
+                    onclick="goSettings()"
+                >
+                    <span class="nav-icon">⚙</span>
+                    <span class="nav-label">Settings</span>
+                </button>
+
+            </nav>
+
+
+            <div class="sidebar-bottom">
+
+                <div
+                    id="currentUserMini"
+                    class="user-mini"
+                >
+
+                    <div
+                        id="currentUserAvatar"
+                        class="avatar"
+                    >
+                        ?
+                    </div>
+
+                    <div class="user-mini-info">
+
+                        <div
+                            id="currentUserName"
+                            class="user-mini-name"
+                        >
+                            Zilnet user
+                        </div>
+
+                        <div
+                            id="currentUsername"
+                            class="user-mini-username"
+                        >
+                            @username
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </aside>
+
+
+        <!-- =================================================
+             MAIN CONTENT
+             ================================================= -->
+
+        <main class="main">
+
+
+            <!-- TOP BAR -->
+
+            <header class="topbar">
+
+                <div
+                    id="pageTitle"
+                    class="page-title"
+                >
+                    Home
+                </div>
+
+
+                <div class="top-actions">
+
+                    <button
+                        class="icon-btn"
+                        type="button"
+                        onclick="searchAll()"
+                        aria-label="Search"
+                    >
+                        ⌕
+                    </button>
+
+
+                    <button
+                        class="icon-btn"
+                        type="button"
+                        onclick="openNotifications()"
+                        aria-label="Notifications"
+                    >
+                        ♡
+                    </button>
+
+                </div>
+
+            </header>
+
+
+            <!-- =================================================
+                 HOME
+                 ================================================= -->
+
+            <section
+                id="page-home"
+                class="page"
+            >
+
+                <!-- STORIES — KEPT AT THE TOP -->
+
+                <div class="stories-card card">
+
+                    <div class="stories-header">
+
+                        <span class="stories-title">
+                            Stories
+                        </span>
+
+                        <button
+                            class="icon-btn"
+                            type="button"
+                            onclick="openStory()"
+                            aria-label="Create story"
+                        >
+                            ＋
+                        </button>
+
+                    </div>
+
+
+                    <div
+                        id="stories"
+                        class="stories-row"
+                    ></div>
+
+                </div>
+
+
+                <!-- COMPOSER -->
+
+                <div class="composer card">
+
+                    <div class="composer-top">
+
+                        <div
+                            id="composerAvatar"
+                            class="avatar"
+                        >
+                            ?
+                        </div>
+
+
+                        <div class="composer-body">
+
+                            <textarea
+                                id="postText"
+                                maxlength="5000"
+                                placeholder="Share something with the world…"
+                            ></textarea>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="composer-bottom">
+
+                        <div class="composer-tools">
+
+                            <button
+                                class="icon-btn"
+                                type="button"
+                                onclick="openCamera('post')"
+                                aria-label="Camera"
+                            >
+                                ◉
+                            </button>
+
+                            <button
+                                class="icon-btn"
+                                type="button"
+                                onclick="openGallery('post')"
+                                aria-label="Gallery"
+                            >
+                                ▣
+                            </button>
+
+                        </div>
+
+
+                        <button
+                            class="primary"
+                            type="button"
+                            onclick="createPost()"
+                        >
+                            Post
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <!-- HIDDEN MEDIA INPUTS -->
+
+                <input
+                    id="postCameraInput"
+                    type="file"
+                    accept="image/*,video/*"
+                    capture="environment"
+                    hidden
+                    onchange="handlePostMedia(this)"
+                >
+
+                <input
+                    id="postGalleryInput"
+                    type="file"
+                    accept="image/*,video/*"
+                    hidden
+                    onchange="handlePostMedia(this)"
+                >
+
+
+                <!-- FEED -->
+
+                <div id="feed"></div>
+
+            </section>
+
+
+            <!-- =================================================
+                 DISCOVER
+                 ================================================= -->
+
+            <section
+                id="page-discover"
+                class="page hidden"
+            >
+
+                <div class="search-box">
+
+                    <span>⌕</span>
+
+                    <input
+                        id="searchInput"
+                        type="search"
+                        placeholder="Search people, posts or user ID…"
+                        autocomplete="off"
+                        oninput="searchZilnet()"
+                    >
+
+                </div>
+
+
+                <div
+                    id="discoverResults"
+                    class="card"
+                    style="padding:0 16px;"
+                ></div>
+
+
+                <h2 class="section-heading">
+                    Skills
+                </h2>
+
+                <div
+                    id="skillsGrid"
+                    class="skills-grid"
+                >
+
+                    <button class="skill-chip" type="button">Art</button>
+                    <button class="skill-chip" type="button">Design</button>
+                    <button class="skill-chip" type="button">Coding</button>
+                    <button class="skill-chip" type="button">Music</button>
+                    <button class="skill-chip" type="button">Photography</button>
+                    <button class="skill-chip" type="button">Gaming</button>
+                    <button class="skill-chip" type="button">Science</button>
+                    <button class="skill-chip" type="button">Technology</button>
+                    <button class="skill-chip" type="button">Business</button>
+                    <button class="skill-chip" type="button">Writing</button>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 CREATE
+                 ================================================= -->
+
+            <section
+                id="page-create"
+                class="page hidden"
+            >
+
+                <div class="card" style="padding:22px;">
+
+                    <h2 style="margin-bottom:7px;">
+                        Create
+                    </h2>
+
+                    <p style="color:#777;font-size:13px;margin-bottom:22px;">
+                        Share something with the Zilnet community.
+                    </p>
+
+
+                    <button
+                        class="primary full"
+                        type="button"
+                        onclick="openCreatePost()"
+                        style="margin-bottom:10px;"
+                    >
+                        Create post
+                    </button>
+
+
+                    <button
+                        class="primary full"
+                        type="button"
+                        onclick="openStory()"
+                        style="margin-bottom:10px;"
+                    >
+                        Create story
+                    </button>
+
+
+                    <button
+                        class="primary full"
+                        type="button"
+                        onclick="openReelCreator()"
+                    >
+                        Create reel
+                    </button>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 REELS
+                 ================================================= -->
+
+            <section
+                id="page-reels"
+                class="page hidden"
+            >
+
+                <div
+                    id="reelsFeed"
+                    class="reels-feed"
+                ></div>
+
+            </section>
+
+
+            <!-- =================================================
+                 CHAT
+                 ================================================= -->
+
+            <section
+                id="page-chat"
+                class="page hidden"
+            >
+
+                <div class="chat-layout">
+
+                    <div
+                        id="chatList"
+                        class="chat-list"
+                    ></div>
+
+
+                    <div class="chat-window">
+
+                        <div
+                            id="chatHeader"
+                            class="chat-header"
+                        >
+                            Messages
+                        </div>
+
+
+                        <div
+                            id="messages"
+                            class="messages"
+                        >
+
+                            <div class="empty-state">
+
+                                <div class="empty-icon">
+                                    ◌
+                                </div>
+
+                                <h3>
+                                    Select a conversation
+                                </h3>
+
+                                <p>
+                                    Your messages will appear here.
+                                </p>
+
+                            </div>
+
+                        </div>
+
+
+                        <form
+                            id="messageForm"
+                            class="message-form"
+                            onsubmit="sendMessage(event)"
+                        >
+
+                            <input
+                                id="messageInput"
+                                type="text"
+                                maxlength="2000"
+                                placeholder="Write a message…"
+                                autocomplete="off"
+                            >
+
+                            <button
+                                class="primary"
+                                type="submit"
+                            >
+                                Send
+                            </button>
+
+                        </form>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 PROFILE
+                 ================================================= -->
+
+            <section
+                id="page-profile"
+                class="page hidden"
+            >
+
+                <div
+                    id="profileView"
+                    class="card"
+                ></div>
+
+            </section>
+
+
+            <!-- =================================================
+                 SETTINGS
+                 ================================================= -->
+
+            <section
+                id="page-settings"
+                class="page hidden"
+            >
+
+                <div class="card" style="padding:22px;">
+
+                    <h2 style="margin-bottom:20px;">
+                        Settings
+                    </h2>
+
+
+                    <div class="setting-row">
+
+                        <div>
+                            <strong>
+                                Privacy
+                            </strong>
+
+                            <p style="color:#777;font-size:12px;margin-top:4px;">
+                                Control who can see your account.
+                            </p>
+                        </div>
+
+                        <label class="switch">
+
+                            <input
+                                id="privateAccountToggle"
+                                type="checkbox"
+                                onchange="savePrivacySettings()"
+                            >
+
+                            <span></span>
+
+                        </label>
+
+                    </div>
+
+
+                    <div
+                        style="
+                            height:1px;
+                            background:#222;
+                            margin:20px 0;
+                        "
+                    ></div>
+
+
+                    <button
+                        class="primary full"
+                        type="button"
+                        onclick="openEditProfile()"
+                    >
+                        Edit profile
+                    </button>
+
+
+                    <button
+                        class="primary full"
+                        type="button"
+                        onclick="logout()"
+                        style="
+                            margin-top:10px;
+                            background:#171717;
+                            color:white;
+                            border:1px solid #333;
+                        "
+                    >
+                        Log out
+                    </button>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 NOTIFICATIONS
+                 ================================================= -->
+
+            <section
+                id="page-notifications"
+                class="page hidden"
+            >
+
+                <div
+                    id="notificationList"
+                    class="card"
+                    style="padding:0 16px;"
+                ></div>
+
+            </section>
+
+
+        </main>
+
+
+        <!-- =================================================
+             RIGHT SIDEBAR
+             ================================================= -->
+
+        <aside class="rightbar">
+
+            <div class="right-card">
+
+                <div class="right-title">
+                    Find people
+                </div>
+
+
+                <div
+                    id="suggestions"
+                ></div>
+
+            </div>
+
+
+            <div class="right-card">
+
+                <div class="right-title">
+                    Zilnet
+                </div>
+
+                <p style="
+                    color:#666;
+                    font-size:12px;
+                    line-height:1.6;
+                ">
+                    Discover people, share your work
+                    and build your network.
+                </p>
+
+            </div>
+
+        </aside>
+
+    </div>
+
+
+    <!-- =====================================================
+         MOBILE NAVIGATION
+         ===================================================== -->
+
+    <nav class="mobile-nav">
+
+        <button
+            id="mobileHome"
+            class="active"
+            type="button"
+            onclick="goHome()"
+        >
+            <span class="mobile-nav-icon">⌂</span>
+            Home
+        </button>
+
+
+        <button
+            id="mobileDiscover"
+            type="button"
+            onclick="goDiscover()"
+        >
+            <span class="mobile-nav-icon">⌕</span>
+            Search
+        </button>
+
+
+        <button
+            id="mobileCreate"
+            type="button"
+            onclick="goCreate()"
+        >
+            <span class="mobile-nav-icon">＋</span>
+            Create
+        </button>
+
+
+        <button
+            id="mobileReels"
+            type="button"
+            onclick="goReels()"
+        >
+            <span class="mobile-nav-icon">▶</span>
+            Reels
+        </button>
+
+
+        <button
+            id="mobileProfile"
+            type="button"
+            onclick="goProfile()"
+        >
+            <span class="mobile-nav-icon">○</span>
+            Profile
+        </button>
+
+    </nav>
+
+</div>
+
+
+<!-- =======================================================
+     GLOBAL MODAL
+     ======================================================= -->
+
+<div
+    id="modal"
+    class="modal hidden"
+>
+
+    <div
+        id="modalCard"
+        class="modal-card"
+    ></div>
+
+</div>
+
+
+<!-- =======================================================
+     TOAST
+     ======================================================= -->
+
+<div
+    id="toast"
+    class="toast hidden"
+    aria-live="polite"
+></div>
+
+
+<!-- =======================================================
+     JAVASCRIPT
+     PART 2 GOES HERE
+     ======================================================= -->
+
+<script>
 
