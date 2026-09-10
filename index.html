@@ -5299,5 +5299,39 @@ async function logout(){
 
 </script>
 
+   <script>
+async function zilnetAPI(path, options = {}) {
+    const response = await fetch(path, {
+        credentials: "include",
+        ...options,
+        headers: {
+            "Content-Type": "application/json",
+            ...(options.headers || {})
+        }
+    });
+
+    const data = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+        throw new Error(data.error || "Something went wrong");
+    }
+
+    return data;
+}
+
+async function checkZilnetSession() {
+    try {
+        const data = await zilnetAPI("/api/me");
+        console.log("Zilnet session:", data);
+        return data;
+    } catch (error) {
+        console.log("Not logged in");
+        return null;
+    }
+}
+
+checkZilnetSession();
+</script>
+
 </body>
 </html>
