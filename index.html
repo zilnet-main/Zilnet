@@ -2176,3 +2176,3812 @@ textarea.input {
 
 <script>
 
+/* =========================================================
+   ZILNET — PART 2
+   CORE FRONTEND JAVASCRIPT
+   ========================================================= */
+
+"use strict";
+
+/* =========================
+   STATE
+   ========================= */
+
+const state = {
+    authMode: "login",
+    currentUser: null,
+    currentPage: "home",
+    currentChatId: null,
+    searchTimer: null,
+    postMediaFile: null,
+    storyMediaFile: null,
+    reelMediaFile: null
+};
+
+const $ = id => document.getElementById(id);
+
+
+/* =========================
+   API
+   ========================= */
+
+async function api(path, options = {}) {
+
+    const config = {
+        credentials: "include",
+        ...options,
+        headers: {
+            ...(options.body instanceof FormData
+                ? {}
+                : { "Content-Type": "application/json" }),
+            ...(options.headers || {})
+        }
+    };
+
+    const response = await fetch(
+        path.startsWith("/api/")
+            ? path
+            : "/api" + path,
+        config
+    );
+
+    let data = {};
+
+    try {
+        data = await response.json();
+    } catch {
+        data = {};
+    }
+
+    if (!response.ok) {
+        throw new Error(
+            data.error ||
+            `Request failed (${response.status})`
+        );
+    }
+
+    return data;
+}
+
+
+/* =========================
+   ESCAPE HTML
+   ========================= */
+
+function esc(value) {
+
+    return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+
+/* =========================
+   AVATAR
+   ========================= */
+
+function avatar(url, name = "?") {
+
+    const letter =
+        String(name || "?")
+            .trim()
+            .charAt(0)
+            .toUpperCase() || "?";
+
+    if (url) {
+        return `
+            <img
+                src="${esc(url)}"
+                alt=""
+                loading="lazy"
+            >
+        `;
+    }
+
+    return esc(letter);
+}
+
+
+/* =========================
+   DATE
+   ========================= */
+
+function formatDate(date) {
+
+    if (!date) return "";
+
+    const value = new Date(date);
+
+    if (Number.isNaN(value.getTime())) {
+        return "";
+    }
+
+    return value.toLocaleString([], {
+        dateStyle: "medium",
+        timeStyle: "short"
+    });
+}
+
+
+/* =========================
+   TOAST
+   ========================= */
+
+let toastTimer;
+
+function toast(message) {
+
+    const element = $("toast");
+
+    if (!element) return;
+
+    element.textContent = message;
+
+    element.classList.remove("hidden");
+
+    clearTimeout(toastTimer);
+
+    toastTimer = setTimeout(() => {
+        element.classList.add("hidden");
+    }, 3000);
+}
+
+
+/* =========================================================
+   AUTH
+   ========================================================= */
+
+function setAuthMode(mode) {
+
+    state.authMode =
+        mode === "signup"
+            ? "signup"
+            : "login";
+
+    const loginTab = $("loginTab");
+    const signupTab = $("signupTab");
+
+    const displayNameGroup =
+        $("displayNameGroup");
+
+    const emailGroup =
+        $("emailGroup");
+
+    const forgotBtn =
+        $("forgotBtn");
+
+    const authBtn =
+        $("authBtn");
+
+    if (loginTab) {
+        loginTab.classList.toggle(
+            "active",
+            state.authMode === "login"
+        );
+    }
+
+    if (signupTab) {
+        signupTab.classList.toggle(
+            "active",
+            state.authMode === "signup"
+        );
+    }
+
+    if (displayNameGroup) {
+        displayNameGroup.classList.toggle(
+            "hidden",
+            state.authMode !== "signup"
+        );
+    }
+
+    if (emailGroup) {
+        emailGroup.classList.toggle(
+            "hidden",
+            state.authMode !== "signup"
+        );
+    }
+
+    if (forgotBtn) {
+        forgotBtn.classList.toggle(
+            "hidden",
+            state.authMode !== "login"
+        );
+    }
+
+    if (authBtn) {
+        authBtn.textContent =
+            state.authMode === "signup"
+                ? "Create account"
+                : "Continue";
+    }
+
+    const password = $("password");
+
+    if (password) {
+        password.autocomplete =
+            state.authMode === "signup"
+                ? "new-password"
+                : "current-password";
+    }
+
+    const message = $("authMsg");
+
+    if (message) {
+        message.textContent = "";
+    }
+}
+
+
+/* =========================
+   LOGIN / SIGNUP
+   ========================= */
+
+async function submitAuth(event) {
+
+    event.preventDefault();
+
+    const username =
+        $("username")?.value.trim();
+
+    const password =
+        $("password")?.value || "";
+
+    const authMsg =
+        $("authMsg");
+
+    const authBtn =
+        $("authBtn");
+
+    if (!username || !password) {
+        toast("Enter your username and password.");
+        return;
+    }
+
+    if (password.length < 8) {
+        toast("Password must be at least 8 characters.");
+        return;
+    }
+
+    try {
+
+        if (authMsg) {
+            authMsg.textContent =
+                state.authMode === "signup"
+                    ? "Creating your account..."
+                    : "Signing you in...";
+        }
+
+        if (authBtn) {
+            authBtn.disabled = true;
+            authBtn.textContent = "Please wait...";
+        }
+
+
+        /* =====================
+           SIGN UP
+           ===================== */
+
+        if (state.authMode === "signup") {
+
+            const displayName =
+                $("displayName")?.value.trim() ||
+                username;
+
+            const email =
+                $("email")?.value.trim() ||
+                null;
+
+            await api("/signup", {
+                method: "POST",
+                body: JSON.stringify({
+                    username,
+                    password,
+                    display_name: displayName,
+                    email
+                })
+            });
+
+            toast("Account created.");
+
+
+        /* =====================
+           LOGIN
+           ===================== */
+
+        } else {
+
+            await api("/login", {
+                method: "POST",
+                body: JSON.stringify({
+                    username,
+                    password
+                })
+            });
+
+            toast("Welcome back.");
+        }
+
+
+        /* =====================
+           LOAD USER
+           ===================== */
+
+        const me =
+            await api("/me");
+
+        state.currentUser =
+            me.user || null;
+
+        await enterApp();
+
+
+    } catch (error) {
+
+        console.error("Authentication:", error);
+
+        if (authMsg) {
+            authMsg.textContent =
+                error.message ||
+                "Authentication failed.";
+        }
+
+        toast(
+            error.message ||
+            "Authentication failed."
+        );
+
+    } finally {
+
+        if (authBtn) {
+            authBtn.disabled = false;
+
+            authBtn.textContent =
+                state.authMode === "signup"
+                    ? "Create account"
+                    : "Continue";
+        }
+    }
+}
+
+
+/* =========================
+   ENTER APP
+   ========================= */
+
+async function enterApp() {
+
+    const auth = $("auth");
+    const app = $("app");
+
+    if (auth) {
+        auth.classList.add("hidden");
+    }
+
+    if (app) {
+        app.classList.remove("hidden");
+    }
+
+    updateCurrentUserUI();
+
+    goHome();
+
+    await Promise.allSettled([
+        loadFeed(),
+        loadStories(),
+        loadSuggestions()
+    ]);
+
+    handleURLRoute();
+}
+
+
+/* =========================
+   BOOT
+   ========================= */
+
+async function boot() {
+
+    try {
+
+        const data =
+            await api("/me");
+
+        state.currentUser =
+            data.user || null;
+
+        await enterApp();
+
+    } catch {
+
+        state.currentUser = null;
+
+        const app = $("app");
+        const auth = $("auth");
+
+        if (app) {
+            app.classList.add("hidden");
+        }
+
+        if (auth) {
+            auth.classList.remove("hidden");
+        }
+
+        setAuthMode("login");
+    }
+}
+
+
+/* =========================
+   LOGOUT
+   ========================= */
+
+async function logout() {
+
+    try {
+        await api("/logout", {
+            method: "POST"
+        });
+    } catch (error) {
+        console.error(error);
+    }
+
+    state.currentUser = null;
+
+    const app = $("app");
+    const auth = $("auth");
+
+    if (app) {
+        app.classList.add("hidden");
+    }
+
+    if (auth) {
+        auth.classList.remove("hidden");
+    }
+
+    setAuthMode("login");
+
+    if ($("password")) {
+        $("password").value = "";
+    }
+
+    toast("Logged out.");
+}
+
+
+/* =========================================================
+   CURRENT USER UI
+   ========================================================= */
+
+function updateCurrentUserUI() {
+
+    const user =
+        state.currentUser;
+
+    if (!user) return;
+
+    const name =
+        user.display_name ||
+        user.username ||
+        "Zilnet user";
+
+    const username =
+        user.username ||
+        "";
+
+    const avatarHTML =
+        avatar(
+            user.avatar_url,
+            name
+        );
+
+    const miniAvatar =
+        $("currentUserAvatar");
+
+    const composerAvatar =
+        $("composerAvatar");
+
+    if (miniAvatar) {
+        miniAvatar.innerHTML =
+            avatarHTML;
+    }
+
+    if (composerAvatar) {
+        composerAvatar.innerHTML =
+            avatarHTML;
+    }
+
+    const nameElement =
+        $("currentUserName");
+
+    const usernameElement =
+        $("currentUsername");
+
+    if (nameElement) {
+        nameElement.textContent = name;
+    }
+
+    if (usernameElement) {
+        usernameElement.textContent =
+            "@" + username;
+    }
+}
+
+
+/* =========================================================
+   NAVIGATION
+   ========================================================= */
+
+function showPage(page) {
+
+    const pages = [
+        "home",
+        "discover",
+        "create",
+        "reels",
+        "chat",
+        "profile",
+        "settings",
+        "notifications"
+    ];
+
+    pages.forEach(name => {
+
+        const element =
+            $("page-" + name);
+
+        if (!element) return;
+
+        element.classList.toggle(
+            "hidden",
+            name !== page
+        );
+    });
+
+
+    /* =====================
+       SIDEBAR
+       ===================== */
+
+    const navMap = {
+        home: "navHome",
+        discover: "navDiscover",
+        create: "navCreate",
+        reels: "navReels",
+        chat: "navChat",
+        profile: "navProfile",
+        settings: "navSettings"
+    };
+
+    Object.entries(navMap).forEach(
+        ([name, id]) => {
+
+            const element = $(id);
+
+            if (element) {
+                element.classList.toggle(
+                    "active",
+                    name === page
+                );
+            }
+        }
+    );
+
+
+    /* =====================
+       MOBILE
+       ===================== */
+
+    const mobileMap = {
+        home: "mobileHome",
+        discover: "mobileDiscover",
+        create: "mobileCreate",
+        reels: "mobileReels",
+        profile: "mobileProfile"
+    };
+
+    Object.entries(mobileMap).forEach(
+        ([name, id]) => {
+
+            const element = $(id);
+
+            if (element) {
+                element.classList.toggle(
+                    "active",
+                    name === page
+                );
+            }
+        }
+    );
+
+
+    const titles = {
+        home: "Home",
+        discover: "Discover",
+        create: "Create",
+        reels: "Reels",
+        chat: "Messages",
+        profile: "Profile",
+        settings: "Settings",
+        notifications: "Notifications"
+    };
+
+    const title =
+        $("pageTitle");
+
+    if (title) {
+        title.textContent =
+            titles[page] || "Zilnet";
+    }
+
+    state.currentPage = page;
+
+    window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+    });
+}
+
+
+function goHome() {
+
+    showPage("home");
+
+    loadFeed();
+    loadStories();
+}
+
+
+function goDiscover() {
+
+    showPage("discover");
+
+    loadSuggestions();
+}
+
+
+function goCreate() {
+
+    showPage("create");
+}
+
+
+function openCreate() {
+
+    goCreate();
+}
+
+
+function openCreatePost() {
+
+    goCreate();
+
+    setTimeout(() => {
+
+        const text =
+            $("postText");
+
+        if (text) {
+            text.focus();
+        }
+
+    }, 50);
+}
+
+
+function goReels() {
+
+    showPage("reels");
+
+    loadReels();
+}
+
+
+function goChat() {
+
+    showPage("chat");
+
+    loadChats();
+}
+
+
+function goProfile() {
+
+    showPage("profile");
+
+    renderMyProfile();
+}
+
+
+function goSettings() {
+
+    showPage("settings");
+
+    loadPrivacySettings();
+}
+
+
+function openSettings() {
+
+    goSettings();
+}
+
+
+function searchAll() {
+
+    goDiscover();
+
+    setTimeout(() => {
+
+        const input =
+            $("searchInput");
+
+        if (input) {
+            input.focus();
+        }
+
+    }, 100);
+}
+
+
+/* =========================================================
+   FEED
+   ========================================================= */
+
+async function loadFeed() {
+
+    const feed =
+        $("feed");
+
+    if (!feed) return;
+
+    feed.innerHTML = `
+        <div class="empty-state">
+            Loading posts...
+        </div>
+    `;
+
+    try {
+
+        const data =
+            await api("/feed");
+
+        renderFeed(
+            data.posts || []
+        );
+
+    } catch (error) {
+
+        console.error("Feed:", error);
+
+        feed.innerHTML = `
+            <div class="empty-state">
+                <div class="empty-icon">!</div>
+                <h3>Couldn't load posts</h3>
+                <p>${esc(error.message)}</p>
+            </div>
+        `;
+    }
+}
+
+
+function renderFeed(posts) {
+
+    const feed =
+        $("feed");
+
+    if (!feed) return;
+
+    if (!posts.length) {
+
+        feed.innerHTML = `
+            <div class="card empty-state">
+                <div class="empty-icon">◌</div>
+                <h3>No posts yet</h3>
+                <p>Be the first person to share something.</p>
+            </div>
+        `;
+
+        return;
+    }
+
+    feed.innerHTML =
+        posts.map(renderPost).join("");
+}
+
+
+function renderPost(post) {
+
+    const username =
+        post.username || "user";
+
+    const displayName =
+        post.display_name ||
+        username;
+
+    const likeCount =
+        Number(post.like_count || 0);
+
+    const commentCount =
+        Number(post.comment_count || 0);
+
+    const media =
+        post.media_url
+            ? renderMedia(post.media_url)
+            : "";
+
+    return `
+        <article
+            class="post"
+            data-post-id="${Number(post.id)}"
+        >
+
+            <div class="post-header">
+
+                <button
+                    class="avatar"
+                    type="button"
+                    onclick="openUserProfile(${Number(post.user_id)})"
+                >
+                    ${avatar(
+                        post.avatar_url,
+                        displayName
+                    )}
+                </button>
+
+                <div class="post-user">
+
+                    <div class="post-user-name">
+                        ${esc(displayName)}
+                    </div>
+
+                    <div class="post-user-handle">
+                        @${esc(username)}
+                    </div>
+
+                </div>
+
+                <button
+                    class="icon-btn post-menu"
+                    type="button"
+                    onclick="postMenu(${Number(post.id)}, ${Number(post.user_id)})"
+                >
+                    ⋯
+                </button>
+
+            </div>
+
+            ${
+                post.content
+                    ? `
+                        <div class="post-content">
+                            ${esc(post.content)}
+                        </div>
+                    `
+                    : ""
+            }
+
+            ${media}
+
+            <div class="post-meta">
+                ${formatDate(post.created_at)}
+            </div>
+
+            <div class="post-actions">
+
+                <button
+                    class="post-action"
+                    type="button"
+                    onclick="toggleLike(this, ${Number(post.id)})"
+                >
+                    ♡
+                    <span>
+                        ${likeCount}
+                    </span>
+                </button>
+
+                <button
+                    class="post-action"
+                    type="button"
+                    onclick="loadComments(${Number(post.id)})"
+                >
+                    ◌
+                    <span>
+                        ${commentCount}
+                    </span>
+                </button>
+
+                <button
+                    class="post-action"
+                    type="button"
+                    onclick="sharePost(${Number(post.id)})"
+                >
+                    ↗
+                </button>
+
+                <button
+                    class="post-action"
+                    type="button"
+                    onclick="toggleSavePost(${Number(post.id)}, this)"
+                >
+                    ♧
+                </button>
+
+            </div>
+
+            <div
+                id="comments-${Number(post.id)}"
+                class="comments"
+            ></div>
+
+        </article>
+    `;
+}
+
+
+function renderMedia(url) {
+
+    const safeUrl =
+        esc(url);
+
+    const lower =
+        String(url).toLowerCase();
+
+    if (
+        lower.includes(".mp4") ||
+        lower.includes(".webm") ||
+        lower.includes(".mov")
+    ) {
+
+        return `
+            <div class="post-media">
+                <video
+                    src="${safeUrl}"
+                    controls
+                    playsinline
+                    preload="metadata"
+                ></video>
+            </div>
+        `;
+    }
+
+    return `
+        <div class="post-media">
+            <img
+                src="${safeUrl}"
+                alt="Post media"
+                loading="lazy"
+            >
+        </div>
+    `;
+}
+
+
+/* =========================================================
+   POST MENU
+   ========================================================= */
+
+function postMenu(postId, ownerId) {
+
+    const isOwner =
+        state.currentUser &&
+        Number(state.currentUser.id) ===
+        Number(ownerId);
+
+    const options = isOwner
+        ? `
+            <button
+                class="primary full"
+                type="button"
+                onclick="deletePost(${Number(postId)}); closeModal();"
+            >
+                Delete post
+            </button>
+
+            <button
+                class="primary full"
+                type="button"
+                onclick="sharePost(${Number(postId)}); closeModal();"
+                style="margin-top:10px;"
+            >
+                Share post
+            </button>
+        `
+        : `
+            <button
+                class="primary full"
+                type="button"
+                onclick="sharePost(${Number(postId)}); closeModal();"
+            >
+                Share post
+            </button>
+
+            <button
+                class="primary full"
+                type="button"
+                onclick="copyText(location.href); closeModal();"
+                style="margin-top:10px;"
+            >
+                Copy link
+            </button>
+        `;
+
+    openModal(`
+        <div class="modal-header">
+            <div class="modal-title">
+                Post options
+            </div>
+
+            <button
+                class="icon-btn"
+                type="button"
+                onclick="closeModal()"
+            >
+                ×
+            </button>
+        </div>
+
+        ${options}
+    `);
+}
+
+
+/* =========================================================
+   DELETE POST
+   ========================================================= */
+
+async function deletePost(postId) {
+
+    if (!confirm("Delete this post?")) {
+        return;
+    }
+
+    try {
+
+        await api(
+            `/posts/${Number(postId)}`,
+            {
+                method: "DELETE"
+            }
+        );
+
+        toast("Post deleted.");
+
+        await loadFeed();
+
+    } catch (error) {
+
+        toast(error.message);
+    }
+}
+
+
+/* =========================================================
+   LIKE
+   ========================================================= */
+
+async function toggleLike(button, postId) {
+
+    if (!state.currentUser) {
+        toast("Log in to like posts.");
+        return;
+    }
+
+    try {
+
+        const data =
+            await api(
+                `/posts/${Number(postId)}/like`,
+                {
+                    method: "POST"
+                }
+            );
+
+        const count =
+            button.querySelector("span");
+
+        let current =
+            Number(
+                count?.textContent || 0
+            );
+
+        if (data.liked) {
+
+            button.classList.add("liked");
+
+            current++;
+
+        } else {
+
+            button.classList.remove("liked");
+
+            current =
+                Math.max(
+                    0,
+                    current - 1
+                );
+        }
+
+        if (count) {
+            count.textContent =
+                current;
+        }
+
+        const icon =
+            button.firstChild;
+
+        if (icon) {
+            icon.textContent =
+                data.liked
+                    ? "♥"
+                    : "♡";
+        }
+
+    } catch (error) {
+
+        toast(error.message);
+    }
+}
+
+
+/* =========================================================
+   CREATE POST
+   ========================================================= */
+
+async function createPost() {
+
+    const input =
+        $("postText");
+
+    if (!input) return;
+
+    const content =
+        input.value.trim();
+
+    if (!content) {
+        toast("Write something first.");
+        input.focus();
+        return;
+    }
+
+    try {
+
+        const mediaFile =
+            state.postMediaFile;
+
+        let mediaUrl = null;
+
+        if (mediaFile) {
+
+            toast("Uploading media...");
+
+            mediaUrl =
+                await uploadPostMedia(
+                    mediaFile
+                );
+
+            if (!mediaUrl) {
+                return;
+            }
+        }
+
+        await api("/posts", {
+            method: "POST",
+            body: JSON.stringify({
+                content,
+                media_url: mediaUrl
+            })
+        });
+
+        input.value = "";
+
+        state.postMediaFile = null;
+
+        const preview =
+            $("postMediaPreview");
+
+        if (preview) {
+            preview.innerHTML = "";
+            preview.style.display = "none";
+        }
+
+        toast("Post published.");
+
+        goHome();
+
+    } catch (error) {
+
+        toast(error.message);
+    }
+}
+
+
+/* =========================================================
+   COMMENTS
+   ========================================================= */
+
+async function loadComments(postId) {
+
+    const container =
+        $(`comments-${Number(postId)}`);
+
+    if (!container) return;
+
+    if (container.dataset.loaded !== "true") {
+
+        container.innerHTML = `
+            <div style="padding:12px;color:#777;">
+                Loading comments...
+            </div>
+        `;
+
+        try {
+
+            const data =
+                await api(
+                    `/posts/${Number(postId)}/comments`
+                );
+
+            renderComments(
+                postId,
+                data.comments || []
+            );
+
+            container.dataset.loaded = "true";
+
+        } catch (error) {
+
+            container.innerHTML = `
+                <div style="padding:12px;color:#777;">
+                    ${esc(error.message)}
+                </div>
+            `;
+
+            return;
+        }
+    }
+
+    openCommentModal(postId);
+}
+
+
+function renderComments(postId, comments) {
+
+    const container =
+        $(`comments-${Number(postId)}`);
+
+    if (!container) return;
+
+    if (!comments.length) {
+        container.innerHTML = "";
+        return;
+    }
+
+    container.innerHTML =
+        comments.map(comment => `
+            <div style="
+                padding:8px 0;
+                border-top:1px solid #202020;
+                font-size:13px;
+            ">
+                <strong>
+                    @${esc(comment.username)}
+                </strong>
+
+                <span style="color:#aaa;">
+                    ${esc(comment.content)}
+                </span>
+            </div>
+        `).join("");
+}
+
+
+function openCommentModal(postId) {
+
+    openModal(`
+        <div class="modal-header">
+
+            <div class="modal-title">
+                Comment
+            </div>
+
+            <button
+                class="icon-btn"
+                type="button"
+                onclick="closeModal()"
+            >
+                ×
+            </button>
+
+        </div>
+
+        <form
+            onsubmit="submitComment(event, ${Number(postId)})"
+        >
+
+            <textarea
+                id="commentInput"
+                class="input"
+                maxlength="1000"
+                placeholder="Write a comment..."
+                required
+            ></textarea>
+
+            <button
+                class="primary full"
+                type="submit"
+                style="margin-top:12px;"
+            >
+                Comment
+            </button>
+
+        </form>
+    `);
+}
+
+
+async function submitComment(event, postId) {
+
+    event.preventDefault();
+
+    const input =
+        $("commentInput");
+
+    const content =
+        input?.value.trim();
+
+    if (!content) return;
+
+    try {
+
+        await api("/comments", {
+            method: "POST",
+            body: JSON.stringify({
+                post_id: Number(postId),
+                content
+            })
+        });
+
+        closeModal();
+
+        toast("Comment added.");
+
+        await loadFeed();
+
+    } catch (error) {
+
+        toast(error.message);
+    }
+}
+
+
+/* =========================================================
+   MODAL
+   ========================================================= */
+
+function openModal(content) {
+
+    const modal =
+        $("modal");
+
+    const card =
+        $("modalCard");
+
+    if (!modal || !card) return;
+
+    card.innerHTML = content;
+
+    modal.classList.remove("hidden");
+
+    modal.classList.add("open");
+}
+
+
+function closeModal() {
+
+    const modal =
+        $("modal");
+
+    if (!modal) return;
+
+    modal.classList.remove("open");
+    modal.classList.add("hidden");
+}
+
+
+/* =========================================================
+   STORIES
+   ========================================================= */
+
+async function loadStories() {
+
+    const container =
+        $("stories");
+
+    if (!container) return;
+
+    try {
+
+        const data =
+            await api("/stories");
+
+        renderStories(
+            data.stories || []
+        );
+
+    } catch (error) {
+
+        console.error("Stories:", error);
+
+        container.innerHTML = "";
+    }
+}
+
+
+function renderStories(stories) {
+
+    const container =
+        $("stories");
+
+    if (!container) return;
+
+    const createButton = `
+        <button
+            class="story"
+            type="button"
+            onclick="openStory()"
+        >
+            <div class="story-avatar">
+                <div class="story-avatar-inner">
+                    +
+                </div>
+            </div>
+
+            <div class="story-name">
+                Your story
+            </div>
+        </button>
+    `;
+
+    const storyButtons =
+        stories.map(story => `
+
+            <button
+                class="story"
+                type="button"
+                onclick="viewStory(${Number(story.id)})"
+            >
+
+                <div class="story-avatar">
+
+                    <div class="story-avatar-inner">
+                        ${avatar(
+                            story.avatar_url,
+                            story.display_name ||
+                            story.username
+                        )}
+                    </div>
+
+                </div>
+
+                <div class="story-name">
+                    ${esc(
+                        story.display_name ||
+                        story.username
+                    )}
+                </div>
+
+            </button>
+
+        `).join("");
+
+    container.innerHTML =
+        createButton +
+        storyButtons;
+}
+
+
+function openStory() {
+
+    openModal(`
+
+        <div class="modal-header">
+
+            <div class="modal-title">
+                Create story
+            </div>
+
+            <button
+                class="icon-btn"
+                type="button"
+                onclick="closeModal()"
+            >
+                ×
+            </button>
+
+        </div>
+
+
+        <textarea
+            id="storyContent"
+            class="input"
+            maxlength="2000"
+            placeholder="Share something..."
+        ></textarea>
+
+
+        <div style="
+            display:flex;
+            gap:8px;
+            margin-top:12px;
+        ">
+
+            <button
+                class="primary"
+                type="button"
+                onclick="openCamera('story')"
+            >
+                Camera
+            </button>
+
+            <button
+                class="primary"
+                type="button"
+                onclick="openGallery('story')"
+            >
+                Gallery
+            </button>
+
+        </div>
+
+
+        <div
+            id="storyMediaPreview"
+            style="
+                display:none;
+                margin-top:12px;
+            "
+        ></div>
+
+
+        <input
+            id="storyCameraInput"
+            type="file"
+            accept="image/*,video/*"
+            capture="environment"
+            hidden
+            onchange="handleStoryMedia(this)"
+        >
+
+        <input
+            id="storyGalleryInput"
+            type="file"
+            accept="image/*,video/*"
+            hidden
+            onchange="handleStoryMedia(this)"
+        >
+
+
+        <select
+            id="storyVisibility"
+            class="input"
+            style="margin-top:12px;"
+        >
+            <option value="public">
+                Public
+            </option>
+
+            <option value="followers">
+                Followers only
+            </option>
+        </select>
+
+
+        <button
+            class="primary full"
+            type="button"
+            onclick="createStory()"
+            style="margin-top:12px;"
+        >
+            Post story
+        </button>
+    `);
+}
+
+
+async function createStory() {
+
+    const content =
+        $("storyContent")?.value.trim();
+
+    const visibility =
+        $("storyVisibility")?.value ||
+        "public";
+
+    if (!content && !state.storyMediaFile) {
+        toast("Add text or media to your story.");
+        return;
+    }
+
+    try {
+
+        let mediaUrl = null;
+
+        if (state.storyMediaFile) {
+
+            toast("Uploading story...");
+
+            mediaUrl =
+                await uploadStoryMedia(
+                    state.storyMediaFile
+                );
+
+            if (!mediaUrl) return;
+        }
+
+        await api("/stories", {
+            method: "POST",
+            body: JSON.stringify({
+                content:
+                    content ||
+                    "",
+                visibility,
+                media_url: mediaUrl
+            })
+        });
+
+        state.storyMediaFile = null;
+
+        closeModal();
+
+        toast("Story published.");
+
+        await loadStories();
+
+    } catch (error) {
+
+        toast(error.message);
+    }
+}
+
+
+async function viewStory(storyId) {
+
+    try {
+
+        const data =
+            await api(
+                `/stories/${Number(storyId)}`
+            );
+
+        const story =
+            data.story;
+
+        openModal(`
+
+            <div class="modal-header">
+
+                <div class="modal-title">
+                    ${esc(
+                        story.display_name ||
+                        story.username
+                    )}
+                </div>
+
+                <button
+                    class="icon-btn"
+                    type="button"
+                    onclick="closeModal()"
+                >
+                    ×
+                </button>
+
+            </div>
+
+            ${
+                story.content
+                    ? `
+                        <div style="
+                            line-height:1.7;
+                            color:#ddd;
+                        ">
+                            ${esc(story.content)}
+                        </div>
+                    `
+                    : ""
+            }
+
+            ${
+                story.media_url
+                    ? renderMedia(
+                        story.media_url
+                    )
+                    : ""
+            }
+
+            <div style="
+                color:#666;
+                font-size:11px;
+                margin-top:12px;
+            ">
+                ${formatDate(story.created_at)}
+            </div>
+
+        `);
+
+    } catch (error) {
+
+        toast(error.message);
+    }
+}
+
+
+/* =========================================================
+   SEARCH
+   ========================================================= */
+
+function searchZilnet() {
+
+    clearTimeout(
+        state.searchTimer
+    );
+
+    state.searchTimer =
+        setTimeout(
+            performSearch,
+            250
+        );
+}
+
+
+async function performSearch() {
+
+    const input =
+        $("searchInput");
+
+    const container =
+        $("discoverResults");
+
+    if (!input || !container) return;
+
+    const query =
+        input.value.trim();
+
+    if (!query) {
+
+        container.innerHTML = `
+            <div class="empty-state">
+                <div class="empty-icon">⌕</div>
+                <h3>Search Zilnet</h3>
+                <p>
+                    Find people and posts.
+                </p>
+            </div>
+        `;
+
+        return;
+    }
+
+    try {
+
+        const data =
+            await api(
+                `/search?q=${encodeURIComponent(query)}`
+            );
+
+        renderSearchResults(data);
+
+    } catch (error) {
+
+        container.innerHTML = `
+            <div class="empty-state">
+                ${esc(error.message)}
+            </div>
+        `;
+    }
+}
+
+
+function renderSearchResults(data) {
+
+    const container =
+        $("discoverResults");
+
+    if (!container) return;
+
+    const users =
+        data.users || [];
+
+    const posts =
+        data.posts || [];
+
+    if (!users.length && !posts.length) {
+
+        container.innerHTML = `
+            <div class="empty-state">
+                <div class="empty-icon">⌕</div>
+                <h3>No results</h3>
+                <p>Try another search.</p>
+            </div>
+        `;
+
+        return;
+    }
+
+    container.innerHTML = `
+
+        ${
+            users.length
+                ? `
+                    <div style="
+                        padding-top:16px;
+                        font-weight:800;
+                    ">
+                        People
+                    </div>
+
+                    ${users.map(user => `
+
+                        <button
+                            class="search-result"
+                            type="button"
+                            onclick="openUserProfile(${Number(user.id)})"
+                            style="
+                                width:100%;
+                                display:flex;
+                                align-items:center;
+                                gap:11px;
+                                background:transparent;
+                                color:white;
+                                text-align:left;
+                            "
+                        >
+
+                            <div class="avatar">
+                                ${avatar(
+                                    user.avatar_url,
+                                    user.display_name ||
+                                    user.username
+                                )}
+                            </div>
+
+                            <div style="min-width:0;">
+
+                                <strong>
+                                    ${esc(
+                                        user.display_name ||
+                                        user.username
+                                    )}
+                                </strong>
+
+                                <div style="
+                                    color:#666;
+                                    font-size:12px;
+                                ">
+                                    @${esc(user.username)}
+                                </div>
+
+                            </div>
+
+                        </button>
+
+                    `).join("")}
+                `
+                : ""
+        }
+
+
+        ${
+            posts.length
+                ? `
+                    <div style="
+                        padding:18px 0 5px;
+                        font-weight:800;
+                    ">
+                        Posts
+                    </div>
+
+                    ${posts.map(post => `
+
+                        <div
+                            class="search-result"
+                        >
+
+                            <strong>
+                                @${esc(post.username)}
+                            </strong>
+
+                            <div style="
+                                color:#aaa;
+                                margin-top:5px;
+                                line-height:1.5;
+                            ">
+                                ${esc(post.content)}
+                            </div>
+
+                        </div>
+
+                    `).join("")}
+                `
+                : ""
+        }
+
+    `;
+}
+
+
+async function searchByUserId(userId) {
+
+    if (!userId?.trim()) {
+        toast("Enter a username or user ID.");
+        return;
+    }
+
+    const input =
+        $("searchInput");
+
+    if (input) {
+        input.value =
+            userId.trim();
+    }
+
+    goDiscover();
+
+    await performSearch();
+}
+
+
+/* =========================================================
+   USER PROFILE
+   ========================================================= */
+
+async function openUserProfile(userId) {
+
+    try {
+
+        const data =
+            await api(
+                `/users/${Number(userId)}`
+            );
+
+        const user =
+            data.user;
+
+        openModal(`
+
+            <div class="modal-header">
+
+                <div class="modal-title">
+                    Profile
+                </div>
+
+                <button
+                    class="icon-btn"
+                    type="button"
+                    onclick="closeModal()"
+                >
+                    ×
+                </button>
+
+            </div>
+
+
+            <div style="
+                display:flex;
+                gap:14px;
+                align-items:center;
+            ">
+
+                <div class="profile-avatar">
+                    ${
+                        user.avatar_url
+                            ? `
+                                <img
+                                    src="${esc(user.avatar_url)}"
+                                    alt=""
+                                >
+                            `
+                            : avatar(
+                                null,
+                                user.display_name ||
+                                user.username
+                            )
+                    }
+                </div>
+
+
+                <div>
+
+                    <div class="profile-name">
+                        ${esc(
+                            user.display_name ||
+                            user.username
+                        )}
+                    </div>
+
+                    <div class="profile-username">
+                        @${esc(user.username)}
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            ${
+                user.bio
+                    ? `
+                        <p class="profile-bio">
+                            ${esc(user.bio)}
+                        </p>
+                    `
+                    : ""
+            }
+
+
+            <div class="profile-stats">
+
+                <div class="profile-stat">
+                    <strong>
+                        ${Number(user.post_count || 0)}
+                    </strong>
+                    <span>Posts</span>
+                </div>
+
+                <div class="profile-stat">
+                    <strong>
+                        ${Number(user.follower_count || 0)}
+                    </strong>
+                    <span>Followers</span>
+                </div>
+
+                <div class="profile-stat">
+                    <strong>
+                        ${Number(user.following_count || 0)}
+                    </strong>
+                    <span>Following</span>
+                </div>
+
+            </div>
+
+
+            ${
+                user.skills
+                    ? `
+                        <div style="
+                            margin-top:16px;
+                            color:#aaa;
+                            font-size:13px;
+                        ">
+                            <strong style="color:white;">
+                                Skills
+                            </strong>
+                            <div style="margin-top:6px;">
+                                ${esc(user.skills)}
+                            </div>
+                        </div>
+                    `
+                    : ""
+            }
+
+
+            <button
+                class="primary full"
+                type="button"
+                onclick="toggleFollow(${Number(user.id)}, this)"
+                style="margin-top:20px;"
+            >
+                Follow / Unfollow
+            </button>
+
+
+            <button
+                class="primary full"
+                type="button"
+                onclick="copyProfileLink(${Number(user.id)})"
+                style="
+                    margin-top:10px;
+                    background:#171717;
+                    color:white;
+                    border:1px solid #333;
+                "
+            >
+                Copy profile link
+            </button>
+
+        `);
+
+    } catch (error) {
+
+        toast(error.message);
+    }
+}
+
+
+async function renderMyProfile() {
+
+    const container =
+        $("profileView");
+
+    if (!container) return;
+
+    const user =
+        state.currentUser;
+
+    if (!user) return;
+
+    container.innerHTML = `
+
+        <div class="profile-header">
+
+            <div class="profile-top">
+
+                <div class="profile-avatar">
+
+                    ${
+                        user.avatar_url
+                            ? `
+                                <img
+                                    src="${esc(user.avatar_url)}"
+                                    alt=""
+                                >
+                            `
+                            : avatar(
+                                null,
+                                user.display_name ||
+                                user.username
+                            )
+                    }
+
+                </div>
+
+
+                <div class="profile-info">
+
+                    <div class="profile-name">
+                        ${esc(
+                            user.display_name ||
+                            user.username
+                        )}
+                    </div>
+
+                    <div class="profile-username">
+                        @${esc(user.username)}
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            ${
+                user.bio
+                    ? `
+                        <div class="profile-bio">
+                            ${esc(user.bio)}
+                        </div>
+                    `
+                    : ""
+            }
+
+
+            <div style="
+                display:flex;
+                gap:8px;
+                margin-top:18px;
+            ">
+
+                <button
+                    class="primary"
+                    type="button"
+                    onclick="openEditProfile()"
+                >
+                    Edit profile
+                </button>
+
+                <button
+                    class="primary"
+                    type="button"
+                    onclick="copyProfileLink(${Number(user.id)})"
+                    style="
+                        background:#171717;
+                        color:white;
+                        border:1px solid #333;
+                    "
+                >
+                    Share
+                </button>
+
+            </div>
+
+        </div>
+
+    `;
+}
+
+
+async function openEditProfile() {
+
+    const user =
+        state.currentUser;
+
+    if (!user) return;
+
+    openModal(`
+
+        <div class="modal-header">
+
+            <div class="modal-title">
+                Edit profile
+            </div>
+
+            <button
+                class="icon-btn"
+                type="button"
+                onclick="closeModal()"
+            >
+                ×
+            </button>
+
+        </div>
+
+
+        <label
+            style="
+                display:block;
+                color:#aaa;
+                font-size:13px;
+                margin-bottom:7px;
+            "
+        >
+            Display name
+        </label>
+
+        <input
+            id="editDisplayName"
+            class="input"
+            maxlength="60"
+            value="${esc(
+                user.display_name || ""
+            )}"
+        >
+
+
+        <label
+            style="
+                display:block;
+                color:#aaa;
+                font-size:13px;
+                margin:15px 0 7px;
+            "
+        >
+            Bio
+        </label>
+
+        <textarea
+            id="editBio"
+            class="input"
+            maxlength="300"
+        >${esc(user.bio || "")}</textarea>
+
+
+        <label
+            style="
+                display:block;
+                color:#aaa;
+                font-size:13px;
+                margin:15px 0 7px;
+            "
+        >
+            Skills
+        </label>
+
+        <input
+            id="editSkills"
+            class="input"
+            maxlength="300"
+            value="${esc(
+                user.skills || ""
+            )}"
+            placeholder="Coding, Design, Music..."
+        >
+
+
+        <button
+            class="primary full"
+            type="button"
+            onclick="saveProfile()"
+            style="margin-top:18px;"
+        >
+            Save changes
+        </button>
+
+    `);
+}
+
+
+async function saveProfile() {
+
+    try {
+
+        await api("/profile", {
+            method: "PUT",
+            body: JSON.stringify({
+                display_name:
+                    $("editDisplayName")?.value.trim(),
+
+                bio:
+                    $("editBio")?.value.trim(),
+
+                skills:
+                    $("editSkills")?.value.trim()
+            })
+        });
+
+        const me =
+            await api("/me");
+
+        state.currentUser =
+            me.user;
+
+        updateCurrentUserUI();
+
+        closeModal();
+
+        renderMyProfile();
+
+        toast("Profile updated.");
+
+    } catch (error) {
+
+        toast(error.message);
+    }
+}
+
+
+/* =========================================================
+   FOLLOW
+   ========================================================= */
+
+async function toggleFollow(userId, button) {
+
+    if (!state.currentUser) {
+        toast("Log in first.");
+        return;
+    }
+
+    try {
+
+        const data =
+            await api(
+                `/users/${Number(userId)}/follow`,
+                {
+                    method: "POST"
+                }
+            );
+
+        if (button) {
+            button.textContent =
+                data.following
+                    ? "Following"
+                    : "Follow";
+        }
+
+        toast(
+            data.following
+                ? "Following"
+                : "Unfollowed"
+        );
+
+    } catch (error) {
+
+        toast(error.message);
+    }
+}
+
+
+/* =========================================================
+   SUGGESTIONS
+   ========================================================= */
+
+async function loadSuggestions() {
+
+    const container =
+        $("suggestions");
+
+    if (!container) return;
+
+    try {
+
+        const data =
+            await api("/suggestions");
+
+        const users =
+            data.users || [];
+
+        if (!users.length) {
+
+            container.innerHTML = `
+                <div style="
+                    color:#666;
+                    font-size:12px;
+                ">
+                    No suggestions right now.
+                </div>
+            `;
+
+            return;
+        }
+
+        container.innerHTML =
+            users.map(user => `
+
+                <div class="suggestion">
+
+                    <button
+                        class="avatar"
+                        type="button"
+                        onclick="openUserProfile(${Number(user.id)})"
+                    >
+                        ${avatar(
+                            user.avatar_url,
+                            user.display_name ||
+                            user.username
+                        )}
+                    </button>
+
+                    <button
+                        type="button"
+                        onclick="openUserProfile(${Number(user.id)})"
+                        style="
+                            flex:1;
+                            min-width:0;
+                            text-align:left;
+                            background:transparent;
+                            color:white;
+                        "
+                    >
+
+                        <div class="suggestion-name">
+                            ${esc(
+                                user.display_name ||
+                                user.username
+                            )}
+                        </div>
+
+                        <div class="suggestion-username">
+                            @${esc(user.username)}
+                        </div>
+
+                    </button>
+
+                    <button
+                        class="icon-btn"
+                        type="button"
+                        onclick="toggleFollow(${Number(user.id)}, this)"
+                    >
+                        +
+                    </button>
+
+                </div>
+
+            `).join("");
+
+    } catch (error) {
+
+        console.error("Suggestions:", error);
+    }
+}
+
+
+/* =========================================================
+   SHARING
+   ========================================================= */
+
+async function copyProfileLink(userId) {
+
+    const url =
+        `${location.origin}/?profile=${encodeURIComponent(userId)}`;
+
+    await copyText(url);
+}
+
+
+async function sharePost(postId) {
+
+    const url =
+        `${location.origin}/?post=${encodeURIComponent(postId)}`;
+
+    try {
+
+        if (navigator.share) {
+
+            await navigator.share({
+                title: "Zilnet",
+                text: "Check this post on Zilnet.",
+                url
+            });
+
+        } else {
+
+            await navigator.clipboard.writeText(url);
+
+            toast("Post link copied.");
+        }
+
+    } catch (error) {
+
+        if (error.name !== "AbortError") {
+            try {
+                await navigator.clipboard.writeText(url);
+                toast("Post link copied.");
+            } catch {
+                toast("Could not share post.");
+            }
+        }
+    }
+}
+
+
+async function copyText(text) {
+
+    try {
+
+        await navigator.clipboard.writeText(
+            String(text)
+        );
+
+        toast("Copied.");
+
+    } catch {
+
+        toast("Could not copy.");
+    }
+}
+
+
+/* =========================================================
+   SAVE
+   ========================================================= */
+
+const savedPosts =
+    new Set();
+
+function toggleSavePost(postId, button) {
+
+    if (savedPosts.has(postId)) {
+
+        savedPosts.delete(postId);
+
+        button?.classList.remove("saved");
+
+        toast("Removed from saved.");
+
+    } else {
+
+        savedPosts.add(postId);
+
+        button?.classList.add("saved");
+
+        toast("Saved.");
+    }
+}
+
+
+/* =========================================================
+   MEDIA INPUTS
+   ========================================================= */
+
+function openCamera(type = "post") {
+
+    const id =
+        type === "story"
+            ? "storyCameraInput"
+            : "postCameraInput";
+
+    const input =
+        $(id);
+
+    if (input) {
+        input.click();
+    } else {
+        toast("Camera is unavailable.");
+    }
+}
+
+
+function openGallery(type = "post") {
+
+    const id =
+        type === "story"
+            ? "storyGalleryInput"
+            : "postGalleryInput";
+
+    const input =
+        $(id);
+
+    if (input) {
+        input.click();
+    } else {
+        toast("Gallery is unavailable.");
+    }
+}
+
+
+function validateMediaFile(file) {
+
+    if (!file) {
+        return false;
+    }
+
+    const maxSize =
+        50 * 1024 * 1024;
+
+    if (file.size > maxSize) {
+
+        toast(
+            "File is too large. Maximum 50 MB."
+        );
+
+        return false;
+    }
+
+    const allowed = [
+        "image/jpeg",
+        "image/png",
+        "image/webp",
+        "image/gif",
+        "video/mp4",
+        "video/webm",
+        "video/quicktime"
+    ];
+
+    if (!allowed.includes(file.type)) {
+
+        toast(
+            "This file type is not supported."
+        );
+
+        return false;
+    }
+
+    return true;
+}
+
+
+/* =========================================================
+   MEDIA PREVIEW
+   ========================================================= */
+
+function previewMedia(
+    input,
+    previewId
+) {
+
+    const preview =
+        $(previewId);
+
+    if (
+        !preview ||
+        !input?.files?.length
+    ) {
+        return;
+    }
+
+    const file =
+        input.files[0];
+
+    if (!validateMediaFile(file)) {
+
+        input.value = "";
+
+        return;
+    }
+
+    const url =
+        URL.createObjectURL(file);
+
+    preview.innerHTML = "";
+
+    if (
+        file.type.startsWith("image/")
+    ) {
+
+        preview.innerHTML = `
+            <img
+                src="${url}"
+                alt="Preview"
+                style="
+                    width:100%;
+                    max-height:420px;
+                    object-fit:contain;
+                    border-radius:15px;
+                "
+            >
+        `;
+
+    } else {
+
+        preview.innerHTML = `
+            <video
+                src="${url}"
+                controls
+                playsinline
+                style="
+                    width:100%;
+                    max-height:420px;
+                    border-radius:15px;
+                "
+            ></video>
+        `;
+    }
+
+    preview.style.display =
+        "block";
+}
+
+
+/* =========================================================
+   POST MEDIA
+   ========================================================= */
+
+function handlePostMedia(input) {
+
+    if (!input?.files?.length) {
+        return;
+    }
+
+    const file =
+        input.files[0];
+
+    if (!validateMediaFile(file)) {
+
+        input.value = "";
+
+        return;
+    }
+
+    state.postMediaFile =
+        file;
+
+    let preview =
+        $("postMediaPreview");
+
+    if (!preview) {
+
+        const composer =
+            document.querySelector(".composer");
+
+        if (composer) {
+
+            preview =
+                document.createElement("div");
+
+            preview.id =
+                "postMediaPreview";
+
+            preview.style.marginTop =
+                "12px";
+
+            composer.appendChild(
+                preview
+            );
+        }
+    }
+
+    if (preview) {
+
+        previewMedia(
+            input,
+            "postMediaPreview"
+        );
+    }
+
+    toast("Media selected.");
+}
+
+
+async function uploadPostMedia(file) {
+
+    if (!validateMediaFile(file)) {
+        return null;
+    }
+
+    return uploadMedia(
+        file,
+        "post"
+    );
+}
+
+
+/* =========================================================
+   STORY MEDIA
+   ========================================================= */
+
+function handleStoryMedia(input) {
+
+    if (!input?.files?.length) {
+        return;
+    }
+
+    const file =
+        input.files[0];
+
+    if (!validateMediaFile(file)) {
+
+        input.value = "";
+
+        return;
+    }
+
+    state.storyMediaFile =
+        file;
+
+    previewMedia(
+        input,
+        "storyMediaPreview"
+    );
+
+    toast("Media selected.");
+}
+
+
+async function uploadStoryMedia(file) {
+
+    if (!validateMediaFile(file)) {
+        return null;
+    }
+
+    return uploadMedia(
+        file,
+        "story"
+    );
+}
+
+
+/* =========================================================
+   GENERIC MEDIA UPLOAD
+   ========================================================= */
+
+async function uploadMedia(
+    file,
+    type
+) {
+
+    const form =
+        new FormData();
+
+    form.append(
+        "file",
+        file
+    );
+
+    form.append(
+        "type",
+        type
+    );
+
+    const response =
+        await fetch(
+            "/api/upload",
+            {
+                method: "POST",
+                body: form,
+                credentials: "include"
+            }
+        );
+
+    let data = {};
+
+    try {
+        data =
+            await response.json();
+    } catch {}
+
+    if (!response.ok) {
+
+        throw new Error(
+            data.error ||
+            "Upload failed."
+        );
+    }
+
+    return data.url;
+}
+
+
+/* =========================================================
+   REELS
+   ========================================================= */
+
+async function loadReels() {
+
+    const container =
+        $("reelsFeed");
+
+    if (!container) return;
+
+    container.innerHTML = `
+        <div class="empty-state">
+            Loading reels...
+        </div>
+    `;
+
+    try {
+
+        const data =
+            await api("/reels");
+
+        renderReels(
+            data.reels || []
+        );
+
+    } catch (error) {
+
+        container.innerHTML = `
+            <div class="empty-state">
+                <h3>Couldn't load reels</h3>
+                <p>${esc(error.message)}</p>
+            </div>
+        `;
+    }
+}
+
+
+function renderReels(reels) {
+
+    const container =
+        $("reelsFeed");
+
+    if (!container) return;
+
+    if (!reels.length) {
+
+        container.innerHTML = `
+            <div class="card empty-state">
+                <div class="empty-icon">▶</div>
+                <h3>No reels yet</h3>
+                <p>Be the first to create one.</p>
+            </div>
+        `;
+
+        return;
+    }
+
+    container.innerHTML =
+        reels.map(reel => `
+
+            <article class="reel">
+
+                ${
+                    reel.media_url
+                        ? `
+                            <video
+                                src="${esc(reel.media_url)}"
+                                controls
+                                playsinline
+                                loop
+                                preload="metadata"
+                            ></video>
+                        `
+                        : ""
+                }
+
+                ${
+                    reel.caption
+                        ? `
+                            <div style="
+                                padding:14px;
+                                color:#ccc;
+                            ">
+                                ${esc(reel.caption)}
+                            </div>
+                        `
+                        : ""
+                }
+
+            </article>
+
+        `).join("");
+}
+
+
+function openReelCreator() {
+
+    openModal(`
+
+        <div class="modal-header">
+
+            <div class="modal-title">
+                Create reel
+            </div>
+
+            <button
+                class="icon-btn"
+                type="button"
+                onclick="closeModal()"
+            >
+                ×
+            </button>
+
+        </div>
+
+
+        <input
+            id="reelInput"
+            type="file"
+            accept="video/mp4,video/webm,video/quicktime"
+            hidden
+            onchange="handleReelMedia(this)"
+        >
+
+
+        <button
+            class="primary full"
+            type="button"
+            onclick="document.getElementById('reelInput').click()"
+        >
+            Select video
+        </button>
+
+
+        <div
+            id="reelMediaPreview"
+            style="
+                display:none;
+                margin-top:12px;
+            "
+        ></div>
+
+
+        <textarea
+            id="reelCaption"
+            class="input"
+            maxlength="500"
+            placeholder="Write a caption..."
+            style="margin-top:12px;"
+        ></textarea>
+
+
+        <button
+            class="primary full"
+            type="button"
+            onclick="createReel()"
+            style="margin-top:12px;"
+        >
+            Publish reel
+        </button>
+
+    `);
+}
+
+
+function handleReelMedia(input) {
+
+    if (!input?.files?.length) {
+        return;
+    }
+
+    const file =
+        input.files[0];
+
+    if (!validateMediaFile(file)) {
+        input.value = "";
+        return;
+    }
+
+    state.reelMediaFile =
+        file;
+
+    previewMedia(
+        input,
+        "reelMediaPreview"
+    );
+}
+
+
+async function uploadReelMedia(file) {
+
+    if (!validateMediaFile(file)) {
+        return null;
+    }
+
+    return uploadMedia(
+        file,
+        "reel"
+    );
+}
+
+
+async function createReel() {
+
+    const file =
+        state.reelMediaFile;
+
+    if (!file) {
+        toast("Select a video first.");
+        return;
+    }
+
+    try {
+
+        toast("Uploading reel...");
+
+        const mediaUrl =
+            await uploadReelMedia(file);
+
+        if (!mediaUrl) return;
+
+        await api("/reels", {
+            method: "POST",
+            body: JSON.stringify({
+                media_url: mediaUrl,
+                caption:
+                    $("reelCaption")
+                        ?.value
+                        .trim() || ""
+            })
+        });
+
+        state.reelMediaFile =
+            null;
+
+        closeModal();
+
+        toast("Reel published.");
+
+        loadReels();
+
+    } catch (error) {
+
+        toast(error.message);
+    }
+}
+
+
+/* =========================================================
+   CHAT
+   ========================================================= */
+
+async function loadChats() {
+
+    const list =
+        $("chatList");
+
+    if (!list) return;
+
+    try {
+
+        const data =
+            await api("/chats");
+
+        renderChats(
+            data.chats || []
+        );
+
+    } catch (error) {
+
+        list.innerHTML = `
+            <div class="empty-state">
+                ${esc(error.message)}
+            </div>
+        `;
+    }
+}
+
+
+function renderChats(chats) {
+
+    const list =
+        $("chatList");
+
+    if (!list) return;
+
+    if (!chats.length) {
+
+        list.innerHTML = `
+            <div class="empty-state">
+                <div class="empty-icon">◌</div>
+                <h3>No conversations</h3>
+                <p>Start chatting when messaging is available.</p>
+            </div>
+        `;
+
+        return;
+    }
+
+    list.innerHTML =
+        chats.map(chat => `
+
+            <button
+                class="chat-item ${
+                    Number(chat.id) ===
+                    Number(state.currentChatId)
+                        ? "active"
+                        : ""
+                }"
+                type="button"
+                onclick="openChat(${Number(chat.id)})"
+            >
+
+                <div class="avatar">
+                    ${chat.is_group ? "G" : "•"}
+                </div>
+
+                <div style="min-width:0;">
+
+                    <div style="font-weight:700;">
+                        ${esc(
+                            chat.name ||
+                            "Conversation"
+                        )}
+                    </div>
+
+                    <div style="
+                        color:#666;
+                        font-size:11px;
+                    ">
+                        ${chat.is_group
+                            ? "Group"
+                            : "Chat"}
+                    </div>
+
+                </div>
+
+            </button>
+
+        `).join("");
+}
+
+
+async function openChat(chatId) {
+
+    state.currentChatId =
+        Number(chatId);
+
+    await loadChats();
+
+    const header =
+        $("chatHeader");
+
+    if (header) {
+        header.textContent =
+            "Conversation";
+    }
+
+    await loadMessages(
+        state.currentChatId
+    );
+}
+
+
+async function loadMessages(chatId) {
+
+    const messages =
+        $("messages");
+
+    if (!messages) return;
+
+    try {
+
+        const data =
+            await api(
+                `/chats/${Number(chatId)}/messages`
+            );
+
+        renderMessages(
+            data.messages || []
+        );
+
+    } catch (error) {
+
+        messages.innerHTML = `
+            <div class="empty-state">
+                ${esc(error.message)}
+            </div>
+        `;
+    }
+}
+
+
+function renderMessages(messages) {
+
+    const container =
+        $("messages");
+
+    if (!container) return;
+
+    if (!messages.length) {
+
+        container.innerHTML = `
+            <div class="empty-state">
+                <h3>No messages</h3>
+                <p>Start the conversation.</p>
+            </div>
+        `;
+
+        return;
+    }
+
+    const currentId =
+        Number(
+            state.currentUser?.id
+        );
+
+    container.innerHTML =
+        messages.map(message => {
+
+            const mine =
+                Number(message.user_id) ===
+                currentId;
+
+            return `
+                <div class="
+                    message
+                    ${mine ? "mine" : ""}
+                ">
+
+                    ${
+                        !mine
+                            ? `
+                                <div style="
+                                    font-size:11px;
+                                    font-weight:700;
+                                    margin-bottom:4px;
+                                ">
+                                    @${esc(message.username)}
+                                </div>
+                            `
+                            : ""
+                    }
+
+                    <div>
+                        ${esc(message.content)}
+                    </div>
+
+                    <div class="message-time">
+                        ${formatDate(message.created_at)}
+                    </div>
+
+                </div>
+            `;
+        }).join("");
+
+    container.scrollTop =
+        container.scrollHeight;
+}
+
+
+async function sendMessage(event) {
+
+    event.preventDefault();
+
+    if (!state.currentChatId) {
+        toast("Select a conversation.");
+        return;
+    }
+
+    const input =
+        $("messageInput");
+
+    const content =
+        input?.value.trim();
+
+    if (!content) return;
+
+    try {
+
+        await api(
+            `/chats/${Number(state.currentChatId)}/messages`,
+            {
+                method: "POST",
+                body: JSON.stringify({
+                    content
+                })
+            }
+        );
+
+        input.value = "";
+
+        await loadMessages(
+            state.currentChatId
+        );
+
+    } catch (error) {
+
+        toast(error.message);
+    }
+}
+
+
+/* =========================================================
+   NOTIFICATIONS
+   ========================================================= */
+
+async function openNotifications() {
+
+    showPage("notifications");
+
+    await loadNotifications();
+}
+
+
+async function loadNotifications() {
+
+    const list =
+        $("notificationList");
+
+    if (!list) return;
+
+    try {
+
+        const data =
+            await api("/notifications");
+
+        if (
+            !data.notifications?.length
+        ) {
+
+            list.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-icon">♡</div>
+                    <h3>No notifications yet</h3>
+                    <p>
+                        When people interact with you,
+                        they'll appear here.
+                    </p>
+                </div>
+            `;
+
+            return;
+        }
+
+        list.innerHTML =
+            data.notifications.map(n => `
+
+                <div style="
+                    display:flex;
+                    gap:10px;
+                    padding:14px 0;
+                    border-bottom:1px solid #202020;
+                ">
+
+                    <div class="avatar">
+                        ${avatar(
+                            n.avatar_url,
+                            n.username
+                        )}
+                    </div>
+
+                    <div>
+
+                        <strong>
+                            @${esc(
+                                n.username ||
+                                "someone"
+                            )}
+                        </strong>
+
+                        <div style="
+                            color:#aaa;
+                            margin-top:3px;
+                        ">
+                            ${esc(
+                                n.message || ""
+                            )}
+                        </div>
+
+                        <small style="
+                            display:block;
+                            color:#666;
+                            margin-top:4px;
+                        ">
+                            ${formatDate(
+                                n.created_at
+                            )}
+                        </small>
+
+                    </div>
+
+                </div>
+
+            `).join("");
+
+    } catch (error) {
+
+        list.innerHTML = `
+            <div class="empty-state">
+                ${esc(error.message)}
+            </div>
+        `;
+    }
+}
+
+
+/* =========================================================
+   PRIVACY
+   ========================================================= */
+
+async function loadPrivacySettings() {
+
+    const toggle =
+        $("privateAccountToggle");
+
+    if (!toggle) return;
+
+    try {
+
+        const data =
+            await api(
+                "/settings/privacy"
+            );
+
+        if (data.settings) {
+
+            toggle.checked =
+                Boolean(
+                    data.settings.is_private
+                );
+        }
+
+    } catch (error) {
+
+        /*
+         * Old backend versions may not
+         * have the GET endpoint yet.
+         */
+        console.error(
+            "Privacy:",
+            error
+        );
+    }
+}
+
+
+async function savePrivacySettings() {
+
+    const toggle =
+        $("privateAccountToggle");
+
+    if (!toggle) return;
+
+    try {
+
+        await api(
+            "/settings/privacy",
+            {
+                method: "PUT",
+                body: JSON.stringify({
+                    is_private:
+                        toggle.checked
+                })
+            }
+        );
+
+        toast(
+            toggle.checked
+                ? "Private account enabled."
+                : "Public account enabled."
+        );
+
+    } catch (error) {
+
+        toast(
+            error.message ||
+            "Could not save settings."
+        );
+    }
+}
+
+
+/* =========================================================
+   FORGOT PASSWORD
+   ========================================================= */
+
+function openForgotPassword() {
+
+    openModal(`
+
+        <div class="modal-header">
+
+            <div class="modal-title">
+                Password recovery
+            </div>
+
+            <button
+                class="icon-btn"
+                type="button"
+                onclick="closeModal()"
+            >
+                ×
+            </button>
+
+        </div>
+
+        <p style="
+            color:#888;
+            font-size:13px;
+            line-height:1.6;
+        ">
+            Password recovery needs to be connected
+            to an email service before it can securely
+            send reset links.
+        </p>
+
+    `);
+}
+
+
+/* =========================================================
+   URL ROUTING
+   ========================================================= */
+
+function handleURLRoute() {
+
+    const params =
+        new URLSearchParams(
+            location.search
+        );
+
+    const profileId =
+        params.get("profile");
+
+    if (
+        profileId &&
+        /^\d+$/.test(profileId)
+    ) {
+
+        openUserProfile(
+            Number(profileId)
+        );
+
+        return;
+    }
+
+    const postId =
+        params.get("post");
+
+    if (
+        postId &&
+        /^\d+$/.test(postId)
+    ) {
+
+        toast("Post link detected.");
+    }
+}
+
+
+/* =========================================================
+   KEYBOARD / MODAL
+   ========================================================= */
+
+document.addEventListener(
+    "keydown",
+    event => {
+
+        if (event.key === "Escape") {
+            closeModal();
+        }
+    }
+);
+
+
+document.addEventListener(
+    "click",
+    event => {
+
+        const modal =
+            event.target.closest(".modal");
+
+        if (
+            modal &&
+            event.target === modal
+        ) {
+            closeModal();
+        }
+    }
+);
+
+
+/* =========================================================
+   TEXT LIMITS
+   ========================================================= */
+
+function limitText(
+    input,
+    maxLength
+) {
+
+    if (!input) return;
+
+    if (
+        input.value.length >
+        maxLength
+    ) {
+
+        input.value =
+            input.value.slice(
+                0,
+                maxLength
+            );
+    }
+}
+
+
+/* =========================================================
+   USER ID
+   ========================================================= */
+
+function generateUserId(username) {
+
+    if (!username) return "";
+
+    const clean =
+        username
+            .toLowerCase()
+            .replace(
+                /[^a-z0-9]/g,
+                ""
+            );
+
+    return clean;
+}
+
+
+/* =========================================================
+   CREATE GROUP PLACEHOLDER
+   ========================================================= */
+
+function newGroup() {
+    openCreateGroup();
+}
+
+
+function openCreateGroup() {
+
+    openModal(`
+
+        <div class="modal-header">
+
+            <div class="modal-title">
+                New group
+            </div>
+
+            <button
+                class="icon-btn"
+                type="button"
+                onclick="closeModal()"
+            >
+                ×
+            </button>
+
+        </div>
+
+        <p style="
+            color:#777;
+            font-size:13px;
+        ">
+            Group creation will be connected to
+            the messaging backend.
+        </p>
+
+    `);
+}
+
+
+/* =========================================================
+   DOM READY
+   ========================================================= */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    () => {
+
+        setAuthMode("login");
+
+        boot();
+
+    }
+);
