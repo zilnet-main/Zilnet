@@ -1778,13 +1778,17 @@ function setAuthMode(mode) {
 async function submitAuth(event) {
   event.preventDefault();
 
-  const username =
-    $("username")?.value.trim();
+  console.log("AUTH: submitAuth started");
+  console.log("AUTH MODE:", state.authMode);
 
-  const password =
-    $("password")?.value || "";
+  const username = $("username")?.value.trim();
+  const password = $("password")?.value || "";
+
+  console.log("AUTH USERNAME:", username);
+  console.log("AUTH PASSWORD ENTERED:", !!password);
 
   if (!username || !password) {
+    console.log("AUTH: missing username/password");
     toast("Enter your username and password.");
     return;
   }
@@ -1798,6 +1802,8 @@ async function submitAuth(event) {
 
     if (state.authMode === "signup") {
 
+      console.log("AUTH: sending signup request");
+
       const displayName =
         $("displayName")?.value.trim() ||
         username;
@@ -1806,7 +1812,7 @@ async function submitAuth(event) {
         $("email")?.value.trim() ||
         null;
 
-      await api("/signup", {
+      const result = await api("/signup", {
         method: "POST",
         body: JSON.stringify({
           username,
@@ -1816,11 +1822,15 @@ async function submitAuth(event) {
         })
       });
 
+      console.log("AUTH: signup response:", result);
+
       toast("Account created successfully.");
 
     } else {
 
-      await api("/login", {
+      console.log("AUTH: sending login request");
+
+      const result = await api("/login", {
         method: "POST",
         body: JSON.stringify({
           username,
@@ -1828,18 +1838,25 @@ async function submitAuth(event) {
         })
       });
 
-      toast("Welcome back.");
+      console.log("AUTH: login response:", result);
+
     }
+
+    console.log("AUTH: calling boot()");
 
     await boot();
 
+    console.log("AUTH: boot() finished");
+
   } catch (error) {
+
+    console.error("AUTH ERROR:", error);
 
     if (authMsg) {
       authMsg.textContent = error.message;
     }
 
-    toast(error.message);
+    toast(error.message || "Login failed.");
   }
 }
 
