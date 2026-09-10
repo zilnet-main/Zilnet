@@ -280,6 +280,99 @@ async function api(request, env, url) {
 // AUTH
 // ============================================================
 
+async function hashPassword(password) {
+  const encoder = new TextEncoder();
+
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+
+  const key = await crypto.subtle.importKey(
+    "raw",
+    encoder.encode(password),
+    "PBKDF2",
+    false,
+    ["deriveBits"]
+  );
+
+  const bits = await crypto.subtle.deriveBits(
+    {
+      name: "PBKDF2",
+      salt,
+      iterations: PASSWORD_ITERATIONS,
+      hash: "SHA-256"
+    },
+    key,
+    256
+  );
+
+  return `pbkdf2$${PASSWORD_ITERATIONS}$${toBase64(salt)}$${toBase64(new Uint8Array(bits))}`;
+}
+
+async function verifyPassword(password, stored) {
+  const parts = String(stored || "").split("$");
+
+  if (parts.length !== 4 || parts[0] !== "pbkdf2") {
+    return false;
+  }
+
+  const iterations = Number(parts[1]);
+  const salt = fromBase64(parts[2]);
+  const expected = fromBase64(parts[3]);
+
+  const key = await crypto.subtle.importKey(
+    "raw",
+    new TextEncoder().encode(password),
+    "PBKDF2",
+    false,
+    ["deriveBits"]
+  );
+
+  const bits = await crypto.subtle.deriveBits(
+    {
+      name: "PBKDF2",
+      salt,
+      iterations,
+      hash: "SHA-256"
+    },
+    key,
+    256
+  );
+
+  const actual = new Uint8Array(bits);
+
+  if (actual.length !== expected.length) {
+    return false;
+  }
+
+  let difference = 0;
+
+  for (let i = 0; i < actual.length; i++) {
+    difference |= actual[i] ^ expected[i];
+  }
+
+  return difference === 0;
+}
+
+function toBase64(bytes) {
+  let binary = "";
+
+  for (const byte of bytes) {
+    binary += String.fromCharCode(byte);
+  }
+
+  return btoa(binary);
+}
+
+function fromBase64(value) {
+  const binary = atob(value);
+  const bytes = new Uint8Array(binary.length);
+
+  for (let i = 0; i < binary.length; i++) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+
+  return bytes;
+}
+
 async function signup(request, env) {
   const body = await readJSON(request);
 
