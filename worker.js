@@ -877,3 +877,216 @@ async function handleAuth(env, request, pathname) {
 
   return null;
 }
+ /* =========================
+    PART 3 — WORKER ROUTER
+ ========================= */
+
+async function handleRequest(request, env) {
+  const url = new URL(request.url);
+  const pathname = url.pathname;
+
+  /* -------------------------
+     CORS / PREFLIGHT
+  ------------------------- */
+
+  if (request.method === "OPTIONS") {
+    return new Response(null, {
+      status: 204,
+      headers: {
+        "access-control-allow-origin": "*",
+        "access-control-allow-methods":
+          "GET,POST,PUT,PATCH,DELETE,OPTIONS",
+        "access-control-allow-headers":
+          "content-type, authorization",
+        "access-control-max-age": "86400"
+      }
+    });
+  }
+
+  /* -------------------------
+     API
+  ------------------------- */
+
+  if (pathname.startsWith("/api/")) {
+    try {
+      const authResponse =
+        await handleAuth(
+          env,
+          request,
+          pathname
+        );
+
+      if (authResponse) {
+        return authResponse;
+      }
+
+      /* Health check */
+
+      if (
+        pathname === "/api/health" &&
+        request.method === "GET"
+      ) {
+        return json({
+          success: true,
+          service: "zilnet",
+          status: "online",
+          time: nowISO()
+        });
+      }
+
+      /* Public profile */
+
+      const profileMatch =
+        pathname.match(
+          /^\/api\/profile\/([^/]+)$/
+        );
+
+      if (
+        profileMatch &&
+        request.method === "GET"
+      ) {
+        const username =
+          decodeURIComponent(
+            profileMatch[1]
+          );
+
+        const viewer =
+          await getSessionUser(
+            env,
+            request
+          );
+
+        /*
+          Keep this endpoint available even
+          before the rest of the social API
+          is connected.
+        */
+
+        const user =
+          await getUserByUsername(
+            env,
+            username
+          );
+
+        if (!user) {
+          return json({
+            error: "User not found"
+          }, 404);
+        }
+
+        const settings =
+          await getSettings(
+            env,
+            user.id
+          );
+
+        const isOwner =
+          viewer &&
+          String(viewer.id) ===
+            String(user.id);
+
+        if (
+          settings.profile_visibility ===
+            "private" &&
+          !isOwner
+        ) {
+          return json({
+            success: true,
+            user: publicUser(user),
+            private: true,
+            posts: []
+          });
+        }
+
+        return json({
+          success: true,
+          user: publicUser(user),
+          private: false,
+          posts: []
+        });
+      }
+
+      return json({
+        error: "API endpoint not found."
+      }, 404);
+
+    } catch (error) {
+      console.error(
+        "API_ERROR",
+        error?.stack ||
+        error?.message ||
+        error
+      );
+
+      if (
+        error instanceof HttpError
+      ) {
+        return json({
+          error: error.message
+        }, error.status);
+      }
+
+      return json({
+        error: "Internal server error."
+      }, 500);
+    }
+  }
+
+  /* -------------------------
+     FRONTEND
+  ------------------------- */
+
+  if (
+    env.ASSETS &&
+    request.method === "GET"
+  ) {
+    try {
+      return await env.ASSETS.fetch(
+        request
+      );
+    } catch (error) {
+      console.error(
+        "ASSET_ERROR",
+        error?.message || error
+      );
+    }
+  }
+
+  return new Response(
+    "Zilnet is running.",
+    {
+      status: 200,
+      headers: {
+        "content-type":
+          "text/plain; charset=utf-8"
+      }
+    }
+  );
+}
+
+/* =========================
+   CLOUDFLARE ENTRY POINT
+========================= */
+
+export default {
+  async fetch(request, env, ctx) {
+    try {
+      return await handleRequest(
+        request,
+        env,
+        ctx
+      );
+    } catch (error) {
+      console.error(
+        "FATAL_WORKER_ERROR",
+        error?.stack ||
+        error?.message ||
+        error
+      );
+
+      return json({
+        error: "Internal server error."
+      }, 500);
+    }
+  }
+};
