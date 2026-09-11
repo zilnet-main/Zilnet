@@ -1568,3 +1568,1316 @@ async function likePost(
     liked: true
   });
 }
+async function savePost(
+  req,
+  env,
+  user,
+  postId
+) {
+  const existing =
+    await env.DB
+      .prepare(`
+        SELECT 1
+        FROM saved_posts
+        WHERE post_id=?
+          AND user_id=?
+        LIMIT 1
+      `)
+      .bind(
+        postId,
+        Number(user.id)
+      )
+      .first();
+
+  if (existing) {
+    await env.DB
+      .prepare(`
+        DELETE FROM saved_posts
+        WHERE post_id=?
+          AND user_id=?
+      `)
+      .bind(
+        postId,
+        Number(user.id)
+      )
+      .run();
+
+    return json({
+      ok: true,
+      saved: false
+    });
+  }
+
+  await env.DB
+    .prepare(`
+      INSERT INTO saved_posts
+      (post_id, user_id, created_at)
+      VALUES (?, ?, ?)
+    `)
+    .bind(
+      postId,
+      Number(user.id),
+      now()
+    )
+    .run();
+
+  return json({
+    ok: true,
+    saved: true
+  });
+}
+
+async function comments(
+  req,
+  env,
+  user,
+  postId
+) {
+  const method =
+    req.method.toUpperCase();
+
+  if (method === "GET") {
+    const result =
+      await env.DB
+        .prepare(`
+          SELECT
+            c.*,
+            u.username,
+            u.display_name,
+            u.avatar_url
+          FROM comments c
+          JOIN users u
+            ON u.id=c.user_id
+          WHERE c.post_id=?
+          ORDER BY c.id ASC
+          LIMIT 200
+        `)
+        .bind(postId)
+        .all();
+
+    return json({
+      ok: true,
+      comments:
+        result.results || []
+    });
+  }
+
+  const body =
+    await readJSON(req);
+
+  const content =
+    clean(
+      body.content,
+      2000
+    );
+
+  if (!content) {
+    throw new HttpError(
+      400,
+      "Comment cannot be empty"
+    );
+  }
+
+  const post =
+    await env.DB
+      .prepare(`
+        SELECT user_id
+        FROM posts
+        WHERE id=?
+        LIMIT 1
+      `)
+      .bind(postId)
+      .first();
+
+  if (!post) {
+    throw new HttpError(
+      404,
+      "Post not found"
+    );
+  }
+
+  const commentId =
+    crypto.randomUUID();
+
+  await env.DB
+    .prepare(`
+      INSERT INTO comments
+      (
+        id,
+        post_id,
+        user_id,
+        content,
+        created_at
+      )
+      VALUES (?,?,?,?,?)
+    `)
+    .bind(
+      commentId,
+      postId,
+      Number(user.id),
+      content,
+      now()
+    )
+    .run();
+
+  await notify(
+    env,
+    post.user_id,
+    user.id,
+    "comment",
+    postId
+  );
+
+  return json({
+    ok: true,
+    id: commentId
+  }, 201);
+}
+
+async function createStory(
+  req,
+  env,
+  user
+) {
+  const body =
+    await readJSON(req);
+
+  const text =
+    clean(
+      body.text,
+      5000
+    );
+
+  const mediaUrl =
+    clean(
+      body.media_url ??
+      body.mediaUrl ??
+      "",
+      4000
+    );
+
+  if (!text && !mediaUrl) {
+    throw new HttpError(
+      400,
+      "Story cannot be empty"
+    );
+  }
+
+  const storyId =
+    crypto.randomUUID();
+
+  const created =
+    Date.now();
+
+  const expires =
+    created +
+    24 * 60 * 60 * 1000;
+
+  await env.DB
+    .prepare(`
+      INSERT INTO stories
+      (
+        id,
+        user_id,
+        text,
+        media_url,
+        created_at,
+        expires_at
+      )
+      VALUES (?,?,?,?,?,?)
+    `)
+    .bind(
+      storyId,
+      Number(user.id),
+      text,
+      mediaUrl,
+      new Date(created).toISOString(),
+      expires
+    )
+    .run();
+
+  return json({
+    ok: true,
+    id: storyId
+  }, 201);
+}
+
+async function stories(
+  req,
+  env,
+  user
+) {
+  const result =
+    await env.DB
+      .prepare(`
+        SELECT
+          s.*,
+          u.username,
+          u.display_name,
+          u.avatar_url
+        FROM stories s
+        JOIN users u
+          ON u.id=s.user_id
+        WHERE s.expires_at>?
+        ORDER BY s.id DESC
+        LIMIT 200
+      `)
+      .bind(Date.now())
+      .all();
+
+  return json({
+    ok: true,
+    stories:
+      result.results || []
+  });
+}
+
+async function createReel(
+  req,
+  env,
+  user
+) {
+  const body =
+    await readJSON(req);
+
+  const videoUrl =
+    clean(
+      body.video_url ??
+      body.videoUrl ??
+      "",
+      4000
+    );
+
+  const caption =
+    clean(
+      body.caption,
+      5000
+    );
+
+  if (!videoUrl) {
+    throw new HttpError(
+      400,
+      "Video is required"
+    );
+  }
+
+  const reelId =
+    crypto.randomUUID();
+
+  await env.DB
+    .prepare(`
+      INSERT INTO reels
+      (
+        id,
+        user_id,
+        video_url,
+        caption,
+        created_at
+      )
+      VALUES (?,?,?,?,?)
+    `)
+    .bind(
+      reelId,
+      Number(user.id),
+      videoUrl,
+      caption,
+      now()
+    )
+    .run();
+
+  return json({
+    ok: true,
+    id: reelId
+  }, 201);
+}
+
+async function getReels(
+  req,
+  env
+) {
+  const result =
+    await env.DB
+      .prepare(`
+        SELECT
+          r.*,
+          u.username,
+          u.display_name,
+          u.avatar_url
+        FROM reels r
+        JOIN users u
+          ON u.id=r.user_id
+        ORDER BY r.id DESC
+        LIMIT 100
+      `)
+      .all();
+
+  return json({
+    ok: true,
+    reels:
+      result.results || []
+  });
+}
+
+async function getNotifications(
+  req,
+  env,
+  user
+) {
+  const result =
+    await env.DB
+      .prepare(`
+        SELECT
+          n.*,
+          u.username,
+          u.display_name,
+          u.avatar_url
+        FROM notifications n
+        JOIN users u
+          ON u.id=n.actor_id
+        WHERE n.user_id=?
+        ORDER BY n.id DESC
+        LIMIT 100
+      `)
+      .bind(
+        Number(user.id)
+      )
+      .all();
+
+  await env.DB
+    .prepare(`
+      UPDATE notifications
+      SET is_read=1
+      WHERE user_id=?
+    `)
+    .bind(
+      Number(user.id)
+    )
+    .run();
+
+  return json({
+    ok: true,
+    notifications:
+      result.results || []
+  });
+}
+
+async function settingsGet(
+  req,
+  env,
+  user
+) {
+  const settings =
+    await ensureSettings(
+      env,
+      user.id
+    );
+
+  return json({
+    ok: true,
+    settings
+  });
+}
+
+async function settingsUpdate(
+  req,
+  env,
+  user
+) {
+  const body =
+    await readJSON(req);
+
+  const current =
+    await ensureSettings(
+      env,
+      user.id
+    );
+
+  const theme =
+    clean(
+      body.theme ??
+      current.theme ??
+      "system",
+      30
+    );
+
+  const profileVisibility =
+    clean(
+      body.profile_visibility ??
+      body.profileVisibility ??
+      current.profile_visibility ??
+      "public",
+      30
+    );
+
+  const messagePrivacy =
+    clean(
+      body.message_privacy ??
+      body.messagePrivacy ??
+      current.message_privacy ??
+      "everyone",
+      30
+    );
+
+  let notificationSettings =
+    current.notification_settings ||
+    {};
+
+  if (
+    body.notification_settings !==
+    undefined
+  ) {
+    notificationSettings =
+      body.notification_settings;
+  }
+
+  await env.DB
+    .prepare(`
+      UPDATE user_settings
+      SET
+        theme=?,
+        profile_visibility=?,
+        message_privacy=?,
+        notification_settings=?
+      WHERE user_id=?
+    `)
+    .bind(
+      theme,
+      profileVisibility,
+      messagePrivacy,
+      JSON.stringify(
+        notificationSettings
+      ),
+      String(user.id)
+    )
+    .run();
+
+  return json({
+    ok: true,
+    settings:
+      await ensureSettings(
+        env,
+        user.id
+      )
+  });
+}
+
+async function createChat(
+  req,
+  env,
+  user
+) {
+  const body =
+    await readJSON(req);
+
+  const memberIds =
+    Array.isArray(
+      body.user_ids ||
+      body.userIds
+    )
+      ? (
+          body.user_ids ||
+          body.userIds
+        )
+      : [];
+
+  const uniqueIds =
+    [
+      Number(user.id),
+      ...memberIds
+        .map(Number)
+        .filter(
+          Number.isFinite
+        )
+    ].filter(
+      (value, index, arr) =>
+        arr.indexOf(value) ===
+        index
+    );
+
+  if (
+    uniqueIds.length < 2
+  ) {
+    throw new HttpError(
+      400,
+      "At least two members are required"
+    );
+  }
+
+  const type =
+    clean(
+      body.type || "direct",
+      30
+    );
+
+  const name =
+    clean(
+      body.name || "",
+      100
+    );
+
+  const chatId =
+    crypto.randomUUID();
+
+  await env.DB
+    .prepare(`
+      INSERT INTO chats
+      (id, type, name, created_at)
+      VALUES (?,?,?,?)
+    `)
+    .bind(
+      chatId,
+      type,
+      name,
+      now()
+    )
+    .run();
+
+  for (const memberId of uniqueIds) {
+    await env.DB
+      .prepare(`
+        INSERT INTO chat_members
+        (chat_id, user_id, joined_at)
+        VALUES (?,?,?)
+      `)
+      .bind(
+        chatId,
+        memberId,
+        now()
+      )
+      .run();
+  }
+
+  return json({
+    ok: true,
+    id: chatId
+  }, 201);
+}
+
+async function chatList(
+  req,
+  env,
+  user
+) {
+  const result =
+    await env.DB
+      .prepare(`
+        SELECT
+          c.id,
+          c.type,
+          c.name,
+          c.created_at
+        FROM chats c
+        JOIN chat_members cm
+          ON cm.chat_id=c.id
+        WHERE cm.user_id=?
+        ORDER BY c.id DESC
+      `)
+      .bind(
+        Number(user.id)
+      )
+      .all();
+
+  return json({
+    ok: true,
+    chats:
+      result.results || []
+  });
+}
+
+async function chatInfo(
+  env,
+  user,
+  chatId
+) {
+  const chat =
+    await env.DB
+      .prepare(`
+        SELECT
+          c.*
+        FROM chats c
+        JOIN chat_members cm
+          ON cm.chat_id=c.id
+        WHERE c.id=?
+          AND cm.user_id=?
+        LIMIT 1
+      `)
+      .bind(
+        chatId,
+        Number(user.id)
+      )
+      .first();
+
+  if (!chat) {
+    throw new HttpError(
+      404,
+      "Chat not found"
+    );
+  }
+
+  const members =
+    await env.DB
+      .prepare(`
+        SELECT
+          u.id,
+          u.username,
+          u.display_name,
+          u.avatar_url
+        FROM chat_members cm
+        JOIN users u
+          ON u.id=cm.user_id
+        WHERE cm.chat_id=?
+        ORDER BY cm.joined_at ASC
+      `)
+      .bind(chatId)
+      .all();
+
+  const messages =
+    await env.DB
+      .prepare(`
+        SELECT
+          m.*,
+          u.username,
+          u.display_name,
+          u.avatar_url
+        FROM messages m
+        JOIN users u
+          ON u.id=m.user_id
+        WHERE m.chat_id=?
+        ORDER BY m.id ASC
+        LIMIT 500
+      `)
+      .bind(chatId)
+      .all();
+
+  return {
+    ...chat,
+    members:
+      members.results || [],
+    messages:
+      messages.results || []
+  };
+}
+
+async function chatMessages(
+  req,
+  env,
+  user,
+  chatId
+) {
+  const member =
+    await env.DB
+      .prepare(`
+        SELECT 1
+        FROM chat_members
+        WHERE chat_id=?
+          AND user_id=?
+        LIMIT 1
+      `)
+      .bind(
+        chatId,
+        Number(user.id)
+      )
+      .first();
+
+  if (!member) {
+    throw new HttpError(
+      403,
+      "You are not a member of this chat"
+    );
+  }
+
+  if (
+    req.method.toUpperCase() ===
+    "GET"
+  ) {
+    const result =
+      await env.DB
+        .prepare(`
+          SELECT
+            m.*,
+            u.username,
+            u.display_name,
+            u.avatar_url
+          FROM messages m
+          JOIN users u
+            ON u.id=m.user_id
+          WHERE m.chat_id=?
+          ORDER BY m.id ASC
+          LIMIT 500
+        `)
+        .bind(chatId)
+        .all();
+
+    return json({
+      ok: true,
+      messages:
+        result.results || []
+    });
+  }
+
+  const body =
+    await readJSON(req);
+
+  const content =
+    clean(
+      body.content,
+      10000
+    );
+
+  const mediaUrl =
+    clean(
+      body.media_url ??
+      body.mediaUrl ??
+      "",
+      4000
+    );
+
+  if (
+    !content &&
+    !mediaUrl
+  ) {
+    throw new HttpError(
+      400,
+      "Message cannot be empty"
+    );
+  }
+
+  const messageId =
+    crypto.randomUUID();
+
+  await env.DB
+    .prepare(`
+      INSERT INTO messages
+      (
+        id,
+        chat_id,
+        user_id,
+        content,
+        media_url,
+        created_at
+      )
+      VALUES (?,?,?,?,?,?)
+    `)
+    .bind(
+      messageId,
+      chatId,
+      Number(user.id),
+      content,
+      mediaUrl,
+      now()
+    )
+    .run();
+
+  return json({
+    ok: true,
+    id: messageId
+  }, 201);
+}
+
+async function publicProfile(
+  req,
+  env,
+  username
+) {
+  return json(
+    await getProfile(
+      env,
+      null,
+      username
+    )
+  );
+}
+
+async function route(
+  req,
+  env
+) {
+  const url =
+    new URL(req.url);
+
+  const path =
+    url.pathname.replace(
+      /\/+$/,
+      ""
+    ) || "/";
+
+  const method =
+    req.method.toUpperCase();
+
+  /*
+    Public profile lookup.
+  */
+  const profileMatch =
+    path.match(
+      /^\/api\/profile\/([^/]+)$/
+    );
+
+  if (
+    profileMatch &&
+    method === "GET"
+  ) {
+    return publicProfile(
+      req,
+      env,
+      decodeURIComponent(
+        profileMatch[1]
+      )
+    );
+  }
+
+  if (
+    path === "/api/signup" &&
+    method === "POST"
+  ) {
+    return signup(
+      req,
+      env
+    );
+  }
+
+  if (
+    path === "/api/login" &&
+    method === "POST"
+  ) {
+    return login(
+      req,
+      env
+    );
+  }
+
+  if (
+    path === "/api/logout" &&
+    method === "POST"
+  ) {
+    return logout(
+      req,
+      env
+    );
+  }
+
+  if (
+    path === "/api/me" &&
+    method === "GET"
+  ) {
+    return me(
+      req,
+      env
+    );
+  }
+
+  const user =
+    await requireUser(
+      req,
+      env
+    );
+
+  if (
+    path === "/api/profile/update" &&
+    method === "POST"
+  ) {
+    return updateProfile(
+      req,
+      env,
+      user
+    );
+  }
+
+  if (
+    path === "/api/password" &&
+    method === "POST"
+  ) {
+    return changePassword(
+      req,
+      env,
+      user
+    );
+  }
+
+  if (
+    path === "/api/feed" &&
+    method === "GET"
+  ) {
+    return feed(
+      req,
+      env,
+      user
+    );
+  }
+
+  if (
+    path === "/api/search" &&
+    method === "GET"
+  ) {
+    return searchUsers(
+      req,
+      env
+    );
+  }
+
+  if (
+    path === "/api/posts" &&
+    method === "POST"
+  ) {
+    return createPost(
+      req,
+      env,
+      user
+    );
+  }
+
+  const postMatch =
+    path.match(
+      /^\/api\/posts\/([^/]+)$/
+    );
+
+  if (
+    postMatch &&
+    method === "GET"
+  ) {
+    return getPost(
+      req,
+      env,
+      user,
+      decodeURIComponent(
+        postMatch[1]
+      )
+    );
+  }
+
+  if (
+    postMatch &&
+    method === "DELETE"
+  ) {
+    return deletePost(
+      req,
+      env,
+      user,
+      decodeURIComponent(
+        postMatch[1]
+      )
+    );
+  }
+
+  const likeMatch =
+    path.match(
+      /^\/api\/posts\/([^/]+)\/like$/
+    );
+
+  if (
+    likeMatch &&
+    method === "POST"
+  ) {
+    return likePost(
+      req,
+      env,
+      user,
+      decodeURIComponent(
+        likeMatch[1]
+      )
+    );
+  }
+
+  const saveMatch =
+    path.match(
+      /^\/api\/posts\/([^/]+)\/save$/
+    );
+
+  if (
+    saveMatch &&
+    method === "POST"
+  ) {
+    return savePost(
+      req,
+      env,
+      user,
+      decodeURIComponent(
+        saveMatch[1]
+      )
+    );
+  }
+
+  const commentMatch =
+    path.match(
+      /^\/api\/posts\/([^/]+)\/comments$/
+    );
+
+  if (
+    commentMatch &&
+    (
+      method === "GET" ||
+      method === "POST"
+    )
+  ) {
+    return comments(
+      req,
+      env,
+      user,
+      decodeURIComponent(
+        commentMatch[1]
+      )
+    );
+  }
+
+  if (
+    path === "/api/stories" &&
+    method === "GET"
+  ) {
+    return stories(
+      req,
+      env,
+      user
+    );
+  }
+
+  if (
+    path === "/api/stories" &&
+    method === "POST"
+  ) {
+    return createStory(
+      req,
+      env,
+      user
+    );
+  }
+
+  if (
+    path === "/api/reels" &&
+    method === "GET"
+  ) {
+    return getReels(
+      req,
+      env
+    );
+  }
+
+  if (
+    path === "/api/reels" &&
+    method === "POST"
+  ) {
+    return createReel(
+      req,
+      env,
+      user
+    );
+  }
+
+  const followMatch =
+    path.match(
+      /^\/api\/follow\/([^/]+)$/
+    );
+
+  if (
+    followMatch &&
+    method === "POST"
+  ) {
+    return followUser(
+      req,
+      env,
+      user,
+      decodeURIComponent(
+        followMatch[1]
+      )
+    );
+  }
+
+  if (
+    followMatch &&
+    method === "DELETE"
+  ) {
+    return unfollowUser(
+      req,
+      env,
+      user,
+      decodeURIComponent(
+        followMatch[1]
+      )
+    );
+  }
+
+  if (
+    path === "/api/notifications" &&
+    method === "GET"
+  ) {
+    return getNotifications(
+      req,
+      env,
+      user
+    );
+  }
+
+  if (
+    path === "/api/settings" &&
+    method === "GET"
+  ) {
+    return settingsGet(
+      req,
+      env,
+      user
+    );
+  }
+
+  if (
+    path === "/api/settings" &&
+    method === "POST"
+  ) {
+    return settingsUpdate(
+      req,
+      env,
+      user
+    );
+  }
+
+  if (
+    path === "/api/chats" &&
+    method === "GET"
+  ) {
+    return chatList(
+      req,
+      env,
+      user
+    );
+  }
+
+  if (
+    path === "/api/chats" &&
+    method === "POST"
+  ) {
+    return createChat(
+      req,
+      env,
+      user
+    );
+  }
+
+  const chatMatch =
+    path.match(
+      /^\/api\/chats\/([^/]+)$/
+    );
+
+  if (
+    chatMatch &&
+    method === "GET"
+  ) {
+    return json({
+      ok: true,
+      chat:
+        await chatInfo(
+          env,
+          user,
+          decodeURIComponent(
+            chatMatch[1]
+          )
+        )
+    });
+  }
+
+  const chatMessagesMatch =
+    path.match(
+      /^\/api\/chats\/([^/]+)\/messages$/
+    );
+
+  if (
+    chatMessagesMatch &&
+    (
+      method === "GET" ||
+      method === "POST"
+    )
+  ) {
+    return chatMessages(
+      req,
+      env,
+      user,
+      decodeURIComponent(
+        chatMessagesMatch[1]
+      )
+    );
+  }
+
+  return error(
+    404,
+    "API route not found"
+  );
+}
+
+export default {
+  async fetch(req, env) {
+    try {
+      if (
+        req.method.toUpperCase() ===
+        "OPTIONS"
+      ) {
+        return new Response(
+          null,
+          {
+            status: 204,
+            headers: {
+              "Access-Control-Allow-Origin":
+                req.headers.get(
+                  "Origin"
+                ) || "*",
+              "Access-Control-Allow-Methods":
+                "GET,POST,PUT,DELETE,OPTIONS",
+              "Access-Control-Allow-Headers":
+                "Content-Type, Authorization",
+              "Access-Control-Allow-Credentials":
+                "true"
+            }
+          }
+        );
+      }
+
+      const response =
+        await route(
+          req,
+          env
+        );
+
+      const headers =
+        new Headers(
+          response.headers
+        );
+
+      headers.set(
+        "Access-Control-Allow-Origin",
+        req.headers.get(
+          "Origin"
+        ) || "*"
+      );
+
+      headers.set(
+        "Access-Control-Allow-Credentials",
+        "true"
+      );
+
+      return new Response(
+        response.body,
+        {
+          status:
+            response.status,
+          statusText:
+            response.statusText,
+          headers
+        }
+      );
+    } catch (err) {
+      console.error(
+        "ZILNET WORKER ERROR:",
+        err
+      );
+
+      if (
+        err instanceof HttpError
+      ) {
+        return error(
+          err.status,
+          err.message
+        );
+      }
+
+      return error(
+        500,
+        "Internal server error"
+      );
+    }
+  }
+};
