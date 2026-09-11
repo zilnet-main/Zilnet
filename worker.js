@@ -3208,19 +3208,17 @@ async function route(
     );
 
   if (
-    chat &&
-    method === "GET"
-  ) {
-    return json({
-      chat:
-        await chatInfo(
-          env,
-          user,
-          decodeURIComponent(
-            chat[1]
-          )
-    });
-  }
+  chat &&
+  method === "GET"
+) {
+  return json({
+    chat: await chatInfo(
+      env,
+      user,
+      decodeURIComponent(chat[1])
+    )
+  });
+}
 
   // CHAT MESSAGES
 
