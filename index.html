@@ -1,0 +1,2314 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b0b0c">
+<title>Zilnet</title>
+<style>
+:root{--bg:#0b0b0c;--card:#151619;--card2:#202125;--text:#f5f5f7;--muted:#96979d;--line:#292a2e;--danger:#ff375f;--max:680px}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+button,input,textarea,select{font:inherit;color:inherit}
+button{cursor:pointer}
+.hidden{display:none!important}
+
+#toast{
+position:fixed;z-index:100;left:50%;bottom:86px;
+transform:translate(-50%,20px);opacity:0;
+background:#fff;color:#000;padding:11px 16px;
+border-radius:999px;font-size:13px;font-weight:700;
+transition:.2s
+}
+.show{opacity:1!important;transform:translate(-50%,0)!important}
+
+.auth{
+min-height:100vh;display:grid;place-items:center;padding:22px
+}
+.authbox{width:min(420px,100%);text-align:center}
+.brand{font-size:36px;font-weight:900;letter-spacing:-2px}
+.tag{color:var(--muted);margin:8px 0 28px}
+.tabs{display:flex;border-bottom:1px solid var(--line);margin-bottom:18px}
+.tabs button{
+flex:1;border:0;background:none;color:var(--muted);padding:12px
+}
+.tabs .on{
+color:var(--text);font-weight:800;border-bottom:2px solid var(--text)
+}
+.field{
+width:100%;padding:14px;margin-bottom:10px;
+border:1px solid var(--line);background:var(--card);
+border-radius:12px;outline:0
+}
+.primary{
+width:100%;padding:14px;border:0;border-radius:12px;
+background:#fff;color:#000;font-weight:800
+}
+.secondary{
+width:100%;padding:13px;border:1px solid var(--line);
+background:none;border-radius:12px;font-weight:700
+}
+.note{font-size:12px;color:var(--muted);margin-top:15px}
+
+.app{min-height:100vh;padding-bottom:76px}
+.top{
+height:64px;position:sticky;top:0;z-index:20;
+background:rgba(11,11,12,.92);
+backdrop-filter:blur(18px);
+border-bottom:1px solid var(--line);
+display:flex;align-items:center;
+justify-content:space-between;padding:0 16px
+}
+.logo{font-size:22px;font-weight:900;letter-spacing:-1px}
+.topbuttons{display:flex}
+.ib{
+width:42px;height:42px;border:0;background:none;
+display:grid;place-items:center;font-size:27px
+}
+.content{max-width:var(--max);margin:auto}
+
+.stories{
+padding:16px;border-bottom:1px solid var(--line)
+}
+.storyrow{
+display:flex;gap:17px;overflow:auto;scrollbar-width:none
+}
+.storyrow::-webkit-scrollbar{display:none}
+.story{min-width:66px;text-align:center}
+.ring{
+width:62px;height:62px;padding:3px;border-radius:50%;
+margin:auto;
+background:linear-gradient(135deg,#ffd600,#ff3040,#c000ff)
+}
+.avatar{
+width:100%;height:100%;border-radius:50%;
+background:var(--card2);display:grid;
+place-items:center;overflow:hidden;font-weight:800
+}
+.avatar img,.postavatar img,.profileavatar img,.chatavatar img{
+width:100%;height:100%;object-fit:cover
+}
+.storyname{
+font-size:11px;margin-top:7px;
+white-space:nowrap;overflow:hidden;text-overflow:ellipsis
+}
+
+.post{border-bottom:1px solid var(--line)}
+.posthead{
+display:flex;align-items:center;gap:10px;padding:14px 15px
+}
+.postavatar{
+width:40px;height:40px;border-radius:50%;
+background:var(--card2);display:grid;
+place-items:center;overflow:hidden;flex:none;font-weight:800
+}
+.author{flex:1;min-width:0}
+.author strong{display:block;font-size:14px}
+.author span{font-size:12px;color:var(--muted)}
+
+.postmedia{
+display:block;width:100%;max-height:760px;
+background:#000;object-fit:contain
+}
+.postimage{aspect-ratio:1/1;object-fit:cover}
+.posttext{
+padding:17px 16px;font-size:15px;
+line-height:1.5;white-space:pre-wrap
+}
+.actions{
+display:flex;align-items:center;padding:7px 10px
+}
+.action{
+width:42px;height:42px;border:0;
+background:none;font-size:25px
+}
+.liked{color:var(--danger)}
+.save{margin-left:auto}
+.postinfo{padding:0 16px 17px}
+.likes{font-size:13px;font-weight:800;margin-bottom:6px}
+.caption{font-size:14px;line-height:1.45}
+.caption b{margin-right:5px}
+.meta{font-size:12px;color:var(--muted);margin-top:8px}
+.empty{text-align:center;color:var(--muted);padding:70px 25px}
+
+.bottom{
+position:fixed;z-index:30;left:0;right:0;bottom:0;
+height:64px;background:rgba(11,11,12,.95);
+backdrop-filter:blur(18px);
+border-top:1px solid var(--line);
+display:flex;justify-content:space-around;align-items:center
+}
+.nav{
+width:54px;height:54px;border:0;background:none;
+color:#999;font-size:26px
+}
+.nav.active{color:#fff}
+
+.panel{
+position:fixed;inset:0;z-index:50;
+background:var(--bg);overflow:auto
+}
+.panelhead{
+height:64px;position:sticky;top:0;z-index:2;
+background:rgba(11,11,12,.96);
+backdrop-filter:blur(16px);
+border-bottom:1px solid var(--line);
+display:flex;align-items:center;gap:8px;padding:0 14px
+}
+.panelhead h2{font-size:18px}
+.panelbody{
+width:min(var(--max),100%);
+margin:auto;padding:18px 16px 40px
+}
+.search{
+width:100%;padding:13px 15px;
+border:1px solid var(--line);
+background:var(--card);
+border-radius:12px;outline:0;margin-bottom:14px
+}
+
+.userrow,.chatrow{
+display:flex;align-items:center;gap:12px;
+padding:12px 2px;border-bottom:1px solid var(--line)
+}
+.userrow{cursor:pointer}
+.userrow .avatar,.chatavatar{
+width:48px;height:48px;flex:none
+}
+.userinfo,.chatinfo{flex:1;min-width:0}
+.userinfo span,.chatinfo span{
+display:block;color:var(--muted);font-size:12px
+}
+.follow{
+border:1px solid var(--line);
+background:#fff;color:#000;
+border-radius:9px;padding:8px 12px;font-weight:800
+}
+.following{background:none;color:#fff}
+
+.profiletop{padding:20px 0}
+.profileline{
+display:flex;gap:18px;align-items:center
+}
+.profileavatar{
+width:92px;height:92px;border-radius:50%;
+background:var(--card2);display:grid;
+place-items:center;overflow:hidden;
+font-size:28px;font-weight:900;flex:none
+}
+.profilemain{flex:1}
+.profilemain h2{font-size:21px}
+.profilemain p{
+color:var(--muted);font-size:13px;
+margin-top:4px;white-space:pre-wrap
+}
+.stats{
+display:flex;gap:20px;margin-top:13px;font-size:13px
+}
+.profilebuttons{
+display:flex;gap:8px;margin-top:18px
+}
+.profilebuttons button{
+flex:1;padding:10px;
+border:1px solid var(--line);
+background:none;border-radius:9px;font-weight:800
+}
+.grid{
+display:grid;grid-template-columns:repeat(3,1fr);
+gap:2px;margin:0 -16px
+}
+.griditem{
+aspect-ratio:1;background:var(--card);overflow:hidden
+}
+.griditem img,.griditem video{
+width:100%;height:100%;object-fit:cover
+}
+
+.setting{
+width:100%;padding:18px 3px;
+border:0;border-bottom:1px solid var(--line);
+background:none;text-align:left;
+display:flex;justify-content:space-between
+}
+.setting span{color:var(--muted)}
+
+.modal{
+position:fixed;inset:0;z-index:80;
+background:rgba(0,0,0,.7);
+display:grid;place-items:end
+}
+.sheet{
+width:min(680px,100%);
+max-height:90vh;overflow:auto;
+background:var(--bg);
+border-radius:20px 20px 0 0;
+border:1px solid var(--line);
+padding:16px 16px 28px
+}
+.option{
+width:100%;padding:18px;margin:6px 0;
+text-align:left;border:1px solid var(--line);
+background:var(--card);border-radius:13px
+}
+.option b{display:block}
+.option span{color:var(--muted);font-size:12px}
+
+.comment{
+display:flex;gap:8px;margin:9px 0;font-size:13px
+}
+.commentform{
+display:flex;gap:8px;margin-top:12px
+}
+.commentform input{
+flex:1;min-width:0;padding:10px 13px;
+border:1px solid var(--line);
+background:var(--card);border-radius:20px;outline:0
+}
+.commentform button{
+border:0;background:#fff;color:#000;
+border-radius:20px;padding:0 15px;font-weight:800
+}
+
+.chatview{
+position:fixed;inset:0;z-index:70;
+background:var(--bg);display:flex;flex-direction:column
+}
+.messages{flex:1;overflow:auto;padding:14px}
+.bubble{
+max-width:78%;padding:9px 12px;
+border-radius:17px;margin:5px 0;
+font-size:14px;white-space:pre-wrap
+}
+.mine{
+margin-left:auto;background:#fff;color:#000;
+border-bottom-right-radius:5px
+}
+.theirs{
+background:var(--card2);
+border-bottom-left-radius:5px
+}
+.chatinput{
+display:flex;gap:8px;padding:10px;
+border-top:1px solid var(--line);
+padding-bottom:max(10px,env(safe-area-inset-bottom))
+}
+.chatinput input{
+flex:1;padding:11px 14px;
+border:1px solid var(--line);
+background:var(--card);border-radius:22px;outline:0
+}
+.chatinput button{
+border:0;background:#fff;color:#000;
+border-radius:22px;padding:0 16px;font-weight:800
+}
+
+.reel video{
+width:100%;max-height:80vh;
+background:#000;display:block
+}
+.storyviewer{
+position:fixed;inset:0;z-index:90;
+background:#000;display:grid;place-items:center
+}
+.storyviewer img,.storyviewer video{
+max-width:100%;max-height:100%;object-fit:contain
+}
+.storycaption{
+position:absolute;bottom:25px;left:15px;right:15px;
+padding:12px;background:rgba(0,0,0,.5);
+border-radius:12px
+}
+
+@media(min-width:800px){
+.bottom{
+width:520px;left:50%;right:auto;
+transform:translateX(-50%);bottom:14px;
+border:1px solid var(--line);border-radius:20px
+}
+.app{padding-bottom:100px}
+}
+</style>
+</head>
+<body>
+
+<div id="toast"></div>
+
+<section id="auth" class="auth">
+ <div class="authbox">
+  <div class="brand">ZILNET</div>
+  <div class="tag">Create. Connect. Discover.</div>
+
+  <div class="tabs">
+   <button id="loginTab" class="on"
+    onclick="authMode('login')">Log in</button>
+   <button id="signupTab"
+    onclick="authMode('signup')">Create account</button>
+  </div>
+
+  <form id="loginForm">
+   <input id="identity" class="field"
+    placeholder="Username or email" required>
+   <input id="password" class="field"
+    type="password" placeholder="Password" required>
+   <button class="primary">Log in</button>
+  </form>
+
+  <form id="signupForm" class="hidden">
+   <input id="username" class="field"
+    placeholder="Username" required>
+   <input id="email" class="field"
+    type="email" placeholder="Email (optional)">
+   <input id="newPassword" class="field"
+    type="password" placeholder="Password" required>
+   <button class="primary">Create account</button>
+  </form>
+
+  <div class="note">
+   Real authentication, profiles and content use the Zilnet Worker.
+  </div>
+ </div>
+</section>
+
+<div id="app" class="app hidden">
+
+ <header class="top">
+  <div class="logo">ZILNET</div>
+  <div class="topbuttons">
+   <button class="ib" onclick="createMenu()">＋</button>
+   <button class="ib" onclick="notifications()">♡</button>
+  </div>
+ </header>
+
+ <main id="home" class="content"></main>
+
+ <nav class="bottom">
+  <button id="homeNav" class="nav active"
+   onclick="home()">⌂</button>
+  <button id="searchNav" class="nav"
+   onclick="searchPanel()">⌕</button>
+  <button class="nav"
+   onclick="createMenu()">＋</button>
+  <button id="chatNav" class="nav"
+   onclick="chats()">◇</button>
+  <button id="profileNav" class="nav"
+   onclick="myProfile()">○</button>
+ </nav>
+</div>
+
+<div id="panel"></div>
+<div id="modal"></div>
+
+<div class="hidden">
+ <input id="storyPicker" type="file"
+  accept="image/*,video/*">
+ <input id="reelPicker" type="file"
+  accept="video/*">
+</div>
+
+<script>
+const API='/api';
+
+let me=null;
+let feed=[];
+let chatId=null;
+let poll=null;
+
+const $=x=>document.getElementById(x);
+
+const esc=x=>String(x??'').replace(
+ /[&<>"']/g,
+ m=>({
+  '&':'&amp;',
+  '<':'&lt;',
+  '>':'&gt;',
+  '"':'&quot;',
+  "'":'&#039;'
+ }[m])
+);
+
+const toast=x=>{
+ let t=$('toast');
+ t.textContent=x;
+ t.classList.add('show');
+ clearTimeout(toast.t);
+ toast.t=setTimeout(
+  ()=>t.classList.remove('show'),
+  2200
+ );
+};
+
+const initial=u=>
+ (u?.display_name||u?.username||'?')
+ .slice(0,1).toUpperCase();
+
+const av=(u,c='avatar')=>
+ u?.avatar_url
+ ?`<div class="${c}">
+    <img src="${esc(u.avatar_url)}">
+   </div>`
+ :`<div class="${c}">
+    ${esc(initial(u))}
+   </div>`;
+
+async function api(path,opt={}){
+ let r=await fetch(
+  API+path,
+  {
+   credentials:'include',
+   ...opt
+  }
+ );
+
+ let d=null;
+
+ try{
+  d=await r.json();
+ }catch{}
+
+ if(!r.ok)
+  throw Error(
+   d?.error||
+   d?.message||
+   `Request failed (${r.status})`
+  );
+
+ return d;
+}
+
+function nav(id){
+ document.querySelectorAll('.nav')
+ .forEach(x=>x.classList.remove('active'));
+
+ if(id)
+  $(id+'Nav')?.classList.add('active');
+}
+
+function authMode(m){
+ $('loginForm')
+  .classList.toggle('hidden',m!='login');
+
+ $('signupForm')
+  .classList.toggle('hidden',m!='signup');
+
+ $('loginTab')
+  .classList.toggle('on',m=='login');
+
+ $('signupTab')
+  .classList.toggle('on',m=='signup');
+}
+
+$('loginForm').onsubmit=async e=>{
+ e.preventDefault();
+
+ try{
+  await api('/login',{
+   method:'POST',
+   headers:{
+    'Content-Type':'application/json'
+   },
+   body:JSON.stringify({
+    username:$('identity').value.trim(),
+    email:$('identity').value.trim(),
+    password:$('password').value
+   })
+  });
+
+  boot();
+ }catch(x){
+  toast(x.message);
+ }
+};
+
+$('signupForm').onsubmit=async e=>{
+ e.preventDefault();
+
+ try{
+  await api('/signup',{
+   method:'POST',
+   headers:{
+    'Content-Type':'application/json'
+   },
+   body:JSON.stringify({
+    username:$('username').value.trim(),
+    email:$('email').value.trim(),
+    password:$('newPassword').value
+   })
+  });
+
+  boot();
+ }catch(x){
+  toast(x.message);
+ }
+};
+
+async function boot(){
+ try{
+  let r=await api('/me');
+
+  me=r?.user||r;
+
+  $('auth').classList.add('hidden');
+  $('app').classList.remove('hidden');
+
+  home();
+ }catch{
+  $('auth').classList.remove('hidden');
+  $('app').classList.add('hidden');
+ }
+}
+
+async function logout(){
+ try{
+  await api('/logout',{
+   method:'POST'
+  });
+ }catch{}
+
+ me=null;
+
+ $('app').classList.add('hidden');
+ $('auth').classList.remove('hidden');
+}
+
+async function home(){
+ nav('home');
+ closeUI();
+
+ try{
+  let r=await api('/feed');
+
+  feed=r?.posts||r?.feed||[];
+
+  renderFeed();
+  stories();
+ }catch(x){
+  $('home').innerHTML=
+   `<div class="empty">
+    ${esc(x.message)}
+   </div>`;
+ }
+}
+
+function renderFeed(){
+ if(!feed.length){
+  $('home').innerHTML=
+   '<div class="empty">'+
+   '<h3>Your feed is empty</h3>'+
+   '<p style="margin-top:8px">'+
+   'Follow people or create the first post.'+
+   '</p></div>';
+
+  return;
+ }
+
+ $('home').innerHTML=
+  feed.map(post).join('');
+}
+
+function post(p){
+ let u=p.user||p.author||{
+  username:p.username,
+  display_name:p.display_name,
+  avatar_url:p.avatar_url
+ };
+
+ let m=p.media_url||'';
+ let type=p.media_type||'';
+
+ let liked=!!(
+  p.liked||
+  p.is_liked
+ );
+
+ let saved=!!(
+  p.saved||
+  p.is_saved
+ );
+
+ let media=m
+ ?(
+  type.startsWith('video')||
+  /\.(mp4|webm|mov|m4v)(\?|$)/i.test(m)
+  ?
+  `<video class="postmedia"
+   src="${esc(url(m))}"
+   controls
+   playsinline
+   preload="metadata"></video>`
+  :
+  `<img class="postmedia postimage"
+   src="${esc(url(m))}"
+   loading="lazy">`
+ )
+ :'';
+
+ return `
+ <article class="post" id="post-${p.id}">
+
+  <div class="posthead">
+
+   ${av(u,'postavatar')}
+
+   <div class="author">
+    <strong>
+     ${esc(u.display_name||u.username)}
+    </strong>
+
+    <span>
+     @${esc(u.username||'')}
+    </span>
+   </div>
+
+   <button class="ib"
+    onclick="postMenu(${p.id},${p.user_id||u.id})">
+    ⋯
+   </button>
+
+  </div>
+
+  ${media}
+
+  ${
+   p.content
+   ?`<div class="posttext">
+      ${esc(p.content)}
+     </div>`
+   :''
+  }
+
+  <div class="actions">
+
+   <button
+    class="action ${liked?'liked':''}"
+    onclick="like(${p.id},this)">
+    ♡
+   </button>
+
+   <button
+    class="action"
+    onclick="comments(${p.id})">
+    ◯
+   </button>
+
+   <button
+    class="action"
+    onclick="share(${p.id})">
+    ➤
+   </button>
+
+   <button
+    class="action save ${saved?'liked':''}"
+    onclick="save(${p.id},this)">
+    ▢
+   </button>
+
+  </div>
+
+  <div class="postinfo">
+
+   <div class="likes">
+    ${Number(p.likes_count??p.likes??0)} likes
+   </div>
+
+   <div class="caption">
+    <b>${esc(u.username||'')}</b>
+    ${esc(p.content||'')}
+   </div>
+
+   <div class="meta">
+    ${esc(p.created_at||'')}
+   </div>
+
+  </div>
+
+ </article>`;
+}
+
+const url=x=>
+ x.startsWith('http')||
+ x.startsWith('/')
+ ?x
+ :x;
+async function like(id,b){
+ try{
+  let r=await api(
+   `/posts/${id}/like`,
+   {method:'POST'}
+  );
+
+  b.classList.toggle(
+   'liked',
+   !!r?.liked
+  );
+
+  b.closest('.post')
+   .querySelector('.likes')
+   .textContent=
+   `${Number(
+    r?.likes_count??r?.count??0
+   )} likes`;
+
+ }catch(x){
+  toast(x.message);
+ }
+}
+
+async function save(id,b){
+ try{
+  let r=await api(
+   `/posts/${id}/save`,
+   {method:'POST'}
+  );
+
+  b.classList.toggle(
+   'liked',
+   !!r?.saved
+  );
+
+  toast(
+   r?.saved
+   ?'Saved'
+   :'Removed'
+  );
+
+ }catch(x){
+  toast(x.message);
+ }
+}
+
+async function share(id){
+ let u=new URL(location.href);
+
+ u.hash='post-'+id;
+
+ try{
+  if(navigator.share){
+   await navigator.share({
+    title:'Zilnet post',
+    url:u.href
+   });
+  }else{
+   await navigator.clipboard
+    .writeText(u.href);
+
+   toast('Link copied');
+  }
+ }catch{}
+}
+
+async function comments(id){
+ try{
+  let r=await api(
+   `/posts/${id}/comments`
+  );
+
+  let cs=r?.comments||r||[];
+
+  $('modal').innerHTML=`
+   <div class="modal"
+    onclick="if(event.target===this)closeModal()">
+
+    <div class="sheet">
+
+     <h3>Comments</h3>
+
+     <div id="commentList">
+      ${cs.map(c=>`
+       <div class="comment">
+        <b>
+         ${esc(
+          c.username||
+          c.user?.username||
+          'user'
+         )}
+        </b>
+
+        <span>
+         ${esc(c.content)}
+        </span>
+       </div>
+      `).join('')}
+     </div>
+
+     <form
+      class="commentform"
+      onsubmit="sendComment(event,${id})">
+
+      <input
+       id="commentInput"
+       placeholder="Write a comment…"
+       required>
+
+      <button>
+       Send
+      </button>
+
+     </form>
+
+    </div>
+   </div>`;
+
+  $('commentInput').focus();
+
+ }catch(x){
+  toast(x.message);
+ }
+}
+
+async function sendComment(e,id){
+ e.preventDefault();
+
+ let i=$('commentInput');
+
+ try{
+  let r=await api(
+   `/posts/${id}/comments`,
+   {
+    method:'POST',
+    headers:{
+     'Content-Type':
+     'application/json'
+    },
+    body:JSON.stringify({
+     content:i.value.trim()
+    })
+   }
+  );
+
+  let c=r?.comment||r;
+
+  $('commentList')
+   .insertAdjacentHTML(
+    'beforeend',
+    `<div class="comment">
+     <b>${esc(me.username)}</b>
+     <span>
+      ${esc(c.content||i.value)}
+     </span>
+    </div>`
+   );
+
+  i.value='';
+
+ }catch(x){
+  toast(x.message);
+ }
+}
+
+async function stories(){
+ try{
+  let r=await api(
+   '/stories/feed'
+  );
+
+  let s=r?.stories||r||[];
+
+  let groups={};
+
+  s.forEach(x=>{
+   let u=x.user||{
+    username:x.username,
+    avatar_url:x.avatar_url
+   };
+
+   (groups[u.username]??=[]).push(x);
+  });
+
+  let h=`
+   <section class="stories">
+
+    <div style="
+     font-size:12px;
+     font-weight:800;
+     color:var(--muted);
+     margin-bottom:13px">
+     STORIES
+    </div>
+
+    <div class="storyrow">
+
+     <div class="story"
+      onclick="pick('story')">
+
+      <div class="ring">
+       <div class="avatar">＋</div>
+      </div>
+
+      <div class="storyname">
+       Your story
+      </div>
+
+     </div>
+
+     ${
+      Object.values(groups)
+      .map(a=>{
+       let u=a[0].user||{
+        username:a[0].username,
+        avatar_url:a[0].avatar_url
+       };
+
+       return `
+        <div
+         class="story"
+         onclick='viewStory(
+          ${JSON.stringify(a)
+           .replace(/'/g,"&#39;")}
+         )'>
+
+         <div class="ring">
+          ${av(u)}
+         </div>
+
+         <div class="storyname">
+          ${esc(u.username)}
+         </div>
+
+        </div>`;
+      }).join('')
+     }
+
+    </div>
+   </section>`;
+
+  $('home')
+   .insertAdjacentHTML(
+    'afterbegin',
+    h
+   );
+
+ }catch{}
+}
+
+function viewStory(a){
+ let s=a[0];
+ let m=s.media_url||'';
+
+ let v=
+  (s.media_type||'')
+  .startsWith('video');
+
+ let x=v
+ ?`<video
+    src="${esc(url(m))}"
+    autoplay
+    controls
+    playsinline>
+   </video>`
+ :`<img
+    src="${esc(url(m))}">`;
+
+ $('modal').innerHTML=`
+  <div
+   class="storyviewer"
+   onclick="closeModal()">
+
+   ${x}
+
+   <div class="storycaption">
+    <b>
+     @${esc(
+      s.user?.username||
+      s.username
+     )}
+    </b>
+    <br>
+    ${esc(s.content||'')}
+   </div>
+
+  </div>`;
+}
+
+function createMenu(){
+ $('modal').innerHTML=`
+  <div
+   class="modal"
+   onclick="if(event.target===this)closeModal()">
+
+   <div class="sheet">
+
+    <h3>Create</h3>
+
+    <button
+     class="option"
+     onclick="newPost()">
+
+     <b>Create post</b>
+
+     <span>
+      Photo, video or text
+     </span>
+
+    </button>
+
+    <button
+     class="option"
+     onclick="pick('story')">
+
+     <b>Create story</b>
+
+     <span>
+      Photo or video
+     </span>
+
+    </button>
+
+    <button
+     class="option"
+     onclick="pick('reel')">
+
+     <b>Create reel</b>
+
+     <span>
+      Video
+     </span>
+
+    </button>
+
+   </div>
+  </div>`;
+}
+
+function newPost(){
+ $('modal').innerHTML=`
+  <div class="modal">
+
+   <div class="sheet">
+
+    <h3>New post</h3>
+
+    <textarea
+     id="postText"
+     class="field"
+     placeholder="Write something…">
+    </textarea>
+
+    <input
+     id="postFile"
+     class="field"
+     type="file"
+     accept="image/*,video/*">
+
+    <button
+     class="primary"
+     onclick="sendPost()">
+     Post
+    </button>
+
+   </div>
+  </div>`;
+}
+
+async function upload(f){
+ let fd=new FormData();
+
+ fd.append(
+  'file',
+  f,
+  f.name
+ );
+
+ let r=await api(
+  '/upload',
+  {
+   method:'POST',
+   body:fd
+  }
+ );
+
+ return r?.url||
+        r?.media_url||
+        r?.mediaUrl||
+        r?.key;
+}
+
+async function sendPost(){
+ try{
+  let f=$('postFile').files[0];
+
+  let m='';
+
+  if(f)
+   m=await upload(f);
+
+  await api(
+   '/posts',
+   {
+    method:'POST',
+    headers:{
+     'Content-Type':
+     'application/json'
+    },
+    body:JSON.stringify({
+     content:
+      $('postText')
+      .value.trim(),
+
+     media_url:m,
+
+     media_type:
+      f?.type||''
+    })
+   }
+  );
+
+  closeModal();
+
+  toast('Posted');
+
+  home();
+
+ }catch(x){
+  toast(x.message);
+ }
+}
+
+function pick(k){
+ closeModal();
+
+ let i=$(
+  k==='story'
+  ?'storyPicker'
+  :'reelPicker'
+ );
+
+ i.value='';
+
+ i.onchange=()=>{
+  k==='story'
+  ?sendStory(i.files[0])
+  :sendReel(i.files[0]);
+ };
+
+ /*
+  This directly opens the device
+  photo/video picker.
+ */
+ i.click();
+}
+
+async function sendStory(f){
+ if(!f)return;
+
+ try{
+  let m=await upload(f);
+
+  await api(
+   '/stories',
+   {
+    method:'POST',
+    headers:{
+     'Content-Type':
+     'application/json'
+    },
+    body:JSON.stringify({
+     content:'',
+     media_url:m,
+     media_type:f.type
+    })
+   }
+  );
+
+  toast('Story added');
+
+  home();
+
+ }catch(x){
+  toast(x.message);
+ }
+}
+
+async function sendReel(f){
+ if(!f)return;
+
+ try{
+  let m=await upload(f);
+
+  await api(
+   '/reels',
+   {
+    method:'POST',
+    headers:{
+     'Content-Type':
+     'application/json'
+    },
+    body:JSON.stringify({
+     caption:'',
+     media_url:m,
+     video_url:m
+    })
+   }
+  );
+
+  toast('Reel added');
+
+  reels();
+
+ }catch(x){
+  toast(x.message);
+ }
+}
+
+function openPanel(title,body){
+ $('panel').innerHTML=`
+  <section class="panel">
+
+   <div class="panelhead">
+
+    <button
+     class="ib"
+     onclick="closeUI()">
+     ‹
+    </button>
+
+    <h2>
+     ${esc(title)}
+    </h2>
+
+   </div>
+
+   <div class="panelbody">
+    ${body}
+   </div>
+
+  </section>`;
+}
+
+function closeUI(){
+ clearInterval(poll);
+ chatId=null;
+
+ $('panel').innerHTML='';
+ $('modal').innerHTML='';
+}
+
+function closeModal(){
+ $('modal').innerHTML='';
+}
+
+function searchPanel(){
+ nav('search');
+
+ openPanel(
+  'Search',
+  `
+  <input
+   id="q"
+   class="search"
+   placeholder="Search people, skills or work">
+
+  <div id="results"></div>
+  `
+ );
+
+ $('q').oninput=()=>doSearch();
+
+ $('q').focus();
+}
+
+let st;
+
+async function doSearch(){
+ clearTimeout(st);
+
+ st=setTimeout(
+  async()=>{
+   let q=$('q')
+    .value.trim();
+
+   if(!q)return;
+
+   if(!$('results'))return;
+
+   try{
+    let r=await api(
+     '/search?q='+
+     encodeURIComponent(q)
+    );
+
+    let us=
+     r?.users||
+     r?.results||
+     [];
+
+    $('results').innerHTML=
+     us.map(user=>`
+      <div
+       class="userrow"
+       onclick="userProfile(
+        '${encodeURIComponent(
+         user.username
+        )}'
+       )">
+
+       ${av(user)}
+
+       <div class="userinfo">
+
+        <strong>
+         ${esc(
+          user.display_name||
+          user.username
+         )}
+        </strong>
+
+        <span>
+         @${esc(
+          user.username||''
+         )}
+
+         ${
+          user.skills
+          ?' · '+esc(user.skills)
+          :''
+         }
+        </span>
+
+       </div>
+
+       ${
+        Number(user.id)!==
+        Number(me.id)
+        ?
+        `<button
+         class="follow ${
+          user.following
+          ?'following'
+          :''
+         }"
+         onclick="
+          event.stopPropagation();
+          follow(${user.id},this)
+         ">
+         ${
+          user.following
+          ?'Following'
+          :'Follow'
+         }
+        </button>`
+        :''
+       }
+
+      </div>
+     `).join('')||
+     '<div class="empty">No results.</div>';
+
+   }catch(x){
+    toast(x.message);
+   }
+
+  },
+  250
+ );
+}
+
+async function follow(id,b){
+ try{
+  let r=await api(
+   `/users/${id}/follow`,
+   {method:'POST'}
+  );
+
+  b.textContent=
+   r?.following
+   ?'Following'
+   :'Follow';
+
+  b.classList.toggle(
+   'following',
+   !!r?.following
+  );
+
+ }catch(x){
+  toast(x.message);
+ }
+}
+  async function myProfile(){
+ nav('profile');
+
+ await userProfile(
+  encodeURIComponent(
+   me.username
+  ),
+  true
+ );
+}
+
+async function userProfile(
+ un,
+ own=false
+){
+ try{
+  let r=await api(
+   `/profile/${decodeURIComponent(un)}`
+  );
+
+  let u=
+   r?.user||
+   r?.profile||
+   r;
+
+  let ps=r?.posts||[];
+
+  openPanel(
+   u.username||'Profile',
+   profileHTML(u,ps,own)
+  );
+
+ }catch(x){
+  toast(x.message);
+ }
+}
+
+function profileHTML(u,ps,own){
+ return `
+ <div class="profiletop">
+
+  <div class="profileline">
+
+   ${av(u,'profileavatar')}
+
+   <div class="profilemain">
+
+    <h2>
+     ${esc(
+      u.display_name||
+      u.username
+     )}
+    </h2>
+
+    <p>
+     @${esc(u.username)}
+     ${
+      u.bio
+      ?'\\n'+esc(u.bio)
+      :''
+     }
+    </p>
+
+    <div class="stats">
+
+     <span>
+      <b>${ps.length}</b>
+      posts
+     </span>
+
+     <span>
+      <b>
+       ${Number(
+        u.followers_count??
+        u.followers??
+        0
+       )}
+      </b>
+      followers
+     </span>
+
+     <span>
+      <b>
+       ${Number(
+        u.following_count??
+        u.following??
+        0
+       )}
+      </b>
+      following
+     </span>
+
+    </div>
+
+   </div>
+
+  </div>
+
+  <div class="profilebuttons">
+
+   ${
+    own
+    ?
+    `
+    <button
+     onclick="editProfile()">
+     Edit profile
+    </button>
+
+    <button
+     onclick="settings()">
+     Settings
+    </button>
+    `
+    :
+    `
+    <button
+     onclick="follow(${u.id},this)">
+     ${
+      u.following
+      ?'Following'
+      :'Follow'
+     }
+    </button>
+
+    <button
+     onclick="startChat(${u.id})">
+     Message
+    </button>
+    `
+   }
+
+  </div>
+
+ </div>
+
+ <div class="grid">
+
+ ${
+  ps.map(p=>{
+   let m=p.media_url||'';
+
+   return `
+    <div
+     class="griditem"
+     onclick="single(${p.id})">
+
+     ${
+      m
+      ?
+      (
+       (p.media_type||'')
+       .startsWith('video')
+       ?
+       `<video
+        src="${esc(url(m))}"
+        muted>
+       </video>`
+       :
+       `<img
+        src="${esc(url(m))}">
+       `
+      )
+      :
+      `
+       <div
+        style="
+         padding:10px;
+         font-size:12px">
+        ${esc(p.content||'')}
+       </div>
+      `
+     }
+
+    </div>`;
+  }).join('')
+ }
+
+ </div>`;
+}
+
+async function single(id){
+ try{
+  let r=await api(
+   '/posts/'+id
+  );
+
+  let p=r?.post||r;
+
+  closeUI();
+
+  $('home').innerHTML=
+   post(p);
+
+ }catch(x){
+  toast(x.message);
+ }
+}
+
+function editProfile(){
+ $('modal').innerHTML=`
+  <div class="modal">
+
+   <div class="sheet">
+
+    <h3>Edit profile</h3>
+
+    <input
+     id="ename"
+     class="field"
+     placeholder="Display name"
+     value="${esc(
+      me.display_name||''
+     )}">
+
+    <textarea
+     id="ebio"
+     class="field"
+     placeholder="Bio">${esc(
+      me.bio||''
+     )}</textarea>
+
+    <input
+     id="eskills"
+     class="field"
+     placeholder="Skills"
+     value="${esc(
+      me.skills||''
+     )}">
+
+    <button
+     class="primary"
+     onclick="saveProfile()">
+     Save
+    </button>
+
+   </div>
+
+  </div>`;
+}
+
+async function saveProfile(){
+ try{
+  let r=await api(
+   '/profile/update',
+   {
+    method:'POST',
+    headers:{
+     'Content-Type':
+     'application/json'
+    },
+    body:JSON.stringify({
+     display_name:
+      $('ename').value,
+
+     bio:
+      $('ebio').value,
+
+     skills:
+      $('eskills').value
+    })
+   }
+  );
+
+  me={
+   ...me,
+   ...(r?.user||r)
+  };
+
+  closeModal();
+
+  toast('Profile updated');
+
+  myProfile();
+
+ }catch(x){
+  toast(x.message);
+ }
+}
+
+async function settings(){
+ try{
+  let r=await api(
+   '/settings'
+  );
+
+  let s=
+   r?.settings||
+   r||
+   {};
+
+  openPanel(
+   'Settings',
+   `
+   <div class="setting">
+    Profile visibility
+    <span>
+     ${esc(
+      s.profile_visibility||
+      'public'
+     )}
+    </span>
+   </div>
+
+   <button
+    class="setting"
+    onclick="editSettings()">
+    Privacy
+    <span>›</span>
+   </button>
+
+   <button
+    class="setting"
+    onclick="theme()">
+    Appearance
+    <span>Dark / Light</span>
+   </button>
+
+   <button
+    class="setting"
+    onclick="logout()">
+    Log out
+    <span>›</span>
+   </button>
+   `
+  );
+
+ }catch(x){
+  toast(x.message);
+ }
+}
+
+function editSettings(){
+ $('modal').innerHTML=`
+  <div class="modal">
+
+   <div class="sheet">
+
+    <h3>Privacy</h3>
+
+    <select
+     id="visibility"
+     class="field">
+
+     <option value="public">
+      Public profile
+     </option>
+
+     <option value="private">
+      Private profile
+     </option>
+
+    </select>
+
+    <select
+     id="messages"
+     class="field">
+
+     <option value="everyone">
+      Messages: everyone
+     </option>
+
+     <option value="followers">
+      Messages: followers
+     </option>
+
+    </select>
+
+    <button
+     class="primary"
+     onclick="saveSettings()">
+     Save
+    </button>
+
+   </div>
+
+  </div>`;
+}
+
+async function saveSettings(){
+ try{
+  await api(
+   '/settings',
+   {
+    method:'POST',
+    headers:{
+     'Content-Type':
+     'application/json'
+    },
+    body:JSON.stringify({
+     profile_visibility:
+      $('visibility').value,
+
+     message_privacy:
+      $('messages').value
+    })
+   }
+  );
+
+  closeModal();
+
+  toast('Settings saved');
+
+ }catch(x){
+  toast(x.message);
+ }
+}
+
+function theme(){
+ let l=
+  localStorage.getItem(
+   'zilnet-theme'
+  )==='light';
+
+ localStorage.setItem(
+  'zilnet-theme',
+  l?'dark':'light'
+ );
+
+ location.reload();
+}
+
+async function notifications(){
+ openPanel(
+  'Notifications',
+  '<div id="notes">Loading…</div>'
+ );
+
+ try{
+  let r=await api(
+   '/notifications'
+  );
+
+  let n=
+   r?.notifications||
+   r||
+   [];
+
+  $('notes').innerHTML=
+   n.map(x=>`
+    <div class="userrow">
+
+     <div class="avatar">
+      ♡
+     </div>
+
+     <div class="userinfo">
+
+      <strong>
+       ${esc(
+        x.actor_username||
+        x.actor?.username||
+        'Zilnet'
+       )}
+      </strong>
+
+      <span>
+       ${esc(
+        x.type||
+        'notification'
+       )}
+       ·
+       ${esc(
+        x.created_at||
+        ''
+       )}
+      </span>
+
+     </div>
+
+    </div>
+   `).join('')||
+   '<div class="empty">No notifications.</div>';
+
+  api(
+   '/notifications/read',
+   {method:'POST'}
+  ).catch(()=>{});
+
+ }catch(x){
+  toast(x.message);
+ }
+}
+
+async function chats(){
+ nav('chat');
+
+ openPanel(
+  'Chats',
+  `
+  <input
+   id="chatq"
+   class="search"
+   placeholder="Search chats">
+
+  <div id="chatList">
+   Loading…
+  </div>
+
+  <button
+   class="primary"
+   onclick="newChat()"
+   style="margin-top:14px">
+   New chat
+  </button>
+  `
+ );
+
+ try{
+  let r=await api(
+   '/chats'
+  );
+
+  let cs=
+   r?.chats||
+   r||
+   [];
+
+  $('chatList').innerHTML=
+   cs.map(c=>`
+    <div
+     class="chatrow"
+     onclick="chat(${c.id})">
+
+     <div class="chatavatar">
+      ${esc(
+       (c.name||'C')
+       .slice(0,1)
+       .toUpperCase()
+      )}
+     </div>
+
+     <div class="chatinfo">
+
+      <strong>
+       ${esc(
+        c.name||
+        'Chat'
+       )}
+      </strong>
+
+      <span>
+       ${esc(
+        c.last_message||
+        c.lastMessage||
+        ''
+       )}
+      </span>
+
+     </div>
+
+    </div>
+   `).join('')||
+   '<div class="empty">No chats yet.</div>';
+
+ }catch(x){
+  toast(x.message);
+ }
+}
+
+async function newChat(){
+ openPanel(
+  'New chat',
+  `
+  <input
+   id="newq"
+   class="search"
+   placeholder="Search a person">
+
+  <div id="newr"></div>
+  `
+ );
+
+ $('newq').oninput=
+  async()=>{
+   let q=
+    $('newq')
+    .value
+    .trim();
+
+   if(!q)return;
+
+   try{
+    let r=await api(
+     '/search?q='+
+     encodeURIComponent(q)
+    );
+
+    $('newr').innerHTML=
+     (r?.users||[])
+     .filter(
+      x=>Number(x.id)!==
+      Number(me.id)
+     )
+     .map(u=>`
+      <div
+       class="userrow"
+       onclick="startChat(${u.id})">
+
+       ${av(u)}
+
+       <div class="userinfo">
+
+        <strong>
+         ${esc(
+          u.display_name||
+          u.username
+         )}
+        </strong>
+
+        <span>
+         @${esc(
+          u.username
+         )}
+        </span>
+
+       </div>
+
+      </div>
+     `).join('');
+
+   }catch{}
+  };
+}
+
+async function startChat(id){
+ try{
+  let r=await api(
+   '/chats',
+   {
+    method:'POST',
+    headers:{
+     'Content-Type':
+     'application/json'
+    },
+    body:JSON.stringify({
+     user_id:Number(id)
+    })
+   }
+  );
+
+  chat(
+   r?.chat?.id||
+   r?.id
+  );
+
+ }catch(x){
+  toast(x.message);
+ }
+}
+
+async function chat(id){
+ chatId=id;
+
+ try{
+  let r=await api(
+   `/chats/${id}/messages`
+  );
+
+  let ms=
+   r?.messages||
+   r||
+   [];
+
+  $('modal').innerHTML=`
+   <div class="chatview">
+
+    <div class="panelhead">
+
+     <button
+      class="ib"
+      onclick="closeModal()">
+      ‹
+     </button>
+
+     <h2>
+      Chat
+     </h2>
+
+    </div>
+
+    <div
+     id="messages"
+     class="messages">
+
+     ${ms.map(msg).join('')}
+
+    </div>
+
+    <form
+     class="chatinput"
+     onsubmit="sendMsg(event)">
+
+     <input
+      id="msg"
+      placeholder="Message…">
+
+     <button>
+      Send
+     </button>
+
+    </form>
+
+   </div>`;
+
+  $('messages').scrollTop=
+   $('messages').scrollHeight;
+
+  clearInterval(poll);
+
+  poll=setInterval(
+   ()=>refreshChat(),
+   3000
+  );
+
+ }catch(x){
+  toast(x.message);
+ }
+}
+
+const msg=m=>
+ `<div class="bubble ${
+  Number(
+   m.user_id||
+   m.sender_id
+  )===Number(me.id)
+  ?'mine'
+  :'theirs'
+ }">
+  ${esc(m.content||'')}
+ </div>`;
+
+async function refreshChat(){
+ if(!chatId||
+    !$('messages'))
+  return;
+
+ try{
+  let r=await api(
+   `/chats/${chatId}/messages`
+  );
+
+  $('messages').innerHTML=
+   (r?.messages||r||[])
+   .map(msg)
+   .join('');
+
+  $('messages').scrollTop=
+   $('messages').scrollHeight;
+
+ }catch{}
+}
+
+async function sendMsg(e){
+ e.preventDefault();
+
+ let i=$('msg');
+ let t=i.value.trim();
+
+ if(!t)return;
+
+ try{
+  await api(
+   `/chats/${chatId}/messages`,
+   {
+    method:'POST',
+    headers:{
+     'Content-Type':
+     'application/json'
+    },
+    body:JSON.stringify({
+     content:t
+    })
+   }
+  );
+
+  i.value='';
+
+  refreshChat();
+
+ }catch(x){
+  toast(x.message);
+ }
+}
+
+function reels(){
+ openPanel(
+  'Reels',
+  '<div id="reels">Loading…</div>'
+ );
+
+ loadReels();
+}
+
+async function loadReels(){
+ try{
+  let r=await api(
+   '/reels/feed'
+  );
+
+  let rs=
+   r?.reels||
+   r||
+   [];
+
+  $('reels').innerHTML=
+   rs.map(x=>`
+    <article class="reel">
+
+     <video
+      src="${esc(
+       url(
+        x.media_url||
+        x.video_url
+       )
+      )}"
+      controls
+      playsinline
+      loop>
+     </video>
+
+     <div class="postinfo">
+
+      <div class="caption">
+
+       <b>
+        @${esc(
+         x.user?.username||
+         x.username||
+         'user'
+        )}
+       </b>
+
+       ${esc(
+        x.caption||''
+       )}
+
+      </div>
+
+     </div>
+
+    </article>
+   `).join('')||
+   '<div class="empty">No reels yet.</div>';
+
+ }catch(x){
+  toast(x.message);
+ }
+}
+
+function postMenu(id,owner){
+ if(
+  Number(owner)===
+  Number(me.id)
+ ){
+  if(
+   confirm(
+    'Delete this post?'
+   )
+  ){
+   api(
+    `/posts/${id}`,
+    {method:'DELETE'}
+   )
+   .then(home)
+   .catch(
+    x=>toast(x.message)
+   );
+  }
+ }
+}
+
+window.onhashchange=()=>{
+ let m=
+  location.hash.match(
+   /^#post-(\d+)$/
+  );
+
+ if(m)
+  single(
+   Number(m[1])
+  );
+};
+
+boot();
+</script>
+
+</body>
+</html>
