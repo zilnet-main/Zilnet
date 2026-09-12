@@ -53,23 +53,77 @@ async function hashPassword(password, saltB64=randomToken(16), iterations=120000
 }
 
 async function verifyPassword(password, stored){
-  const p=String(stored||'').split('$');
+  const p = String(stored || '').split('$');
 
-  if(p.length!==5 || p[0]!=='pbkdf2' || p[1]!=='sha256')
+  if (
+    p.length !== 5 ||
+    p[0] !== 'pbkdf2' ||
+    p[1] !== 'sha256'
+  ) {
     return false;
+  }
 
-  const iterations=Number(p[2]);
+  const iterations = Number(p[2]);
 
-  if(
+  if (
     !Number.isInteger(iterations) ||
-    iterations<10000 ||
-    iterations>1000000
-  ) return false;
+    iterations < 10000 ||
+    iterations > 1000000
+  ) {
+    return false;
+  }
 
-  const salt=p[3];
-  const got=await hashPassword(password,salt,iterations);
+  const saltB64 = p[3];
+  const expected = p[4];
 
-  return got===stored;
+  try {
+    const salt = Uint8Array.from(
+      atob(
+        saltB64
+          .replace(/-/g, '+')
+          .replace(/_/g, '/')
+          .padEnd(Math.ceil(saltB64.length / 4) * 4, '=')
+      ),
+      c => c.charCodeAt(0)
+    );
+
+    const key = await crypto.subtle.importKey(
+      'raw',
+      new TextEncoder().encode(password),
+      'PBKDF2',
+      false,
+      ['deriveBits']
+    );
+
+    const bits = await crypto.subtle.deriveBits(
+      {
+        name: 'PBKDF2',
+        salt,
+        iterations,
+        hash: 'SHA-256'
+      },
+      key,
+      256
+    );
+
+    const bytes = new Uint8Array(bits);
+
+    // Support both the original ZILNET hash format
+    // and the newer URL-safe format.
+    const standard = btoa(
+      String.fromCharCode(...bytes)
+    );
+
+    const urlSafe = standard
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+      .replace(/=+$/g, '');
+
+    return expected === standard || expected === urlSafe;
+
+  } catch {
+    return false;
+  }
 }
 
 function cookie(token, maxAge=SESSION_DAYS*86400){
