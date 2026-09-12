@@ -1,0 +1,1060 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <meta name="theme-color" content="#050509">
+
+  <title>ZILNET — Under Maintenance</title>
+
+  <link
+    rel="apple-touch-icon"
+    href="/8B3E6116-7C23-4F57-81D1-066DBE799949.jpeg"
+  >
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      min-height: 100vh;
+      font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Roboto,
+        Helvetica,
+        Arial,
+        sans-serif;
+
+      color: white;
+      overflow-x: hidden;
+
+      background:
+        #030305;
+    }
+
+    /* =========================
+       ANIMATED BACKGROUND
+    ========================= */
+
+    body::before,
+    body::after {
+      content: "";
+      position: fixed;
+      inset: -35%;
+      z-index: -3;
+      pointer-events: none;
+    }
+
+    body::before {
+      background:
+        radial-gradient(
+          circle at 20% 20%,
+          rgba(124, 58, 237, 0.55),
+          transparent 32%
+        ),
+        radial-gradient(
+          circle at 80% 25%,
+          rgba(37, 99, 235, 0.45),
+          transparent 30%
+        ),
+        radial-gradient(
+          circle at 50% 85%,
+          rgba(255, 255, 255, 0.16),
+          transparent 25%
+        ),
+        radial-gradient(
+          circle at 85% 80%,
+          rgba(76, 29, 149, 0.5),
+          transparent 28%
+        );
+
+      filter: blur(55px);
+      animation: backgroundMove 18s ease-in-out infinite alternate;
+    }
+
+    body::after {
+      background:
+        linear-gradient(
+          125deg,
+          rgba(255,255,255,0.04),
+          transparent 30%,
+          rgba(93, 33, 182, 0.12),
+          transparent 65%,
+          rgba(37,99,235,0.12)
+        );
+
+      filter: blur(20px);
+      animation: backgroundPulse 12s ease-in-out infinite;
+    }
+
+    @keyframes backgroundMove {
+      0% {
+        transform:
+          translate3d(-5%, -4%, 0)
+          scale(1);
+      }
+
+      25% {
+        transform:
+          translate3d(7%, 2%, 0)
+          scale(1.08);
+      }
+
+      50% {
+        transform:
+          translate3d(2%, 8%, 0)
+          scale(1.02);
+      }
+
+      75% {
+        transform:
+          translate3d(-7%, 3%, 0)
+          scale(1.1);
+      }
+
+      100% {
+        transform:
+          translate3d(5%, -6%, 0)
+          scale(1);
+      }
+    }
+
+    @keyframes backgroundPulse {
+      0% {
+        opacity: 0.65;
+        transform: scale(1) rotate(0deg);
+      }
+
+      50% {
+        opacity: 1;
+        transform: scale(1.08) rotate(4deg);
+      }
+
+      100% {
+        opacity: 0.65;
+        transform: scale(1) rotate(0deg);
+      }
+    }
+
+    /* =========================
+       FLOATING LIGHTS
+    ========================= */
+
+    .light {
+      position: fixed;
+      width: 260px;
+      height: 260px;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: -2;
+      filter: blur(80px);
+      opacity: 0.22;
+    }
+
+    .light.one {
+      background: #7c3aed;
+      top: 8%;
+      left: -100px;
+      animation: floatOne 15s ease-in-out infinite;
+    }
+
+    .light.two {
+      background: #2563eb;
+      right: -100px;
+      top: 35%;
+      animation: floatTwo 19s ease-in-out infinite;
+    }
+
+    .light.three {
+      background: #ffffff;
+      bottom: -130px;
+      left: 40%;
+      opacity: 0.1;
+      animation: floatThree 17s ease-in-out infinite;
+    }
+
+    @keyframes floatOne {
+      0%,100% {
+        transform: translate(0,0);
+      }
+
+      50% {
+        transform: translate(180px,140px);
+      }
+    }
+
+    @keyframes floatTwo {
+      0%,100% {
+        transform: translate(0,0);
+      }
+
+      50% {
+        transform: translate(-170px,-100px);
+      }
+    }
+
+    @keyframes floatThree {
+      0%,100% {
+        transform: translate(0,0);
+      }
+
+      50% {
+        transform: translate(-100px,-160px);
+      }
+    }
+
+    /* =========================
+       HEADER
+    ========================= */
+
+    header {
+      width: 100%;
+      padding: 22px 28px;
+
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      position: sticky;
+      top: 0;
+
+      z-index: 10;
+
+      background:
+        rgba(3, 3, 5, 0.42);
+
+      backdrop-filter: blur(22px);
+      -webkit-backdrop-filter: blur(22px);
+
+      border-bottom:
+        1px solid rgba(255,255,255,0.08);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-logo {
+      width: 36px;
+      height: 36px;
+
+      object-fit: cover;
+
+      border-radius: 10px;
+
+      box-shadow:
+        0 0 25px rgba(124,58,237,0.35);
+    }
+
+    .brand-name {
+      font-size: 25px;
+      font-weight: 900;
+      letter-spacing: 2px;
+    }
+
+    .status {
+      font-size: 12px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+
+      padding: 8px 12px;
+
+      border-radius: 999px;
+
+      background:
+        rgba(255,255,255,0.07);
+
+      border:
+        1px solid rgba(255,255,255,0.12);
+
+      color:
+        rgba(255,255,255,0.72);
+    }
+
+    /* =========================
+       HERO
+    ========================= */
+
+    .hero {
+      min-height: calc(100vh - 81px);
+
+      display: flex;
+      flex-direction: column;
+
+      align-items: center;
+      justify-content: center;
+
+      text-align: center;
+
+      padding:
+        80px 20px
+        100px;
+    }
+
+    .hero-logo {
+      width: 86px;
+      height: 86px;
+
+      object-fit: cover;
+
+      border-radius: 24px;
+
+      margin-bottom: 28px;
+
+      box-shadow:
+        0 0 55px rgba(124,58,237,0.42),
+        0 0 100px rgba(37,99,235,0.22);
+
+      animation: logoFloat 5s ease-in-out infinite;
+    }
+
+    @keyframes logoFloat {
+      0%,100% {
+        transform: translateY(0);
+      }
+
+      50% {
+        transform: translateY(-10px);
+      }
+    }
+
+    .eyebrow {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+
+      color:
+        rgba(255,255,255,0.55);
+
+      margin-bottom: 16px;
+    }
+
+    h1 {
+      max-width: 850px;
+
+      font-size:
+        clamp(42px, 8vw, 82px);
+
+      line-height: 0.98;
+
+      font-weight: 900;
+
+      letter-spacing: -3px;
+
+      margin-bottom: 24px;
+
+      background:
+        linear-gradient(
+          110deg,
+          #ffffff 15%,
+          #b9a0ff 42%,
+          #75a9ff 68%,
+          #ffffff 90%
+        );
+
+      background-size: 250% auto;
+
+      -webkit-background-clip: text;
+      background-clip: text;
+
+      color: transparent;
+
+      animation:
+        titleShine 7s linear infinite;
+    }
+
+    @keyframes titleShine {
+      0% {
+        background-position: 0% center;
+      }
+
+      100% {
+        background-position: 250% center;
+      }
+    }
+
+    .subtitle {
+      max-width: 650px;
+
+      font-size:
+        clamp(17px, 2.5vw, 21px);
+
+      line-height: 1.7;
+
+      color:
+        rgba(255,255,255,0.7);
+
+      margin-bottom: 36px;
+    }
+
+    .notice {
+      max-width: 680px;
+
+      padding: 20px 24px;
+
+      border-radius: 20px;
+
+      background:
+        rgba(255,255,255,0.055);
+
+      border:
+        1px solid rgba(255,255,255,0.1);
+
+      box-shadow:
+        0 20px 80px rgba(0,0,0,0.28);
+
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+
+      font-size: 15px;
+
+      line-height: 1.7;
+
+      color:
+        rgba(255,255,255,0.72);
+    }
+
+    /* =========================
+       WORKER IMAGE
+    ========================= */
+
+    .worker-section {
+      width: 100%;
+      max-width: 950px;
+
+      margin:
+        0 auto;
+
+      padding:
+        40px 20px 100px;
+
+      text-align: center;
+    }
+
+    .worker-frame {
+      width: 100%;
+
+      padding: 10px;
+
+      border-radius: 28px;
+
+      background:
+        linear-gradient(
+          135deg,
+          rgba(124,58,237,0.45),
+          rgba(37,99,235,0.35),
+          rgba(255,255,255,0.08)
+        );
+
+      box-shadow:
+        0 30px 100px rgba(0,0,0,0.4);
+    }
+
+    .worker-image {
+      display: block;
+
+      width: 100%;
+
+      max-height: 620px;
+
+      object-fit: contain;
+
+      border-radius: 20px;
+
+      background: #050507;
+    }
+
+    .worker-caption {
+      margin-top: 24px;
+
+      font-size: 16px;
+
+      line-height: 1.7;
+
+      color:
+        rgba(255,255,255,0.72);
+    }
+
+    .worker-caption strong {
+      color: white;
+    }
+
+    /* =========================
+       CONTENT
+    ========================= */
+
+    main {
+      width: 100%;
+    }
+
+    .section {
+      width: min(1000px, calc(100% - 40px));
+
+      margin:
+        0 auto;
+
+      padding:
+        90px 0;
+    }
+
+    .section-card {
+      padding:
+        42px;
+
+      border-radius: 30px;
+
+      background:
+        rgba(255,255,255,0.045);
+
+      border:
+        1px solid rgba(255,255,255,0.09);
+
+      backdrop-filter: blur(22px);
+      -webkit-backdrop-filter: blur(22px);
+
+      box-shadow:
+        0 25px 100px rgba(0,0,0,0.22);
+    }
+
+    .section-label {
+      font-size: 11px;
+
+      font-weight: 800;
+
+      letter-spacing: 3px;
+
+      text-transform: uppercase;
+
+      color:
+        #a78bfa;
+
+      margin-bottom: 12px;
+    }
+
+    h2 {
+      font-size:
+        clamp(32px, 5vw, 52px);
+
+      line-height: 1.05;
+
+      letter-spacing: -1.5px;
+
+      margin-bottom: 20px;
+    }
+
+    .section-card p {
+      font-size: 17px;
+
+      line-height: 1.8;
+
+      color:
+        rgba(255,255,255,0.68);
+    }
+
+    /* =========================
+       GOALS
+    ========================= */
+
+    .goals {
+      display: grid;
+
+      grid-template-columns:
+        repeat(2, minmax(0,1fr));
+
+      gap: 18px;
+
+      margin-top: 32px;
+    }
+
+    .goal {
+      padding: 26px;
+
+      border-radius: 22px;
+
+      background:
+        rgba(255,255,255,0.045);
+
+      border:
+        1px solid rgba(255,255,255,0.08);
+
+      transition:
+        transform 0.35s ease,
+        background 0.35s ease,
+        border-color 0.35s ease;
+    }
+
+    .goal:hover {
+      transform:
+        translateY(-6px);
+
+      background:
+        rgba(255,255,255,0.075);
+
+      border-color:
+        rgba(167,139,250,0.28);
+    }
+
+    .goal-number {
+      font-size: 12px;
+
+      font-weight: 800;
+
+      letter-spacing: 2px;
+
+      color:
+        rgba(255,255,255,0.35);
+
+      margin-bottom: 14px;
+    }
+
+    .goal h3 {
+      font-size: 20px;
+
+      margin-bottom: 9px;
+    }
+
+    .goal p {
+      font-size: 14px;
+
+      line-height: 1.65;
+    }
+
+    /* =========================
+       FOOTER
+    ========================= */
+
+    footer {
+      text-align: center;
+
+      padding:
+        60px 20px 80px;
+
+      color:
+        rgba(255,255,255,0.38);
+
+      font-size: 13px;
+
+      border-top:
+        1px solid rgba(255,255,255,0.06);
+    }
+
+    footer strong {
+      color:
+        rgba(255,255,255,0.7);
+    }
+
+    /* =========================
+       MOBILE
+    ========================= */
+
+    @media (max-width: 700px) {
+
+      header {
+        padding:
+          18px 16px;
+      }
+
+      .brand-logo {
+        width: 31px;
+        height: 31px;
+      }
+
+      .brand-name {
+        font-size: 21px;
+      }
+
+      .status {
+        font-size: 9px;
+        padding: 7px 9px;
+      }
+
+      .hero {
+        min-height:
+          calc(100vh - 68px);
+
+        padding:
+          60px 18px 80px;
+      }
+
+      .hero-logo {
+        width: 70px;
+        height: 70px;
+      }
+
+      h1 {
+        letter-spacing:
+          -2px;
+      }
+
+      .subtitle {
+        font-size: 16px;
+      }
+
+      .notice {
+        font-size: 14px;
+        padding: 18px;
+      }
+
+      .worker-section {
+        padding:
+          20px 14px 70px;
+      }
+
+      .worker-frame {
+        padding: 7px;
+        border-radius: 22px;
+      }
+
+      .worker-image {
+        border-radius: 16px;
+      }
+
+      .section {
+        width:
+          calc(100% - 28px);
+
+        padding:
+          55px 0;
+      }
+
+      .section-card {
+        padding:
+          28px 22px;
+
+        border-radius:
+          24px;
+      }
+
+      .goals {
+        grid-template-columns:
+          1fr;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="light one"></div>
+  <div class="light two"></div>
+  <div class="light three"></div>
+
+  <!-- HEADER -->
+
+  <header>
+    <div class="brand">
+
+      <img
+        class="brand-logo"
+        src="/8B3E6116-7C23-4F57-81D1-066DBE799949.jpeg"
+        alt="ZILNET logo"
+      >
+
+      <div class="brand-name">
+        ZILNET
+      </div>
+
+    </div>
+
+    <div class="status">
+      Under development
+    </div>
+  </header>
+
+
+  <main>
+
+    <!-- HERO -->
+
+    <section class="hero">
+
+      <img
+        class="hero-logo"
+        src="/8B3E6116-7C23-4F57-81D1-066DBE799949.jpeg"
+        alt="ZILNET"
+      >
+
+      <div class="eyebrow">
+        A new platform is being built
+      </div>
+
+      <h1>
+        ZILNET is under process of building and maintenance.
+      </h1>
+
+      <p class="subtitle">
+        We're currently working behind the scenes to build something
+        better, stronger and more useful for creators, professionals
+        and people around the world.
+      </p>
+
+      <div class="notice">
+        In the mean time, read what are our goals!
+        <br><br>
+        <strong>
+          ZILNET will be back with a much better experience.
+        </strong>
+      </div>
+
+    </section>
+
+
+    <!-- WORKER IMAGE -->
+
+    <section class="worker-section">
+
+      <div class="worker-frame">
+
+        <img
+          class="worker-image"
+          src="/assets/IMG_2016.png"
+          alt="ZILNET development"
+        >
+
+      </div>
+
+      <p class="worker-caption">
+        This is part of the work happening behind ZILNET.
+        <br>
+        <strong>
+          We're building the foundation before opening the doors.
+        </strong>
+      </p>
+
+    </section>
+
+
+    <!-- ABOUT -->
+
+    <section class="section">
+
+      <div class="section-card">
+
+        <div class="section-label">
+          About
+        </div>
+
+        <h2>
+          What is ZILNET?
+        </h2>
+
+        <p>
+          ZILNET is being built as a professional social platform
+          where people can create a real identity, showcase what
+          they can do, connect with others and discover opportunities.
+          <br><br>
+          The idea is to bring social networking and professional
+          networking closer together — without making everything feel
+          like a traditional job website.
+        </p>
+
+      </div>
+
+    </section>
+
+
+    <!-- GOALS -->
+
+    <section class="section">
+
+      <div class="section-card">
+
+        <div class="section-label">
+          Goals
+        </div>
+
+        <h2>
+          What we're building toward.
+        </h2>
+
+        <p>
+          ZILNET is being designed around real people, real skills,
+          creativity and meaningful connections.
+        </p>
+
+
+        <div class="goals">
+
+          <div class="goal">
+
+            <div class="goal-number">
+              01
+            </div>
+
+            <h3>
+              Real identities
+            </h3>
+
+            <p>
+              Give people a proper profile where they can represent
+              themselves, their skills, interests and work.
+            </p>
+
+          </div>
+
+
+          <div class="goal">
+
+            <div class="goal-number">
+              02
+            </div>
+
+            <h3>
+              Showcase talent
+            </h3>
+
+            <p>
+              Let creators and professionals share photography,
+              digital art, 3D work, filmmaking, programming,
+              marketing and other creative skills.
+            </p>
+
+          </div>
+
+
+          <div class="goal">
+
+            <div class="goal-number">
+              03
+            </div>
+
+            <h3>
+              Discover people
+            </h3>
+
+            <p>
+              Make it easier to discover talented people through
+              profiles, interests, skills and categories.
+            </p>
+
+          </div>
+
+
+          <div class="goal">
+
+            <div class="goal-number">
+              04
+            </div>
+
+            <h3>
+              Connect & collaborate
+            </h3>
+
+            <p>
+              Give people ways to follow each other, communicate,
+              create groups and build useful professional connections.
+            </p>
+
+          </div>
+
+
+          <div class="goal">
+
+            <div class="goal-number">
+              05
+            </div>
+
+            <h3>
+              Share real work
+            </h3>
+
+            <p>
+              Build a platform where people can publish their work,
+              share original creations and eventually create
+              opportunities around what they make.
+            </p>
+
+          </div>
+
+
+          <div class="goal">
+
+            <div class="goal-number">
+              06
+            </div>
+
+            <h3>
+              Build globally
+            </h3>
+
+            <p>
+              Start simple, but build ZILNET with the long-term goal
+              of becoming a useful global community for people,
+              creators and businesses.
+            </p>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- FINAL MESSAGE -->
+
+    <section class="section">
+
+      <div class="section-card">
+
+        <div class="section-label">
+          For now
+        </div>
+
+        <h2>
+          We're building.
+        </h2>
+
+        <p>
+          The current version is temporarily unavailable while we
+          work on the next stage of ZILNET.
+          <br><br>
+          Thank you for visiting while the platform is under
+          construction.
+        </p>
+
+      </div>
+
+    </section>
+
+  </main>
+
+
+  <footer>
+
+    <strong>ZILNET</strong>
+    <br><br>
+    Building the future, one step at a time.
+
+  </footer>
+
+</body>
+</html>
