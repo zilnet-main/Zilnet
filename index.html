@@ -1,0 +1,4282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#ffffff">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>ZILNET</title>
+
+<style>
+:root{
+  --bg:#fff;
+  --surface:#fff;
+  --surface2:#f7f7f9;
+  --text:#111114;
+  --muted:#7b7d86;
+  --line:#e8e8ec;
+  --soft:#f1f1f4;
+  --shadow:0 8px 30px rgba(0,0,0,.07);
+  --blue:#4267ff;
+  --purple:#8b3dff;
+  --grad:linear-gradient(135deg,#4267ff,#8b3dff);
+  --nav-h:76px;
+  --top-h:86px;
+}
+
+*{
+  box-sizing:border-box;
+  -webkit-tap-highlight-color:transparent;
+}
+
+html,body{
+  margin:0;
+  min-height:100%;
+  background:var(--bg);
+  color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text",
+  Inter,Roboto,Helvetica,Arial,sans-serif;
+}
+
+body{
+  overflow-x:hidden;
+  transition:background .25s,color .25s;
+}
+
+body.dark{
+  --bg:#08090b;
+  --surface:#101114;
+  --surface2:#18191d;
+  --text:#f7f7f8;
+  --muted:#9699a4;
+  --line:#292b31;
+  --soft:#1d1f24;
+  --shadow:0 10px 35px rgba(0,0,0,.35);
+}
+
+button,input,textarea,select{
+  font:inherit;
+}
+
+button{
+  border:0;
+  cursor:pointer;
+  color:inherit;
+}
+
+img{
+  max-width:100%;
+}
+
+.hidden{
+  display:none!important;
+}
+
+/* =========================
+   ICON SYSTEM
+========================= */
+
+.iconbox{
+  width:30px;
+  height:30px;
+  min-width:30px;
+  min-height:30px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  position:relative;
+}
+
+.iconbox img{
+  width:25px;
+  height:25px;
+  display:block;
+  object-fit:contain;
+  object-position:center;
+  filter:brightness(0);
+  transition:
+    transform .18s ease,
+    filter .18s ease,
+    opacity .18s ease;
+}
+
+.dark .iconbox img{
+  filter:brightness(0) invert(1);
+}
+
+.iconbox.small img{
+  width:22px;
+  height:22px;
+}
+
+.iconbox.big img{
+  width:28px;
+  height:28px;
+}
+
+.iconbox:active img{
+  transform:scale(.82);
+}
+
+.iconbox.active img{
+  transform:scale(1.08);
+}
+
+/* =========================
+   APP HEADER
+========================= */
+
+.app-header{
+  height:var(--top-h);
+  padding:
+    max(16px,env(safe-area-inset-top))
+    28px
+    10px;
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  border-bottom:1px solid var(--line);
+  background:var(--surface);
+  position:sticky;
+  top:0;
+  z-index:40;
+}
+
+.logo{
+  font-size:34px;
+  line-height:1;
+  font-weight:950;
+  letter-spacing:-2.5px;
+  color:var(--text);
+  user-select:none;
+}
+
+.header-actions{
+  display:flex;
+  align-items:center;
+  gap:20px;
+}
+
+.header-btn{
+  width:32px;
+  height:32px;
+  background:transparent;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  position:relative;
+}
+
+.header-btn .iconbox{
+  width:30px;
+  height:30px;
+}
+
+.notification-dot{
+  position:absolute;
+  top:2px;
+  right:2px;
+  width:7px;
+  height:7px;
+  background:var(--blue);
+  border-radius:50%;
+  box-shadow:0 0 0 2px var(--surface);
+}
+
+/* =========================
+   MAIN
+========================= */
+
+#app{
+  min-height:100vh;
+}
+
+#content{
+  width:100%;
+  max-width:850px;
+  margin:0 auto;
+  padding-bottom:calc(var(--nav-h) + 20px + env(safe-area-inset-bottom));
+}
+
+.screen{
+  min-height:calc(100vh - var(--top-h) - var(--nav-h));
+}
+
+/* =========================
+   STORIES
+========================= */
+
+.story-strip{
+  display:flex;
+  gap:18px;
+  padding:26px 28px 24px;
+  overflow-x:auto;
+  border-bottom:1px solid var(--line);
+  scrollbar-width:none;
+  background:var(--surface);
+}
+
+.story-strip::-webkit-scrollbar{
+  display:none;
+}
+
+.story-item{
+  width:84px;
+  min-width:84px;
+  text-align:center;
+  cursor:pointer;
+}
+
+.story-ring{
+  width:78px;
+  height:78px;
+  margin:0 auto 9px;
+  border-radius:50%;
+  padding:3px;
+  background:var(--soft);
+  position:relative;
+}
+
+.story-ring.active{
+  background:linear-gradient(
+    135deg,
+    #396cff 0%,
+    #674cff 45%,
+    #b43cff 100%
+  );
+  animation:storyPulse 2.4s ease-in-out infinite;
+}
+
+.story-ring.active::before{
+  content:"";
+  position:absolute;
+  inset:-3px;
+  border-radius:50%;
+  background:linear-gradient(
+    135deg,
+    #396cff,
+    #b43cff,
+    #396cff
+  );
+  background-size:200% 200%;
+  z-index:-1;
+  animation:gradientSpin 3s linear infinite;
+  opacity:.7;
+}
+
+@keyframes gradientSpin{
+  0%{background-position:0% 50%}
+  50%{background-position:100% 50%}
+  100%{background-position:0% 50%}
+}
+
+@keyframes storyPulse{
+  0%,100%{transform:scale(1)}
+  50%{transform:scale(1.035)}
+}
+
+.story-inner{
+  width:100%;
+  height:100%;
+  border-radius:50%;
+  overflow:hidden;
+  background:var(--surface2);
+  border:3px solid var(--surface);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.story-inner img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+.story-letter{
+  font-size:24px;
+  font-weight:800;
+  color:var(--muted);
+}
+
+.story-label{
+  font-size:13px;
+  color:var(--muted);
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.story-add .story-ring{
+  border:2px dashed #cfd1d7;
+  padding:0;
+  background:var(--surface2);
+}
+
+.story-add .story-inner{
+  border:0;
+}
+
+.story-plus{
+  font-size:31px;
+  font-weight:300;
+}
+
+/* =========================
+   POSTS
+========================= */
+
+.feed{
+  width:100%;
+}
+
+.post{
+  padding:22px 28px 25px;
+  border-bottom:1px solid var(--line);
+  background:var(--surface);
+}
+
+.post-head{
+  display:flex;
+  align-items:center;
+  gap:13px;
+  margin-bottom:15px;
+}
+
+.avatar{
+  width:48px;
+  height:48px;
+  min-width:48px;
+  border-radius:50%;
+  object-fit:cover;
+  background:var(--soft);
+  border:1px solid var(--line);
+}
+
+.avatar-letter{
+  width:48px;
+  height:48px;
+  min-width:48px;
+  border-radius:50%;
+  background:var(--soft);
+  border:1px solid var(--line);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:20px;
+  font-weight:800;
+  color:var(--muted);
+}
+
+.post-user{
+  min-width:0;
+  flex:1;
+}
+
+.post-name{
+  font-size:16px;
+  font-weight:800;
+  cursor:pointer;
+}
+
+.post-sub{
+  color:var(--muted);
+  font-size:13px;
+  margin-top:3px;
+}
+
+.post-more{
+  background:transparent;
+  padding:7px;
+}
+
+.post-content{
+  margin-top:3px;
+}
+
+.post-text{
+  font-size:17px;
+  line-height:1.48;
+  white-space:pre-wrap;
+  overflow-wrap:anywhere;
+}
+
+.text-post-art{
+  min-height:270px;
+  border-radius:25px;
+  margin-top:14px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:35px;
+  text-align:center;
+  position:relative;
+  overflow:hidden;
+  color:#fff;
+  box-shadow:inset 0 0 70px rgba(0,0,0,.12);
+}
+
+.text-post-art::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:
+    radial-gradient(circle at 15% 15%,rgba(255,255,255,.22),transparent 28%),
+    radial-gradient(circle at 85% 80%,rgba(255,255,255,.14),transparent 32%);
+  pointer-events:none;
+}
+
+.text-post-art span{
+  position:relative;
+  z-index:1;
+  font-size:27px;
+  line-height:1.25;
+  font-weight:850;
+  max-width:650px;
+}
+
+.post-media{
+  margin-top:14px;
+  width:100%;
+  border-radius:22px;
+  overflow:hidden;
+  background:#000;
+  display:block;
+}
+
+.post-media img{
+  width:100%;
+  max-height:720px;
+  object-fit:cover;
+  display:block;
+}
+
+.post-media video{
+  width:100%;
+  max-height:720px;
+  display:block;
+  background:#000;
+}
+
+.post-actions{
+  display:flex;
+  align-items:center;
+  gap:20px;
+  padding-top:17px;
+}
+
+.action{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  background:transparent;
+  color:var(--text);
+  min-height:30px;
+}
+
+.action .iconbox{
+  width:28px;
+  height:28px;
+}
+
+.action .iconbox img{
+  width:26px;
+  height:26px;
+}
+
+.action-count{
+  font-size:14px;
+  font-weight:700;
+}
+
+.action.save{
+  margin-left:auto;
+}
+
+.action.like.liked .iconbox img{
+  filter:
+    brightness(0)
+    saturate(100%)
+    invert(39%)
+    sepia(92%)
+    saturate(3377%)
+    hue-rotate(220deg)
+    brightness(101%)
+    contrast(102%);
+}
+
+.action.like.liked{
+  color:#5966ff;
+}
+
+.like-gradient{
+  background:linear-gradient(135deg,#4267ff,#9b3dff);
+  -webkit-background-clip:text;
+  background-clip:text;
+  color:transparent;
+}
+
+/* =========================
+   PROFILE
+========================= */
+
+.profile-page{
+  padding:28px;
+}
+
+.profile-hero{
+  text-align:center;
+  padding:10px 0 28px;
+}
+
+.profile-avatar{
+  width:112px;
+  height:112px;
+  margin:0 auto 15px;
+  border-radius:50%;
+  object-fit:cover;
+  background:var(--soft);
+  border:1px solid var(--line);
+}
+
+.profile-avatar-letter{
+  width:112px;
+  height:112px;
+  margin:0 auto 15px;
+  border-radius:50%;
+  background:var(--soft);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:42px;
+  font-weight:850;
+  color:var(--muted);
+}
+
+.profile-name{
+  font-size:27px;
+  font-weight:900;
+  letter-spacing:-.8px;
+}
+
+.profile-username{
+  color:var(--muted);
+  margin-top:4px;
+}
+
+.profile-bio{
+  max-width:600px;
+  margin:13px auto;
+  line-height:1.5;
+  color:var(--muted);
+  white-space:pre-wrap;
+}
+
+.profile-stats{
+  display:flex;
+  justify-content:center;
+  gap:35px;
+  margin:20px 0;
+}
+
+.stat{
+  text-align:center;
+}
+
+.stat strong{
+  display:block;
+  font-size:19px;
+}
+
+.stat span{
+  color:var(--muted);
+  font-size:13px;
+}
+
+.profile-actions{
+  display:flex;
+  justify-content:center;
+  gap:10px;
+}
+
+.primary-btn,
+.secondary-btn,
+.follow-btn{
+  min-height:44px;
+  padding:0 21px;
+  border-radius:14px;
+  font-weight:800;
+}
+
+.primary-btn{
+  background:var(--text);
+  color:var(--bg);
+}
+
+.secondary-btn{
+  background:var(--soft);
+}
+
+.follow-btn{
+  background:var(--grad);
+  color:#fff;
+}
+
+.follow-btn.following{
+  background:var(--soft);
+  color:var(--text);
+}
+
+.profile-posts-title{
+  font-size:20px;
+  font-weight:900;
+  padding:20px 0 14px;
+  border-top:1px solid var(--line);
+}
+
+.profile-post-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:4px;
+}
+
+.profile-grid-item{
+  aspect-ratio:1;
+  background:var(--soft);
+  overflow:hidden;
+  cursor:pointer;
+}
+
+.profile-grid-item img,
+.profile-grid-item video{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+.profile-grid-text{
+  width:100%;
+  height:100%;
+  padding:15px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  color:#fff;
+  font-weight:800;
+  font-size:14px;
+}
+
+/* =========================
+   MESSAGES
+========================= */
+
+.messages-page{
+  padding:26px 28px;
+}
+
+.page-heading{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:15px;
+  margin-bottom:24px;
+}
+
+.page-heading h1{
+  margin:0;
+  font-size:32px;
+  font-weight:900;
+  letter-spacing:-1px;
+}
+
+.page-heading p{
+  margin:5px 0 0;
+  color:var(--muted);
+}
+
+.group-button{
+  padding:13px 17px;
+  border:1px solid var(--line);
+  border-radius:15px;
+  background:var(--surface);
+  font-weight:850;
+}
+
+.chat-list{
+  display:flex;
+  flex-direction:column;
+}
+
+.chat-row{
+  display:flex;
+  align-items:center;
+  gap:15px;
+  padding:17px 4px;
+  border-bottom:1px solid var(--line);
+  cursor:pointer;
+}
+
+.chat-row:active{
+  background:var(--soft);
+}
+
+.chat-row-info{
+  min-width:0;
+  flex:1;
+}
+
+.chat-row-name{
+  font-weight:850;
+  font-size:17px;
+}
+
+.chat-row-preview{
+  margin-top:4px;
+  color:var(--muted);
+  font-size:14px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+/* =========================
+   CHAT
+========================= */
+
+.chat-page{
+  min-height:calc(100vh - var(--top-h));
+  display:flex;
+  flex-direction:column;
+  background:var(--surface);
+}
+
+.chat-header{
+  min-height:82px;
+  padding:10px 20px;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  border-bottom:1px solid var(--line);
+  position:sticky;
+  top:0;
+  z-index:25;
+  background:var(--surface);
+}
+
+.back-btn{
+  width:40px;
+  height:40px;
+  background:transparent;
+  flex:none;
+}
+
+.chat-header-main{
+  min-width:0;
+  flex:1;
+  cursor:pointer;
+}
+
+.chat-header-name{
+  font-weight:900;
+  font-size:18px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.chat-header-sub{
+  color:var(--muted);
+  font-size:13px;
+  margin-top:3px;
+}
+
+.chat-theme-btn{
+  width:40px;
+  height:40px;
+  background:var(--soft);
+  border-radius:13px;
+  flex:none;
+}
+
+.group-members{
+  display:flex;
+  gap:8px;
+  overflow-x:auto;
+  padding:10px 18px;
+  border-bottom:1px solid var(--line);
+  scrollbar-width:none;
+}
+
+.group-members::-webkit-scrollbar{
+  display:none;
+}
+
+.member-chip{
+  white-space:nowrap;
+  padding:8px 12px;
+  border-radius:999px;
+  border:1px solid var(--line);
+  background:var(--surface2);
+  font-size:13px;
+  cursor:pointer;
+}
+
+.chat-messages{
+  flex:1;
+  min-height:300px;
+  padding:20px 18px 25px;
+  overflow-y:auto;
+  display:flex;
+  flex-direction:column;
+  gap:9px;
+  background:var(--chat-bg,var(--surface));
+}
+
+.message-row{
+  display:flex;
+  width:100%;
+}
+
+.message-row.mine{
+  justify-content:flex-end;
+}
+
+.message-row.theirs{
+  justify-content:flex-start;
+}
+
+.message-bubble{
+  max-width:min(74%,520px);
+  width:max-content;
+  min-width:0;
+  padding:11px 15px;
+  border-radius:19px;
+  overflow-wrap:anywhere;
+  word-break:break-word;
+  line-height:1.4;
+  font-size:15px;
+  background:var(--bubble-other,var(--soft));
+  color:var(--text);
+}
+
+.mine .message-bubble{
+  background:var(--bubble-mine,#111);
+  color:#fff;
+  border-bottom-right-radius:6px;
+}
+
+.theirs .message-bubble{
+  border-bottom-left-radius:6px;
+}
+
+.message-sender{
+  font-size:11px;
+  font-weight:850;
+  opacity:.7;
+  margin-bottom:4px;
+}
+
+.chat-composer{
+  padding:11px 14px max(11px,env(safe-area-inset-bottom));
+  border-top:1px solid var(--line);
+  display:flex;
+  gap:10px;
+  background:var(--surface);
+  position:sticky;
+  bottom:0;
+}
+
+.message-input{
+  flex:1;
+  min-width:0;
+  height:52px;
+  border:1px solid var(--line);
+  background:var(--surface2);
+  color:var(--text);
+  border-radius:27px;
+  padding:0 18px;
+  outline:none;
+}
+
+.message-input:focus{
+  border-color:#777;
+}
+
+.send-btn{
+  width:52px;
+  height:52px;
+  border-radius:50%;
+  background:#111;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.dark .send-btn{
+  background:#fff;
+}
+
+.send-btn img{
+  width:24px;
+  height:24px;
+  object-fit:contain;
+  filter:brightness(0) invert(1);
+}
+
+.dark .send-btn img{
+  filter:brightness(0);
+}
+
+/* =========================
+   THEME SELECTOR
+========================= */
+
+.theme-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:11px;
+}
+
+.theme-card{
+  min-height:105px;
+  border:2px solid var(--line);
+  border-radius:18px;
+  padding:10px;
+  cursor:pointer;
+  position:relative;
+  overflow:hidden;
+}
+
+.theme-card.selected{
+  border-color:#111;
+}
+
+.dark .theme-card.selected{
+  border-color:#fff;
+}
+
+.theme-preview{
+  height:65px;
+  border-radius:12px;
+  overflow:hidden;
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  padding:7px;
+}
+
+.theme-preview i{
+  width:45%;
+  height:19px;
+  border-radius:10px;
+  display:block;
+}
+
+.theme-name{
+  font-size:12px;
+  font-weight:800;
+  margin-top:7px;
+}
+
+/* =========================
+   SETTINGS
+========================= */
+
+.settings-page{
+  padding:28px;
+}
+
+.settings-title{
+  font-size:31px;
+  font-weight:900;
+  margin-bottom:20px;
+}
+
+.settings-section{
+  margin-bottom:24px;
+}
+
+.settings-section-title{
+  font-size:12px;
+  font-weight:850;
+  color:var(--muted);
+  text-transform:uppercase;
+  letter-spacing:1px;
+  margin:0 0 8px 5px;
+}
+
+.setting-row{
+  min-height:58px;
+  display:flex;
+  align-items:center;
+  gap:14px;
+  padding:11px 14px;
+  border-bottom:1px solid var(--line);
+  background:var(--surface);
+}
+
+.setting-row:first-of-type{
+  border-top:1px solid var(--line);
+  border-radius:14px 14px 0 0;
+}
+
+.setting-row:last-of-type{
+  border-radius:0 0 14px 14px;
+}
+
+.setting-info{
+  min-width:0;
+  flex:1;
+}
+
+.setting-name{
+  font-weight:750;
+}
+
+.setting-desc{
+  font-size:12px;
+  color:var(--muted);
+  margin-top:2px;
+}
+
+.setting-control{
+  flex:none;
+}
+
+.setting-control select{
+  border:1px solid var(--line);
+  background:var(--surface2);
+  color:var(--text);
+  border-radius:10px;
+  padding:8px 10px;
+  outline:none;
+}
+
+.danger{
+  color:#e04455!important;
+}
+
+/* =========================
+   MODAL
+========================= */
+
+.modal-backdrop{
+  position:fixed;
+  inset:0;
+  z-index:100;
+  background:rgba(0,0,0,.48);
+  backdrop-filter:blur(8px);
+  display:flex;
+  align-items:flex-end;
+  justify-content:center;
+  padding:0;
+}
+
+.modal-sheet{
+  width:min(700px,100%);
+  max-height:90vh;
+  overflow:auto;
+  background:var(--surface);
+  color:var(--text);
+  border-radius:27px 27px 0 0;
+  padding:20px;
+  animation:sheetIn .22s ease;
+}
+
+@keyframes sheetIn{
+  from{transform:translateY(35px);opacity:0}
+  to{transform:translateY(0);opacity:1}
+}
+
+.modal-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:18px;
+}
+
+.modal-head h2,
+.modal-head h3{
+  margin:0;
+  font-weight:900;
+}
+
+.modal-close{
+  width:38px;
+  height:38px;
+  border-radius:50%;
+  background:var(--soft);
+}
+
+.field{
+  width:100%;
+  min-height:50px;
+  margin:7px 0;
+  border:1px solid var(--line);
+  background:var(--surface2);
+  color:var(--text);
+  border-radius:13px;
+  padding:12px 14px;
+  outline:none;
+}
+
+textarea.field{
+  resize:vertical;
+  min-height:110px;
+}
+
+.modal-submit{
+  width:100%;
+  min-height:50px;
+  margin-top:9px;
+  border-radius:14px;
+  background:var(--text);
+  color:var(--bg);
+  font-weight:850;
+}
+
+.choice-list{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+
+.choice{
+  padding:15px;
+  border:1px solid var(--line);
+  border-radius:14px;
+  background:var(--surface2);
+  text-align:left;
+  font-weight:750;
+}
+
+.choice.selected{
+  border-color:#5966ff;
+}
+
+/* =========================
+   EMPTY / LOADING / TOAST
+========================= */
+
+.empty{
+  padding:70px 25px;
+  text-align:center;
+  color:var(--muted);
+}
+
+.empty strong{
+  display:block;
+  color:var(--text);
+  font-size:20px;
+  margin-bottom:6px;
+}
+
+.loading{
+  padding:50px;
+  text-align:center;
+  color:var(--muted);
+}
+
+.spinner{
+  width:27px;
+  height:27px;
+  border:3px solid var(--line);
+  border-top-color:var(--text);
+  border-radius:50%;
+  animation:spin .7s linear infinite;
+  margin:0 auto 12px;
+}
+
+@keyframes spin{
+  to{transform:rotate(360deg)}
+}
+
+#toast{
+  position:fixed;
+  left:50%;
+  bottom:calc(var(--nav-h) + 20px);
+  transform:translateX(-50%) translateY(15px);
+  z-index:200;
+  background:#111;
+  color:#fff;
+  padding:12px 17px;
+  border-radius:13px;
+  font-size:13px;
+  font-weight:700;
+  opacity:0;
+  pointer-events:none;
+  transition:.2s;
+  max-width:90%;
+  text-align:center;
+}
+
+#toast.show{
+  opacity:1;
+  transform:translateX(-50%) translateY(0);
+}
+
+.dark #toast{
+  background:#fff;
+  color:#111;
+}
+
+/* =========================
+   BOTTOM NAV
+========================= */
+
+.bottom-nav{
+  position:fixed;
+  z-index:50;
+  left:0;
+  right:0;
+  bottom:0;
+  height:var(--nav-h);
+  padding-bottom:env(safe-area-inset-bottom);
+  display:flex;
+  align-items:center;
+  justify-content:space-around;
+  border-top:1px solid var(--line);
+  background:color-mix(in srgb,var(--surface) 94%,transparent);
+  backdrop-filter:blur(18px);
+}
+
+.nav-item{
+  flex:1;
+  height:100%;
+  background:transparent;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:4px;
+  color:var(--muted);
+}
+
+.nav-item .iconbox{
+  width:31px;
+  height:31px;
+}
+
+.nav-item .iconbox img{
+  width:27px;
+  height:27px;
+}
+
+.nav-item.active{
+  color:var(--text);
+}
+
+.nav-item.active .iconbox img{
+  transform:scale(1.08);
+}
+
+.nav-label{
+  font-size:10px;
+  font-weight:800;
+  letter-spacing:.3px;
+}
+
+/* =========================
+   AUTH
+========================= */
+
+.auth-page{
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:28px;
+  background:
+    radial-gradient(circle at 10% 15%,rgba(66,103,255,.12),transparent 30%),
+    radial-gradient(circle at 90% 85%,rgba(139,61,255,.12),transparent 30%),
+    var(--bg);
+}
+
+.auth-card{
+  width:min(420px,100%);
+  padding:35px 26px;
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-radius:28px;
+  box-shadow:var(--shadow);
+}
+
+.auth-logo{
+  font-size:43px;
+  font-weight:950;
+  letter-spacing:-3px;
+  text-align:center;
+  margin-bottom:8px;
+}
+
+.auth-sub{
+  text-align:center;
+  color:var(--muted);
+  margin-bottom:25px;
+}
+
+.auth-tabs{
+  display:flex;
+  background:var(--soft);
+  border-radius:13px;
+  padding:4px;
+  margin-bottom:16px;
+}
+
+.auth-tab{
+  flex:1;
+  min-height:42px;
+  background:transparent;
+  border-radius:10px;
+  font-weight:800;
+  color:var(--muted);
+}
+
+.auth-tab.active{
+  background:var(--surface);
+  color:var(--text);
+  box-shadow:0 2px 8px rgba(0,0,0,.07);
+}
+
+.auth-message{
+  min-height:20px;
+  color:#e04455;
+  font-size:13px;
+  margin:7px 0;
+}
+
+.auth-submit{
+  width:100%;
+  min-height:52px;
+  border-radius:14px;
+  background:var(--text);
+  color:var(--bg);
+  font-weight:850;
+  margin-top:5px;
+}
+
+.auth-forgot{
+  width:100%;
+  background:transparent;
+  color:var(--muted);
+  padding:14px;
+  font-size:13px;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media(min-width:800px){
+  :root{
+    --nav-h:70px;
+  }
+
+  .bottom-nav{
+    left:50%;
+    right:auto;
+    transform:translateX(-50%);
+    width:min(650px,100%);
+    border:1px solid var(--line);
+    border-bottom:0;
+    border-radius:20px 20px 0 0;
+  }
+
+  .modal-backdrop{
+    align-items:center;
+    padding:20px;
+  }
+
+  .modal-sheet{
+    border-radius:25px;
+    max-height:85vh;
+  }
+
+  .post{
+    border-left:1px solid var(--line);
+    border-right:1px solid var(--line);
+  }
+}
+
+@media(max-width:500px){
+  .logo{
+    font-size:31px;
+  }
+
+  .app-header{
+    padding-left:20px;
+    padding-right:20px;
+  }
+
+  .header-actions{
+    gap:12px;
+  }
+
+  .story-strip{
+    padding-left:20px;
+    padding-right:20px;
+  }
+
+  .post{
+    padding-left:18px;
+    padding-right:18px;
+  }
+
+  .messages-page,
+  .profile-page,
+  .settings-page{
+    padding-left:18px;
+    padding-right:18px;
+  }
+
+  .profile-post-grid{
+    gap:2px;
+  }
+
+  .message-bubble{
+    max-width:80%;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div id="app"></div>
+<div id="modalRoot"></div>
+<div id="toast"></div>
+
+<script>
+/* ============================================================
+   ZILNET — PART 1
+   Core shell, assets, theme, API, utilities, authentication
+============================================================ */
+
+const ICONS = {
+  Home:"/icons/IMG_1881.png",
+  Search:"/icons/Icon2/IMG_1946.png",
+  Create:"/icons/IMG_1899.png",
+  Reels:"/icons/IMG_1893.png",
+  Messages:"/icons/IMG_1883.png",
+  Profile:"/icons/IMG_1885.png",
+  Notification:"/icons/IMG_1895.png",
+  Settings:"/icons/IMG_1891.png",
+  More:"/icons/Icon2/IMG_1957.png",
+  Heart:"/icons/IMG_1886.png",
+  Comment:"/icons/IMG_1897.png",
+  Share1:"/icons/IMG_1884.png",
+  Share2:"/icons/IMG_1887.png",
+  Save:"/icons/Icon2/IMG_1948.png",
+  Send:"/icons/IMG_1898.png",
+  Back:"/icons/IMG_1890.png",
+  Close:"/icons/IMG_1889.png",
+  Edit:"/icons/IMG_1879.png",
+  Camera:"/icons/IMG_1880.png"
+};
+
+const state = {
+  me:null,
+  screen:"home",
+  profile:null,
+  profilePosts:[],
+  posts:[],
+  stories:[],
+  reels:[],
+  chats:[],
+  currentChat:null,
+  currentMessages:[],
+  settings:{
+    theme:"system",
+    profile_visibility:"public",
+    message_privacy:"everyone",
+    notification_settings:{
+      likes:true,
+      comments:true,
+      follows:true,
+      messages:true
+    }
+  },
+  storyTimer:null
+};
+
+const TEXT_COLORS = [
+  ["#4267ff","#8b3dff"],
+  ["#0f766e","#22c55e"],
+  ["#db2777","#9333ea"],
+  ["#ea580c","#facc15"],
+  ["#2563eb","#06b6d4"],
+  ["#7c3aed","#ec4899"],
+  ["#111827","#4b5563"],
+  ["#be123c","#fb7185"],
+  ["#0369a1","#38bdf8"],
+  ["#4d7c0f","#84cc16"]
+];
+
+const CHAT_THEMES = [
+  {name:"Ocean",bg:"#eef4ff",mine:"#4267ff",other:"#dfe8ff"},
+  {name:"Violet",bg:"#f5efff",mine:"#7c3aed",other:"#e9ddff"},
+  {name:"Sunset",bg:"#fff1ed",mine:"#ea580c",other:"#ffe0d5"},
+  {name:"Mint",bg:"#effcf5",mine:"#059669",other:"#d9f7e8"},
+  {name:"Rose",bg:"#fff1f5",mine:"#db2777",other:"#ffe0ea"},
+  {name:"Sky",bg:"#eefaff",mine:"#0284c7",other:"#d8f2ff"},
+  {name:"Night",bg:"#111318",mine:"#fff",other:"#272a32"},
+  {name:"Carbon",bg:"#18191c",mine:"#6366f1",other:"#292c35"},
+  {name:"Lemon",bg:"#fffde8",mine:"#ca8a04",other:"#fff4a8"},
+  {name:"Aurora",bg:"#f0fdfc",mine:"#0891b2",other:"#d9f8fa"}
+];
+
+function $(id){
+  return document.getElementById(id);
+}
+
+function esc(value){
+  return String(value ?? "")
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
+}
+
+function icon(name,cls=""){
+  const src=ICONS[name];
+  if(!src) return "";
+  return `<span class="iconbox ${cls}">
+    <img src="${src}" alt="">
+  </span>`;
+}
+
+function initials(name){
+  const s=String(name||"Z").trim();
+  return (s[0]||"Z").toUpperCase();
+}
+
+function avatarHTML(url,name,cls="avatar"){
+  if(url){
+    return `<img class="${cls}" src="${esc(url)}" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <span class="${cls}-letter" style="display:none">${esc(initials(name))}</span>`;
+  }
+  return `<span class="${cls}-letter">${esc(initials(name))}</span>`;
+}
+
+function randomGradient(){
+  const c=TEXT_COLORS[Math.floor(Math.random()*TEXT_COLORS.length)];
+  return `linear-gradient(135deg,${c[0]},${c[1]})`;
+}
+
+function postGradient(id){
+  const n=Number(id)||0;
+  const c=TEXT_COLORS[n % TEXT_COLORS.length];
+  return `linear-gradient(135deg,${c[0]},${c[1]})`;
+}
+
+function timeAgo(value){
+  if(!value) return "";
+  const d=new Date(value);
+  if(Number.isNaN(d.getTime())) return "";
+  const sec=Math.max(0,(Date.now()-d.getTime())/1000);
+  if(sec<60) return "now";
+  if(sec<3600) return Math.floor(sec/60)+"m";
+  if(sec<86400) return Math.floor(sec/3600)+"h";
+  if(sec<604800) return Math.floor(sec/86400)+"d";
+  return d.toLocaleDateString(undefined,{day:"numeric",month:"short"});
+}
+
+function showToast(message){
+  const t=$("toast");
+  if(!t)return;
+  t.textContent=message||"Something went wrong";
+  t.classList.add("show");
+  clearTimeout(showToast.timer);
+  showToast.timer=setTimeout(()=>t.classList.remove("show"),2400);
+}
+
+function loadingHTML(){
+  return `<div class="loading"><div class="spinner"></div>Loading…</div>`;
+}
+
+function emptyHTML(title,text=""){
+  return `<div class="empty"><strong>${esc(title)}</strong>${esc(text)}</div>`;
+}
+
+function errorHTML(message){
+  return `<div class="empty"><strong>Something went wrong</strong>${esc(message||"Please try again.")}</div>`;
+}
+
+/* =========================
+   API
+========================= */
+
+async function api(path,options={}){
+  const opts={...options};
+  const config={
+    method:opts.method||"GET",
+    credentials:"same-origin",
+    headers:{...(opts.headers||{})}
+  };
+
+  if(opts.body instanceof FormData){
+    config.body=opts.body;
+  }else if(opts.body!==undefined){
+    config.headers["Content-Type"]="application/json";
+    config.body=typeof opts.body==="string"
+      ? opts.body
+      : JSON.stringify(opts.body);
+  }
+
+  const response=await fetch(path,config);
+  let data={};
+
+  try{
+    data=await response.json();
+  }catch{
+    data={};
+  }
+
+  if(!response.ok){
+    throw new Error(data.error||data.message||`Request failed (${response.status})`);
+  }
+
+  return data;
+}
+
+/* =========================
+   LOCAL THEME
+========================= */
+
+function systemDark(){
+  return window.matchMedia &&
+    window.matchMedia("(prefers-color-scheme: dark)").matches;
+}
+
+function applyTheme(theme){
+  state.settings.theme=theme||"system";
+
+  const dark=
+    theme==="dark" ||
+    (theme==="system" && systemDark());
+
+  document.body.classList.toggle("dark",dark);
+
+  const meta=document.querySelector('meta[name="theme-color"]');
+  if(meta) meta.content=dark ? "#08090b" : "#ffffff";
+
+  localStorage.setItem("zilnet_theme",theme||"system");
+}
+
+function loadLocalTheme(){
+  applyTheme(localStorage.getItem("zilnet_theme")||"system");
+}
+
+if(window.matchMedia){
+  const media=window.matchMedia("(prefers-color-scheme: dark)");
+  media.addEventListener?.("change",()=>{
+    if((state.settings.theme||localStorage.getItem("zilnet_theme"))==="system"){
+      applyTheme("system");
+    }
+  });
+}
+
+/* =========================
+   MODALS
+========================= */
+
+function openModal(html){
+  $("modalRoot").innerHTML=
+    `<div class="modal-backdrop" id="modalBackdrop">
+      <div class="modal-sheet" onclick="event.stopPropagation()">${html}</div>
+    </div>`;
+
+  $("modalBackdrop").addEventListener("click",e=>{
+    if(e.target.id==="modalBackdrop") closeModal();
+  });
+}
+
+function closeModal(){
+  $("modalRoot").innerHTML="";
+}
+
+/* =========================
+   AUTH
+========================= */
+
+function authScreen(mode="login"){
+  $("app").innerHTML=`
+    <div class="auth-page">
+      <div class="auth-card">
+        <div class="auth-logo">ZILNET</div>
+        <div class="auth-sub">Connect. Create. Discover.</div>
+
+        <div class="auth-tabs">
+          <button class="auth-tab ${mode==="login"?"active":""}" onclick="authScreen('login')">Log in</button>
+          <button class="auth-tab ${mode==="signup"?"active":""}" onclick="authScreen('signup')">Create account</button>
+        </div>
+
+        <div id="authForm"></div>
+      </div>
+    </div>
+  `;
+
+  if(mode==="login"){
+    $("authForm").innerHTML=`
+      <input id="authIdentity" class="field" autocomplete="username" placeholder="Username or email">
+      <input id="authPassword" class="field" type="password" autocomplete="current-password" placeholder="Password">
+      <div id="authMessage" class="auth-message"></div>
+      <button class="auth-submit" onclick="login()">Log in</button>
+      <button class="auth-forgot" onclick="forgotPassword()">Forgot password?</button>
+    `;
+  }else{
+    $("authForm").innerHTML=`
+      <input id="authUsername" class="field" autocomplete="username" placeholder="Username">
+      <input id="authEmail" class="field" type="email" autocomplete="email" placeholder="Email">
+      <input id="authPassword" class="field" type="password" autocomplete="new-password" placeholder="Password (8+ characters)">
+      <div id="authMessage" class="auth-message"></div>
+      <button class="auth-submit" onclick="signup()">Create account</button>
+    `;
+  }
+}
+
+async function login(){
+  const msg=$("authMessage");
+
+  try{
+    const username=$("authIdentity").value.trim();
+    const password=$("authPassword").value;
+
+    if(!username||!password){
+      throw new Error("Enter your username/email and password.");
+    }
+
+    await api("/api/login",{
+      method:"POST",
+      body:{username,password}
+    });
+
+    await boot();
+  }catch(e){
+    if(msg)msg.textContent=e.message;
+  }
+}
+
+async function signup(){
+  const msg=$("authMessage");
+
+  try{
+    const username=$("authUsername").value.trim();
+    const email=$("authEmail").value.trim();
+    const password=$("authPassword").value;
+
+    if(!username||!email||!password){
+      throw new Error("Fill in all fields.");
+    }
+
+    if(password.length<8){
+      throw new Error("Password must be at least 8 characters.");
+    }
+
+    await api("/api/signup",{
+      method:"POST",
+      body:{username,email,password}
+    });
+
+    await boot();
+  }catch(e){
+    if(msg)msg.textContent=e.message;
+  }
+}
+
+async function logout(){
+  try{
+    await api("/api/logout",{method:"POST"});
+  }catch{}
+
+  state.me=null;
+  state.posts=[];
+  state.stories=[];
+  state.chats=[];
+  authScreen("login");
+}
+
+async function forgotPassword(){
+  const email=prompt("Enter the email connected to your ZILNET account.");
+  if(!email)return;
+
+  try{
+    const r=await api("/api/forgot-password",{
+      method:"POST",
+      body:{email:email.trim()}
+    });
+
+    const resetId=r.reset_id;
+    if(!resetId){
+      showToast(r.message||"Check your email.");
+      return;
+    }
+
+    const code=prompt("Enter the 6-digit verification code.");
+    if(!code)return;
+
+    const password=prompt("Enter your new password (8+ characters).");
+    if(!password)return;
+
+    await api("/api/reset-password",{
+      method:"POST",
+      body:{
+        reset_id:resetId,
+        code,
+        new_password:password
+      }
+    });
+
+    showToast("Password changed.");
+    await boot();
+  }catch(e){
+    showToast(e.message);
+  }
+}
+
+/* =========================
+   APP SHELL
+========================= */
+
+function shell(content=""){
+  $("app").innerHTML=`
+    <header class="app-header">
+      <div class="logo">ZILNET</div>
+
+      <div class="header-actions">
+        <button class="header-btn" onclick="openNotifications()" aria-label="Notifications">
+          ${icon("Notification")}
+          <span id="notificationDot" class="notification-dot hidden"></span>
+        </button>
+
+        <button class="header-btn" onclick="go('messages')" aria-label="Messages">
+          ${icon("Messages")}
+        </button>
+
+        <button class="header-btn" onclick="openMore()" aria-label="More">
+          ${icon("More")}
+        </button>
+      </div>
+    </header>
+
+    <main id="content">${content}</main>
+
+    <nav class="bottom-nav">
+      <button class="nav-item ${state.screen==="home"?"active":""}" onclick="go('home')">
+        ${icon("Home")}
+        <span class="nav-label">HOME</span>
+      </button>
+
+      <button class="nav-item ${state.screen==="discover"?"active":""}" onclick="go('discover')">
+        ${icon("Search")}
+        <span class="nav-label">DISCOVER</span>
+      </button>
+
+      <button class="nav-item ${state.screen==="create"?"active":""}" onclick="go('create')">
+        ${icon("Create")}
+        <span class="nav-label">CREATE</span>
+      </button>
+
+      <button class="nav-item ${state.screen==="reels"?"active":""}" onclick="go('reels')">
+        ${icon("Reels")}
+        <span class="nav-label">REELS</span>
+      </button>
+
+      <button class="nav-item ${state.screen==="profile"?"active":""}" onclick="go('profile')">
+        ${icon("Profile")}
+        <span class="nav-label">PROFILE</span>
+      </button>
+    </nav>
+  `;
+}
+
+async function go(screen){
+  state.screen=screen;
+
+  if(screen==="home")return loadHome();
+  if(screen==="discover")return loadDiscover();
+  if(screen==="create")return openCreate();
+  if(screen==="reels")return loadReels();
+  if(screen==="profile")return loadOwnProfile();
+  if(screen==="messages")return loadChats();
+}
+
+/* =========================
+   BOOT
+========================= */
+
+async function boot(){
+  loadLocalTheme();
+
+  try{
+    const r=await api("/api/me");
+    state.me=r.user;
+    await loadServerSettings();
+    await loadHome();
+  }catch{
+    state.me=null;
+    authScreen("login");
+  }
+}
+
+async function loadServerSettings(){
+  try{
+    const r=await api("/api/settings");
+    if(r.settings){
+      state.settings={
+        ...state.settings,
+        ...r.settings,
+        notification_settings:{
+          ...state.settings.notification_settings,
+          ...(r.settings.notification_settings||{})
+        }
+      };
+
+      applyTheme(state.settings.theme||"system");
+    }
+  }catch{}
+}
+
+boot();
+</script>
+<script>
+/* ============================================================
+   ZILNET — PART 2
+   Home / Stories / Posts / Profiles / Discover / Create / Reels
+============================================================ */
+
+/* =========================
+   HOME
+========================= */
+
+async function loadHome(){
+  state.screen="home";
+
+  shell(`
+    <section class="screen">
+      <div id="stories"></div>
+      <div id="feed" class="feed">${loadingHTML()}</div>
+    </section>
+  `);
+
+  try{
+    const r=await api("/api/feed");
+
+    state.posts=r.posts||[];
+    state.stories=r.stories||[];
+
+    renderStories();
+    renderFeed();
+
+    await loadNotificationDot();
+  }catch(e){
+    $("feed").innerHTML=errorHTML(e.message);
+    renderStories();
+  }
+}
+
+function renderStories(){
+  const stories=$("stories");
+  if(!stories)return;
+
+  const ownStory=state.stories.find(
+    s=>Number(s.user_id)===Number(state.me?.id)
+  );
+
+  const people=new Map();
+
+  for(const s of state.stories){
+    if(!people.has(s.user_id)){
+      people.set(s.user_id,s);
+    }
+  }
+
+  let html=`
+    <div class="story-strip">
+      <div class="story-item story-add" onclick="openCreateStory()">
+        <div class="story-ring ${ownStory?"active":""}">
+          <div class="story-inner">
+            ${ownStory
+              ? avatarHTML(
+                  ownStory.avatar_url,
+                  ownStory.display_name||ownStory.username,
+                  "story-avatar"
+                )
+              : `<span class="story-plus">+</span>`
+            }
+          </div>
+        </div>
+        <div class="story-label">Add story</div>
+      </div>
+  `;
+
+  for(const s of people.values()){
+    html+=`
+      <div class="story-item" onclick="viewStory(${Number(s.id)})">
+        <div class="story-ring active">
+          <div class="story-inner">
+            ${avatarHTML(
+              s.avatar_url,
+              s.display_name||s.username,
+              "story-avatar"
+            )}
+          </div>
+        </div>
+        <div class="story-label">@${esc(s.username)}</div>
+      </div>
+    `;
+  }
+
+  html+=`</div>`;
+  stories.innerHTML=html;
+}
+
+function viewStory(id){
+  const story=state.stories.find(s=>Number(s.id)===Number(id));
+  if(!story)return;
+
+  const hasMedia=!!story.media_url;
+
+  openModal(`
+    <div class="modal-head">
+      <div>
+        <h3>${esc(story.display_name||story.username)}</h3>
+        <div style="color:var(--muted);font-size:13px">
+          @${esc(story.username)} · ${timeAgo(story.created_at)}
+        </div>
+      </div>
+      <button class="modal-close" onclick="closeModal()">${icon("Close")}</button>
+    </div>
+
+    <div style="
+      min-height:360px;
+      border-radius:24px;
+      overflow:hidden;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:${hasMedia?"#000":postGradient(story.id)};
+      color:#fff;
+      position:relative;
+    ">
+      ${
+        hasMedia
+        ? story.media_type?.startsWith("video")
+          ? `<video src="${esc(story.media_url)}" controls autoplay playsinline style="width:100%;max-height:70vh"></video>`
+          : `<img src="${esc(story.media_url)}" style="width:100%;max-height:70vh;object-fit:contain">`
+        : `<div style="font-size:27px;font-weight:850;text-align:center;padding:35px;white-space:pre-wrap">
+            ${esc(story.content||"")}
+          </div>`
+      }
+    </div>
+  `);
+}
+
+/* =========================
+   FEED
+========================= */
+
+function renderFeed(){
+  const feed=$("feed");
+  if(!feed)return;
+
+  if(!state.posts.length){
+    feed.innerHTML=emptyHTML(
+      "No posts yet",
+      "Follow people or create your first post."
+    );
+    return;
+  }
+
+  feed.innerHTML=state.posts.map(postHTML).join("");
+}
+
+function postHTML(p){
+  const own=Number(p.user_id)===Number(state.me?.id);
+  const media=String(p.media_url||"").trim();
+  const text=String(p.content||"").trim();
+
+  let content="";
+
+  if(media){
+    const type=String(p.media_type||"").toLowerCase();
+
+    if(type.startsWith("video")||/\.(mp4|webm|mov|m4v)(\?|$)/i.test(media)){
+      content=`
+        ${text?`<div class="post-text">${esc(text)}</div>`:""}
+        <div class="post-media">
+          <video src="${esc(media)}" controls playsinline preload="metadata"></video>
+        </div>
+      `;
+    }else{
+      content=`
+        ${text?`<div class="post-text">${esc(text)}</div>`:""}
+        <div class="post-media">
+          <img src="${esc(media)}" loading="lazy" alt="">
+        </div>
+      `;
+    }
+  }else if(text){
+    content=`
+      <div class="text-post-art" style="background:${postGradient(p.id)}">
+        <span>${esc(text)}</span>
+      </div>
+    `;
+  }
+
+  return `
+    <article class="post" id="post-${Number(p.id)}">
+
+      <div class="post-head">
+        ${avatarHTML(
+          p.avatar_url,
+          p.display_name||p.username
+        )}
+
+        <div class="post-user" onclick="openProfile('${esc(p.username)}')">
+          <div class="post-name">${esc(p.display_name||p.username)}</div>
+          <div class="post-sub">@${esc(p.username)} · ${timeAgo(p.created_at)}</div>
+        </div>
+
+        <button class="post-more" onclick="postMenu(${Number(p.id)},${own})">
+          ${icon("More","small")}
+        </button>
+      </div>
+
+      <div class="post-content">${content}</div>
+
+      <div class="post-actions">
+
+        <button class="action like ${p.liked?"liked":""}"
+          onclick="toggleLike(${Number(p.id)},this)">
+          ${icon("Heart")}
+          <span class="action-count">${Number(p.likes_count||0)}</span>
+        </button>
+
+        <button class="action"
+          onclick="openComments(${Number(p.id)})">
+          ${icon("Comment")}
+          <span class="action-count">${Number(p.comments_count||0)}</span>
+        </button>
+
+        <button class="action"
+          onclick="sharePost(${Number(p.id)})">
+          ${icon("Share1")}
+        </button>
+
+        <button class="action save ${p.saved?"liked":""}"
+          onclick="toggleSave(${Number(p.id)},this)">
+          ${icon("Save")}
+        </button>
+
+      </div>
+    </article>
+  `;
+}
+
+async function toggleLike(id,button){
+  try{
+    const r=await api(`/api/posts/${id}/like`,{
+      method:"POST"
+    });
+
+    const post=state.posts.find(p=>Number(p.id)===Number(id));
+
+    if(post){
+      post.liked=!!r.liked;
+      post.likes_count=Number(r.likes_count||0);
+    }
+
+    button.classList.toggle("liked",!!r.liked);
+
+    const count=button.querySelector(".action-count");
+    if(count)count.textContent=String(r.likes_count||0);
+  }catch(e){
+    showToast(e.message);
+  }
+}
+
+async function toggleSave(id,button){
+  try{
+    const r=await api(`/api/posts/${id}/save`,{
+      method:"POST"
+    });
+
+    const post=state.posts.find(p=>Number(p.id)===Number(id));
+    if(post)post.saved=!!r.saved;
+
+    button.classList.toggle("liked",!!r.saved);
+    showToast(r.saved?"Saved":"Removed from saved");
+  }catch(e){
+    showToast(e.message);
+  }
+}
+
+function postMenu(id,own){
+  openModal(`
+    <div class="modal-head">
+      <h3>Post</h3>
+      <button class="modal-close" onclick="closeModal()">${icon("Close")}</button>
+    </div>
+
+    <div class="choice-list">
+      <button class="choice" onclick="closeModal();openComments(${id})">
+        ${icon("Comment")} Comments
+      </button>
+
+      <button class="choice" onclick="closeModal();sharePost(${id})">
+        ${icon("Share1")} Share post
+      </button>
+
+      <button class="choice" onclick="copyPostLink(${id})">
+        Copy post link
+      </button>
+
+      ${own?`
+        <button class="choice danger" onclick="deletePost(${id})">
+          Delete post
+        </button>
+      `:""}
+    </div>
+  `);
+}
+
+async function deletePost(id){
+  if(!confirm("Delete this post?"))return;
+
+  try{
+    await api(`/api/posts/${id}`,{
+      method:"DELETE"
+    });
+
+    closeModal();
+    state.posts=state.posts.filter(p=>Number(p.id)!==Number(id));
+    renderFeed();
+    showToast("Post deleted");
+  }catch(e){
+    showToast(e.message);
+  }
+}
+
+async function copyPostLink(id){
+  const url=`${location.origin}/#post-${id}`;
+
+  try{
+    await navigator.clipboard.writeText(url);
+    showToast("Link copied");
+  }catch{
+    prompt("Copy this link:",url);
+  }
+
+  closeModal();
+}
+
+async function sharePost(id){
+  const url=`${location.origin}/#post-${id}`;
+
+  try{
+    if(navigator.share){
+      await navigator.share({
+        title:"ZILNET post",
+        text:"Check out this ZILNET post",
+        url
+      });
+    }else{
+      await navigator.clipboard.writeText(url);
+      showToast("Link copied");
+    }
+  }catch{}
+
+  closeModal();
+}
+
+/* =========================
+   COMMENTS
+========================= */
+
+async function openComments(id){
+  openModal(`
+    <div class="modal-head">
+      <h3>Comments</h3>
+      <button class="modal-close" onclick="closeModal()">${icon("Close")}</button>
+    </div>
+
+    <div id="commentsBody">${loadingHTML()}</div>
+
+    <form onsubmit="submitComment(event,${id})">
+      <input id="commentInput" class="field" maxlength="3000" placeholder="Write a comment…">
+      <button class="modal-submit">Comment</button>
+    </form>
+  `);
+
+  try{
+    const r=await api(`/api/posts/${id}/comments`);
+    const comments=r.comments||[];
+
+    $("commentsBody").innerHTML=comments.length
+      ?comments.map(c=>`
+        <div style="
+          display:flex;
+          gap:10px;
+          padding:12px 0;
+          border-bottom:1px solid var(--line)
+        ">
+          ${avatarHTML(c.avatar_url,c.display_name||c.username,"avatar")}
+          <div style="min-width:0">
+            <b>${esc(c.display_name||c.username)}</b>
+            <div style="color:var(--muted);font-size:13px">
+              @${esc(c.username)}
+            </div>
+            <div style="margin-top:5px;white-space:pre-wrap;overflow-wrap:anywhere">
+              ${esc(c.content)}
+            </div>
+          </div>
+        </div>
+      `).join("")
+      :emptyHTML("No comments","Be the first to comment.");
+  }catch(e){
+    $("commentsBody").innerHTML=errorHTML(e.message);
+  }
+}
+
+async function submitComment(event,id){
+  event.preventDefault();
+
+  const input=$("commentInput");
+  const content=input.value.trim();
+  if(!content)return;
+
+  try{
+    await api(`/api/posts/${id}/comments`,{
+      method:"POST",
+      body:{content}
+    });
+
+    input.value="";
+    await openComments(id);
+  }catch(e){
+    showToast(e.message);
+  }
+}
+
+/* =========================
+   CREATE POST
+========================= */
+
+function openCreate(){
+  state.screen="create";
+
+  shell(`
+    <section class="screen">
+      <div class="settings-page">
+        <div class="settings-title">Create</div>
+
+        <div class="settings-section">
+          <div class="settings-section-title">Post</div>
+
+          <div class="setting-row" onclick="openCreatePost()">
+            ${icon("Create")}
+            <div class="setting-info">
+              <div class="setting-name">Create a post</div>
+              <div class="setting-desc">Text, photo or video</div>
+            </div>
+          </div>
+
+          <div class="setting-row" onclick="openCreateStory()">
+            ${icon("Camera")}
+            <div class="setting-info">
+              <div class="setting-name">Add story</div>
+              <div class="setting-desc">Text, photo or video · 24 hours</div>
+            </div>
+          </div>
+
+          <div class="setting-row" onclick="openCreateReel()">
+            ${icon("Reels")}
+            <div class="setting-info">
+              <div class="setting-name">Create reel</div>
+              <div class="setting-desc">Upload a video</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  `);
+}
+
+function openCreatePost(){
+  openModal(`
+    <div class="modal-head">
+      <h3>Create post</h3>
+      <button class="modal-close" onclick="closeModal()">${icon("Close")}</button>
+    </div>
+
+    <textarea id="postText" class="field" maxlength="10000"
+      placeholder="What's on your mind?"></textarea>
+
+    <input id="postFile" type="file"
+      accept="image/*,video/*"
+      class="field">
+
+    <div id="postUploadStatus" style="color:var(--muted);font-size:13px"></div>
+
+    <button class="modal-submit" onclick="submitPost()">
+      Publish post
+    </button>
+  `);
+}
+
+async function uploadFile(file){
+  if(!file)throw new Error("Choose a file.");
+  if(file.size>50*1024*1024){
+    throw new Error("File is too large. Maximum is 50 MB.");
+  }
+
+  const form=new FormData();
+  form.append("file",file);
+
+  return await api("/api/upload",{
+    method:"POST",
+    body:form
+  });
+}
+
+async function submitPost(){
+  const text=$("postText").value.trim();
+  const file=$("postFile").files[0];
+  const status=$("postUploadStatus");
+
+  try{
+    let mediaUrl="";
+    let mediaType="";
+
+    if(file){
+      status.textContent="Uploading…";
+      const r=await uploadFile(file);
+      mediaUrl=r.url||"";
+      mediaType=file.type||"";
+    }
+
+    if(!text&&!mediaUrl){
+      throw new Error("Add text or choose a photo/video.");
+    }
+
+    await api("/api/posts",{
+      method:"POST",
+      body:{
+        content:text,
+        media_url:mediaUrl,
+        media_type:mediaType
+      }
+    });
+
+    closeModal();
+    showToast("Post published");
+    await loadHome();
+  }catch(e){
+    status.textContent=e.message;
+  }
+}
+
+/* =========================
+   CREATE STORY
+========================= */
+
+function openCreateStory(){
+  openModal(`
+    <div class="modal-head">
+      <h3>Add story</h3>
+      <button class="modal-close" onclick="closeModal()">${icon("Close")}</button>
+    </div>
+
+    <textarea id="storyText" class="field" maxlength="5000"
+      placeholder="Write a story…"></textarea>
+
+    <input id="storyFile" type="file"
+      accept="image/*,video/*"
+      class="field">
+
+    <div id="storyStatus" style="color:var(--muted);font-size:13px"></div>
+
+    <button class="modal-submit" onclick="submitStory()">
+      Add story
+    </button>
+  `);
+}
+
+async function submitStory(){
+  const content=$("storyText").value.trim();
+  const file=$("storyFile").files[0];
+  const status=$("storyStatus");
+
+  try{
+    let media_url="";
+    let media_type="";
+
+    if(file){
+      status.textContent="Uploading…";
+      const r=await uploadFile(file);
+      media_url=r.url||"";
+      media_type=file.type||"";
+    }
+
+    if(!content&&!media_url){
+      throw new Error("Add text or choose a photo/video.");
+    }
+
+    await api("/api/stories",{
+      method:"POST",
+      body:{
+        content,
+        media_url,
+        media_type
+      }
+    });
+
+    closeModal();
+    showToast("Story added");
+    await loadHome();
+  }catch(e){
+    status.textContent=e.message;
+  }
+}
+
+/* =========================
+   DISCOVER
+========================= */
+
+async function loadDiscover(){
+  state.screen="discover";
+
+  shell(`
+    <section class="screen">
+      <div class="messages-page">
+        <div class="page-heading">
+          <div>
+            <h1>Discover</h1>
+            <p>Find people on ZILNET</p>
+          </div>
+        </div>
+
+        <input id="discoverSearch"
+          class="field"
+          placeholder="Search people, usernames or skills…"
+          oninput="searchPeople(this.value)">
+
+        <div id="discoverResults">${loadingHTML()}</div>
+      </div>
+    </section>
+  `);
+
+  await searchPeople("");
+}
+
+let searchTimer;
+
+async function searchPeople(q){
+  clearTimeout(searchTimer);
+
+  searchTimer=setTimeout(async()=>{
+    try{
+      const r=await api(`/api/search?q=${encodeURIComponent(q||"")}`);
+      const users=r.users||[];
+
+      $("discoverResults").innerHTML=users.length
+        ?users.map(u=>`
+          <div class="chat-row" onclick="openProfile('${esc(u.username)}')">
+            ${avatarHTML(u.avatar_url,u.display_name||u.username)}
+
+            <div class="chat-row-info">
+              <div class="chat-row-name">
+                ${esc(u.display_name||u.username)}
+              </div>
+
+              <div class="chat-row-preview">
+                @${esc(u.username)}
+                ${u.skills?` · ${esc(u.skills)}`:""}
+              </div>
+            </div>
+
+            ${
+              Number(u.id)!==Number(state.me?.id)
+              ?`
+                <button class="follow-btn ${u.following?"following":""}"
+                  onclick="event.stopPropagation();quickFollow(${Number(u.id)},this)">
+                  ${u.following?"Following":"Follow"}
+                </button>
+              `
+              :""
+            }
+          </div>
+        `).join("")
+        :emptyHTML("No people found","Try another search.");
+    }catch(e){
+      $("discoverResults").innerHTML=errorHTML(e.message);
+    }
+  },180);
+}
+
+async function quickFollow(id,button){
+  try{
+    const r=await api(`/api/users/${id}/follow`,{
+      method:"POST"
+    });
+
+    button.textContent=r.following?"Following":"Follow";
+    button.classList.toggle("following",!!r.following);
+  }catch(e){
+    showToast(e.message);
+  }
+}
+
+/* =========================
+   PROFILES
+========================= */
+
+async function openProfile(username){
+  if(!username)return;
+
+  state.profile=null;
+
+  shell(`
+    <section class="screen">
+      <div id="profileView">${loadingHTML()}</div>
+    </section>
+  `);
+
+  try{
+    const r=await api(`/api/profile/${encodeURIComponent(username)}`);
+    state.profile=r.user;
+    state.profilePosts=r.posts||[];
+
+    renderProfile(r);
+  }catch(e){
+    $("profileView").innerHTML=errorHTML(e.message);
+  }
+}
+
+async function loadOwnProfile(){
+  try{
+    const r=await api("/api/profile");
+    state.profile=r.user;
+    state.profilePosts=r.posts||[];
+
+    state.screen="profile";
+
+    shell(`
+      <section class="screen">
+        <div id="profileView"></div>
+      </section>
+    `);
+
+    renderProfile(r);
+  }catch(e){
+    shell(`<section class="screen">${errorHTML(e.message)}</section>`);
+  }
+}
+
+function renderProfile(data){
+  const u=data.user||{};
+  const posts=data.posts||[];
+  const own=Number(u.id)===Number(state.me?.id);
+
+  $("profileView").innerHTML=`
+    <div class="profile-page">
+
+      <div class="profile-hero">
+
+        ${
+          u.avatar_url
+          ?`<img class="profile-avatar"
+              src="${esc(u.avatar_url)}"
+              alt="">`
+          :`<div class="profile-avatar-letter">
+              ${esc(initials(u.display_name||u.username))}
+            </div>`
+        }
+
+        <div class="profile-name">
+          ${esc(u.display_name||u.username)}
+        </div>
+
+        <div class="profile-username">
+          @${esc(u.username)}
+        </div>
+
+        ${
+          u.bio
+          ?`<div class="profile-bio">${esc(u.bio)}</div>`
+          :""
+        }
+
+        ${
+          u.skills
+          ?`<div style="color:var(--muted);font-size:13px">
+              ${esc(u.skills)}
+            </div>`
+          :""
+        }
+
+        <div class="profile-stats">
+          <div class="stat">
+            <strong>${Number(u.posts_count||posts.length||0)}</strong>
+            <span>Posts</span>
+          </div>
+
+          <div class="stat">
+            <strong>${Number(u.followers_count||0)}</strong>
+            <span>Followers</span>
+          </div>
+
+          <div class="stat">
+            <strong>${Number(u.following_count||0)}</strong>
+            <span>Following</span>
+          </div>
+        </div>
+
+        <div class="profile-actions">
+          ${
+            own
+            ?`
+              <button class="secondary-btn" onclick="editOwnProfile()">
+                ${icon("Edit")} Edit profile
+              </button>
+            `
+            :`
+              <button id="profileFollowBtn"
+                class="follow-btn ${u.following?"following":""}"
+                onclick="followProfile(${Number(u.id)})">
+                ${u.following?"Following":"Follow"}
+              </button>
+
+              <button class="secondary-btn"
+                onclick="messageProfile(${Number(u.id)})">
+                ${icon("Messages")} Message
+              </button>
+            `
+          }
+        </div>
+      </div>
+
+      ${
+        data.private
+        ?emptyHTML(
+          "Private profile",
+          "Follow this person to see their posts."
+        )
+        :`
+          <div class="profile-posts-title">Posts</div>
+
+          <div class="profile-post-grid">
+            ${
+              posts.length
+              ?posts.map(profileGridPostHTML).join("")
+              :`
+                <div style="
+                  grid-column:1/-1;
+                  padding:50px;
+                  text-align:center;
+                  color:var(--muted)
+                ">
+                  No posts yet.
+                </div>
+              `
+            }
+          </div>
+        `
+      }
+    </div>
+  `;
+}
+
+function profileGridPostHTML(p){
+  const media=String(p.media_url||"");
+  const text=String(p.content||"");
+
+  if(media){
+    const video=
+      String(p.media_type||"").startsWith("video") ||
+      /\.(mp4|webm|mov|m4v)(\?|$)/i.test(media);
+
+    return `
+      <div class="profile-grid-item"
+        onclick="openSinglePost(${Number(p.id)})">
+        ${
+          video
+          ?`<video src="${esc(media)}" muted playsinline></video>`
+          :`<img src="${esc(media)}" loading="lazy" alt="">`
+        }
+      </div>
+    `;
+  }
+
+  return `
+    <div class="profile-grid-item"
+      onclick="openSinglePost(${Number(p.id)})">
+      <div class="profile-grid-text"
+        style="background:${postGradient(p.id)}">
+        ${esc(text)}
+      </div>
+    </div>
+  `;
+}
+
+async function openSinglePost(id){
+  try{
+    const r=await api(`/api/posts/${id}`);
+    const p=r.post;
+
+    openModal(`
+      <div class="modal-head">
+        <h3>Post</h3>
+        <button class="modal-close" onclick="closeModal()">${icon("Close")}</button>
+      </div>
+      ${postHTML(p)}
+    `);
+  }catch(e){
+    showToast(e.message);
+  }
+}
+
+async function followProfile(id){
+  try{
+    const r=await api(`/api/users/${id}/follow`,{
+      method:"POST"
+    });
+
+    const u=state.profile;
+    if(u){
+      u.following=!!r.following;
+      u.followers_count=Math.max(
+        0,
+        Number(u.followers_count||0)+(r.following?1:-1)
+      );
+    }
+
+    const button=$("profileFollowBtn");
+
+    if(button){
+      button.textContent=r.following?"Following":"Follow";
+      button.classList.toggle("following",!!r.following);
+    }
+
+    const stats=document.querySelectorAll(".stat strong");
+    if(stats[1]&&u)stats[1].textContent=String(u.followers_count);
+
+    showToast(r.following?"Following":"Unfollowed");
+  }catch(e){
+    showToast(e.message);
+  }
+}
+
+async function messageProfile(id){
+  try{
+    const r=await api("/api/chats",{
+      method:"POST",
+      body:{user_id:id}
+    });
+
+    closeModal();
+
+    const chat=r.chat;
+    if(chat)openChat(chat.id);
+  }catch(e){
+    showToast(e.message);
+  }
+}
+
+function editOwnProfile(){
+  const u=state.profile||state.me||{};
+
+  openModal(`
+    <div class="modal-head">
+      <h3>Edit profile</h3>
+      <button class="modal-close" onclick="closeModal()">${icon("Close")}</button>
+    </div>
+
+    <input id="editDisplay" class="field"
+      value="${esc(u.display_name||"")}"
+      placeholder="Display name">
+
+    <textarea id="editBio" class="field"
+      placeholder="Bio">${esc(u.bio||"")}</textarea>
+
+    <input id="editSkills" class="field"
+      value="${esc(u.skills||"")}"
+      placeholder="Skills">
+
+    <input id="editAvatar" class="field"
+      value="${esc(u.avatar_url||"")}"
+      placeholder="Avatar image URL">
+
+    <button class="modal-submit" onclick="saveOwnProfile()">
+      Save profile
+    </button>
+  `);
+}
+
+async function saveOwnProfile(){
+  try{
+    const r=await api("/api/profile/update",{
+      method:"POST",
+      body:{
+        display_name:$("editDisplay").value.trim(),
+        bio:$("editBio").value.trim(),
+        skills:$("editSkills").value.trim(),
+        avatar_url:$("editAvatar").value.trim()
+      }
+    });
+
+    state.me=r.user;
+    state.profile=r.user;
+
+    closeModal();
+    showToast("Profile updated");
+    await loadOwnProfile();
+  }catch(e){
+    showToast(e.message);
+  }
+}
+
+/* =========================
+   REELS
+========================= */
+
+async function loadReels(){
+  state.screen="reels";
+
+  shell(`
+    <section class="screen">
+      <div class="messages-page">
+        <div class="page-heading">
+          <div>
+            <h1>Reels</h1>
+            <p>Short videos from ZILNET</p>
+          </div>
+        </div>
+
+        <div id="reelsFeed">${loadingHTML()}</div>
+      </div>
+    </section>
+  `);
+
+  try{
+    const r=await api("/api/reels/feed");
+    state.reels=r.reels||[];
+
+    $("reelsFeed").innerHTML=state.reels.length
+      ?state.reels.map(reelHTML).join("")
+      :emptyHTML("No reels yet","Create the first one.");
+  }catch(e){
+    $("reelsFeed").innerHTML=errorHTML(e.message);
+  }
+}
+
+function reelHTML(r){
+  return `
+    <article class="post">
+      <div class="post-head">
+        ${avatarHTML(r.avatar_url,r.display_name||r.username)}
+
+        <div class="post-user"
+          onclick="openProfile('${esc(r.username)}')">
+          <div class="post-name">
+            ${esc(r.display_name||r.username)}
+          </div>
+          <div class="post-sub">
+            @${esc(r.username)} · ${timeAgo(r.created_at)}
+          </div>
+        </div>
+      </div>
+
+      ${
+        r.caption
+        ?`<div class="post-text">${esc(r.caption)}</div>`
+        :""
+      }
+
+      <div class="post-media">
+        <video
+          src="${esc(r.media_url)}"
+          controls
+          playsinline
+          loop
+          preload="metadata">
+        </video>
+      </div>
+    </article>
+  `;
+}
+
+function openCreateReel(){
+  openModal(`
+    <div class="modal-head">
+      <h3>Create reel</h3>
+      <button class="modal-close" onclick="closeModal()">${icon("Close")}</button>
+    </div>
+
+    <textarea id="reelCaption" class="field"
+      maxlength="5000"
+      placeholder="Caption…"></textarea>
+
+    <input id="reelFile" type="file"
+      accept="video/*"
+      class="field">
+
+    <div id="reelStatus" style="color:var(--muted);font-size:13px"></div>
+
+    <button class="modal-submit" onclick="submitReel()">
+      Publish reel
+    </button>
+  `);
+}
+
+async function submitReel(){
+  const file=$("reelFile").files[0];
+  const caption=$("reelCaption").value.trim();
+  const status=$("reelStatus");
+
+  try{
+    if(!file)throw new Error("Choose a video.");
+
+    status.textContent="Uploading…";
+
+    const r=await uploadFile(file);
+
+    await api("/api/reels",{
+      method:"POST",
+      body:{
+        caption,
+        media_url:r.url
+      }
+    });
+
+    closeModal();
+    showToast("Reel published");
+    await loadReels();
+  }catch(e){
+    status.textContent=e.message;
+  }
+}
+</script>
+<script>
+/* ============================================================
+   ZILNET — PART 3
+   Chats / Groups / Chat themes / Settings / Notifications
+============================================================ */
+
+/* =========================
+   CHAT LIST
+========================= */
+
+async function loadChats(){
+  state.screen="messages";
+
+  shell(`
+    <section class="screen">
+      <div class="messages-page">
+
+        <div class="page-heading">
+          <div>
+            <h1>Messages</h1>
+            <p>Your conversations</p>
+          </div>
+
+          <button class="group-button" onclick="openGroupCreator()">
+            + GROUP
+          </button>
+        </div>
+
+        <div id="chatList">${loadingHTML()}</div>
+      </div>
+    </section>
+  `);
+
+  try{
+    const r=await api("/api/chats");
+    state.chats=r.chats||[];
+
+    renderChatList();
+  }catch(e){
+    $("chatList").innerHTML=errorHTML(e.message);
+  }
+}
+
+function renderChatList(){
+  const el=$("chatList");
+
+  if(!el)return;
+
+  if(!state.chats.length){
+    el.innerHTML=emptyHTML(
+      "No conversations",
+      "Open someone's profile and tap Message."
+    );
+    return;
+  }
+
+  el.innerHTML=state.chats.map(chat=>`
+    <div class="chat-row" onclick="openChat(${Number(chat.id)})">
+
+      ${
+        chat.avatar_url
+        ?avatarHTML(chat.avatar_url,chat.name)
+        :`
+          <span class="avatar-letter">
+            ${esc(initials(chat.name||"C"))}
+          </span>
+        `
+      }
+
+      <div class="chat-row-info">
+
+        <div class="chat-row-name">
+          ${esc(chat.name||"Group")}
+        </div>
+
+        <div class="chat-row-preview">
+          ${esc(chat.last_message||"No messages yet")}
+        </div>
+
+      </div>
+
+      ${
+        chat.is_group
+        ?`<span style="color:var(--muted);font-size:12px">GROUP</span>`
+        :""
+      }
+
+    </div>
+  `).join("");
+}
+
+/* =========================
+   OPEN CHAT
+========================= */
+
+async function openChat(id){
+  try{
+    const [chatResult,msgResult]=await Promise.all([
+      api(`/api/chats/${id}`),
+      api(`/api/chats/${id}/messages`)
+    ]);
+
+    state.currentChat=chatResult.chat;
+    state.currentMessages=msgResult.messages||[];
+
+    renderChat();
+  }catch(e){
+    showToast(e.message);
+  }
+}
+
+function renderChat(){
+  const chat=state.currentChat;
+  if(!chat)return;
+
+  const group=!!chat.is_group;
+
+  shell("");
+
+  $("content").innerHTML=`
+    <section class="chat-page">
+
+      <div class="chat-header">
+
+        <button class="back-btn" onclick="loadChats()">
+          ${icon("Back","big")}
+        </button>
+
+        <div class="chat-header-main"
+          onclick="${
+            group
+            ?"showGroupInfo()"
+            :`openProfile('${esc(chat.username||chat.user?.username||"")}')`
+          }">
+
+          <div class="chat-header-name">
+            ${esc(chat.name||"Chat")}
+          </div>
+
+          <div class="chat-header-sub">
+            ${
+              group
+              ?"Group conversation"
+              :`@${esc(chat.username||chat.user?.username||"")}`
+            }
+          </div>
+
+        </div>
+
+        <button class="chat-theme-btn"
+          onclick="openChatThemeSelector()">
+          ${icon("More")}
+        </button>
+
+      </div>
+
+      ${
+        group
+        ?`
+          <div id="groupMembers" class="group-members">
+            ${renderGroupMembers()}
+          </div>
+        `
+        :""
+      }
+
+      <div id="chatMessages"
+        class="chat-messages">
+        ${renderMessagesHTML()}
+      </div>
+
+      <form class="chat-composer"
+        onsubmit="sendCurrentMessage(event)">
+
+        <input
+          id="messageInput"
+          class="message-input"
+          maxlength="5000"
+          autocomplete="off"
+          placeholder="Message…">
+
+        <button class="send-btn" type="submit">
+          <img src="${ICONS.Send}" alt="">
+        </button>
+
+      </form>
+
+    </section>
+  `;
+
+  applyChatTheme();
+  scrollChatBottom();
+}
+
+function renderMessagesHTML(){
+  if(!state.currentMessages.length){
+    return `
+      <div style="
+        margin:auto;
+        text-align:center;
+        color:var(--muted)
+      ">
+        No messages yet.
+      </div>
+    `;
+  }
+
+  return state.currentMessages.map(m=>{
+    const mine=Number(m.user_id)===Number(state.me?.id);
+
+    return `
+      <div class="message-row ${mine?"mine":"theirs"}">
+
+        <div class="message-bubble">
+
+          ${
+            !mine && state.currentChat?.is_group
+            ?`
+              <div class="message-sender">
+                ${esc(m.display_name||m.username||"User")}
+                · @${esc(m.username||"")}
+              </div>
+            `
+            :""
+          }
+
+          <div style="white-space:pre-wrap">
+            ${esc(m.content||"")}
+          </div>
+
+        </div>
+
+      </div>
+    `;
+  }).join("");
+}
+
+/* =========================
+   GROUP MEMBER DISPLAY
+========================= */
+
+function renderGroupMembers(){
+  const map=new Map();
+
+  for(const m of state.currentMessages){
+    if(!m.username)continue;
+
+    map.set(String(m.user_id),{
+      id:m.user_id,
+      username:m.username,
+      display_name:m.display_name||m.username,
+      avatar_url:m.avatar_url||""
+    });
+  }
+
+  if(state.me){
+    map.set(String(state.me.id),{
+      id:state.me.id,
+      username:state.me.username,
+      display_name:state.me.display_name||state.me.username,
+      avatar_url:state.me.avatar_url||""
+    });
+  }
+
+  const members=[...map.values()];
+
+  if(!members.length)return "";
+
+  return members.map(m=>`
+    <button class="member-chip"
+      onclick="openProfile('${esc(m.username)}')">
+      ${esc(m.display_name||m.username)}
+      <span style="opacity:.55">
+        @${esc(m.username)}
+      </span>
+    </button>
+  `).join("");
+}
+
+function showGroupInfo(){
+  const members=[];
+
+  const map=new Map();
+
+  for(const m of state.currentMessages){
+    if(m.username){
+      map.set(String(m.user_id),m);
+    }
+  }
+
+  if(state.me){
+    map.set(String(state.me.id),state.me);
+  }
+
+  for(const m of map.values()){
+    members.push(m);
+  }
+
+  openModal(`
+    <div class="modal-head">
+      <h3>${esc(state.currentChat.name||"Group")}</h3>
+      <button class="modal-close" onclick="closeModal()">
+        ${icon("Close")}
+      </button>
+    </div>
+
+    <div style="color:var(--muted);margin-bottom:15px">
+      People visible from this conversation
+    </div>
+
+    <div class="choice-list">
+      ${
+        members.map(m=>`
+          <button class="choice"
+            onclick="closeModal();openProfile('${esc(m.username)}')">
+            ${esc(m.display_name||m.username)}
+            <span style="color:var(--muted)">
+              @${esc(m.username)}
+            </span>
+          </button>
+        `).join("")
+      }
+    </div>
+  `);
+}
+
+/* =========================
+   SEND MESSAGE
+========================= */
+
+async function sendCurrentMessage(event){
+  event.preventDefault();
+
+  const input=$("messageInput");
+  const content=input.value.trim();
+
+  if(!content||!state.currentChat)return;
+
+  const chatId=Number(state.currentChat.id);
+
+  input.disabled=true;
+
+  try{
+    const r=await api(`/api/chats/${chatId}/messages`,{
+      method:"POST",
+      body:{content}
+    });
+
+    const message=r.message;
+
+    if(message){
+      state.currentMessages.push(message);
+    }
+
+    input.value="";
+    $("chatMessages").innerHTML=renderMessagesHTML();
+
+    if(state.currentChat.is_group){
+      $("groupMembers").innerHTML=renderGroupMembers();
+    }
+
+    scrollChatBottom();
+  }catch(e){
+    showToast(e.message);
+  }finally{
+    input.disabled=false;
+    input.focus();
+  }
+}
+
+function scrollChatBottom(){
+  requestAnimationFrame(()=>{
+    const el=$("chatMessages");
+    if(el)el.scrollTop=el.scrollHeight;
+  });
+}
+
+/* =========================
+   CHAT THEMES
+   Local per-chat setting.
+   Worker/D1 remains untouched.
+========================= */
+
+function chatThemeKey(){
+  return `zilnet_chat_theme_${Number(state.currentChat?.id||0)}`;
+}
+
+function getChatThemeIndex(){
+  const n=Number(localStorage.getItem(chatThemeKey()));
+  return Number.isInteger(n)&&n>=0&&n<CHAT_THEMES.length ? n : 0;
+}
+
+function applyChatTheme(){
+  if(!state.currentChat)return;
+
+  const theme=CHAT_THEMES[getChatThemeIndex()];
+  const page=document.querySelector(".chat-page");
+  if(!page)return;
+
+  page.style.setProperty("--chat-bg",theme.bg);
+  page.style.setProperty("--bubble-mine",theme.mine);
+  page.style.setProperty("--bubble-other",theme.other);
+}
+
+function openChatThemeSelector(){
+  const selected=getChatThemeIndex();
+
+  openModal(`
+    <div class="modal-head">
+      <div>
+        <h3>Chat theme</h3>
+        <div style="color:var(--muted);font-size:13px">
+          ${esc(state.currentChat?.name||"Conversation")}
+        </div>
+      </div>
+
+      <button class="modal-close" onclick="closeModal()">
+        ${icon("Close")}
+      </button>
+    </div>
+
+    <div class="theme-grid">
+
+      ${CHAT_THEMES.map((t,i)=>`
+        <div class="theme-card ${i===selected?"selected":""}"
+          onclick="setChatTheme(${i})">
+
+          <div class="theme-preview"
+            style="background:${t.bg}">
+            <i style="background:${t.other}"></i>
+            <i style="background:${t.mine}"></i>
+          </div>
+
+          <div class="theme-name">${esc(t.name)}</div>
+        </div>
+      `).join("")}
+
+    </div>
+  `);
+}
+
+function setChatTheme(index){
+  if(!state.currentChat)return;
+
+  localStorage.setItem(
+    chatThemeKey(),
+    String(index)
+  );
+
+  closeModal();
+  applyChatTheme();
+  showToast(`${CHAT_THEMES[index].name} theme selected`);
+}
+
+/* =========================
+   GROUP CREATOR
+========================= */
+
+async function openGroupCreator(){
+  let users=[];
+
+  try{
+    const r=await api("/api/search?q=");
+    users=(r.users||[]).filter(
+      u=>Number(u.id)!==Number(state.me?.id)
+    );
+  }catch(e){
+    showToast(e.message);
+    return;
+  }
+
+  openModal(`
+    <div class="modal-head">
+      <div>
+        <h3>Create group</h3>
+        <div style="color:var(--muted);font-size:13px">
+          Choose people to add
+        </div>
+      </div>
+
+      <button class="modal-close" onclick="closeModal()">
+        ${icon("Close")}
+      </button>
+    </div>
+
+    <input id="groupName"
+      class="field"
+      maxlength="60"
+      placeholder="Group name">
+
+    <div id="groupPeople"
+      class="choice-list"
+      style="max-height:45vh;overflow:auto">
+
+      ${
+        users.length
+        ?users.map(u=>`
+          <button
+            type="button"
+            class="choice group-person"
+            data-user-id="${Number(u.id)}"
+            onclick="toggleGroupPerson(this)">
+
+            ${avatarHTML(
+              u.avatar_url,
+              u.display_name||u.username,
+              "avatar"
+            )}
+
+            <span style="vertical-align:middle">
+              ${esc(u.display_name||u.username)}
+              <small style="color:var(--muted)">
+                @${esc(u.username)}
+              </small>
+            </span>
+
+          </button>
+        `).join("")
+        :emptyHTML("No people found")
+      }
+
+    </div>
+
+    <button class="modal-submit" onclick="createGroup()">
+      Create group
+    </button>
+  `);
+}
+
+function toggleGroupPerson(button){
+  button.classList.toggle("selected");
+}
+
+async function createGroup(){
+  const name=$("groupName").value.trim()||"New group";
+
+  const ids=[...document.querySelectorAll(".group-person.selected")]
+    .map(el=>Number(el.dataset.userId))
+    .filter(Boolean);
+
+  try{
+    const r=await api("/api/groups",{
+      method:"POST",
+      body:{
+        name,
+        user_ids:ids
+      }
+    });
+
+    closeModal();
+    showToast("Group created");
+
+    await loadChats();
+
+    if(r.chat){
+      setTimeout(()=>openChat(r.chat.id),100);
+    }
+  }catch(e){
+    showToast(e.message);
+  }
+}
+
+/* =========================
+   NOTIFICATIONS
+========================= */
+
+async function loadNotificationDot(){
+  try{
+    const r=await api("/api/notifications");
+    const list=r.notifications||[];
+
+    const unread=list.some(n=>!n.read);
+
+    $("notificationDot")?.classList.toggle(
+      "hidden",
+      !unread
+    );
+  }catch{}
+}
+
+async function openNotifications(){
+  openModal(`
+    <div class="modal-head">
+      <h3>Notifications</h3>
+
+      <button class="modal-close" onclick="closeModal()">
+        ${icon("Close")}
+      </button>
+    </div>
+
+    <div id="notificationsBody">
+      ${loadingHTML()}
+    </div>
+  `);
+
+  try{
+    const r=await api("/api/notifications");
+    const list=r.notifications||[];
+
+    $("notificationsBody").innerHTML=list.length
+      ?list.map(n=>`
+        <div
+          class="setting-row"
+          onclick="${
+            n.actor?.username
+            ?`closeModal();openProfile('${esc(n.actor.username)}')`
+            :""
+          }">
+
+          ${avatarHTML(
+            n.actor?.avatar_url,
+            n.actor?.display_name||n.actor?.username||"U"
+          )}
+
+          <div class="setting-info">
+            <div class="setting-name">
+              ${esc(
+                n.actor?.display_name||
+                n.actor?.username||
+                "Someone"
+              )}
+              ${
+                n.type==="follow"
+                ?" followed you"
+                :n.type==="like"
+                ?" liked your post"
+                :n.type==="comment"
+                ?" commented on your post"
+                :n.type==="message"
+                ?" sent you a message"
+                :" interacted with you"
+              }
+            </div>
+
+            <div class="setting-desc">
+              ${timeAgo(n.created_at)}
+            </div>
+          </div>
+
+        </div>
+      `).join("")
+      :emptyHTML("You're all caught up");
+
+    await api("/api/notifications/read",{
+      method:"POST"
+    });
+
+    $("notificationDot")?.classList.add("hidden");
+  }catch(e){
+    $("notificationsBody").innerHTML=errorHTML(e.message);
+  }
+}
+
+/* =========================
+   MORE MENU
+   Profile top "More" is where
+   settings/privacy/theme live.
+========================= */
+
+function openMore(){
+  openModal(`
+    <div class="modal-head">
+      <div>
+        <h3>ZILNET</h3>
+        <div style="color:var(--muted);font-size:13px">
+          Account & preferences
+        </div>
+      </div>
+
+      <button class="modal-close" onclick="closeModal()">
+        ${icon("Close")}
+      </button>
+    </div>
+
+    <div class="choice-list">
+
+      <button class="choice"
+        onclick="closeModal();openSettings()">
+        ${icon("Settings")} Settings
+      </button>
+
+      <button class="choice"
+        onclick="closeModal();openNotifications()">
+        ${icon("Notification")} Notifications
+      </button>
+
+      <button class="choice"
+        onclick="closeModal();loadOwnProfile()">
+        ${icon("Profile")} My profile
+      </button>
+
+      <button class="choice danger"
+        onclick="closeModal();logout()">
+        Log out
+      </button>
+
+    </div>
+  `);
+}
+
+/* =========================
+   SETTINGS
+========================= */
+
+async function openSettings(){
+  await loadServerSettings();
+
+  openModal(`
+    <div class="modal-head">
+      <div>
+        <h3>Settings</h3>
+        <div style="color:var(--muted);font-size:13px">
+          Customize your ZILNET experience
+        </div>
+      </div>
+
+      <button class="modal-close" onclick="closeModal()">
+        ${icon("Close")}
+      </button>
+    </div>
+
+    <div class="settings-section">
+
+      <div class="settings-section-title">Appearance</div>
+
+      <div class="setting-row">
+        ${icon("Settings")}
+        <div class="setting-info">
+          <div class="setting-name">Theme</div>
+          <div class="setting-desc">Dark, light or system</div>
+        </div>
+
+        <div class="setting-control">
+          <select id="themeSetting"
+            onchange="changeThemeSetting(this.value)">
+            <option value="system"
+              ${state.settings.theme==="system"?"selected":""}>
+              System
+            </option>
+            <option value="light"
+              ${state.settings.theme==="light"?"selected":""}>
+              Light
+            </option>
+            <option value="dark"
+              ${state.settings.theme==="dark"?"selected":""}>
+              Dark
+            </option>
+          </select>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="settings-section">
+
+      <div class="settings-section-title">Privacy</div>
+
+      <div class="setting-row">
+        <div class="setting-info">
+          <div class="setting-name">Profile visibility</div>
+          <div class="setting-desc">
+            Decide who can see your profile posts
+          </div>
+        </div>
+
+        <div class="setting-control">
+          <select id="profilePrivacy"
+            onchange="saveSettingsPatch({profile_visibility:this.value})">
+
+            <option value="public"
+              ${state.settings.profile_visibility==="public"?"selected":""}>
+              Public
+            </option>
+
+            <option value="private"
+              ${state.settings.profile_visibility==="private"?"selected":""}>
+              Private
+            </option>
+
+          </select>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="settings-section">
+
+      <div class="settings-section-title">Messages</div>
+
+      <div class="setting-row">
+        <div class="setting-info">
+          <div class="setting-name">Message privacy</div>
+          <div class="setting-desc">
+            Who can start a direct conversation
+          </div>
+        </div>
+
+        <div class="setting-control">
+          <select id="messagePrivacy"
+            onchange="saveSettingsPatch({message_privacy:this.value})">
+
+            <option value="everyone"
+              ${state.settings.message_privacy==="everyone"?"selected":""}>
+              Everyone
+            </option>
+
+            <option value="followers"
+              ${state.settings.message_privacy==="followers"?"selected":""}>
+              Followers
+            </option>
+
+            <option value="nobody"
+              ${state.settings.message_privacy==="nobody"?"selected":""}>
+              Nobody
+            </option>
+
+          </select>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="settings-section">
+
+      <div class="settings-section-title">Notifications</div>
+
+      ${notificationSettingRow(
+        "likes",
+        "Likes",
+        "Notify me when someone likes my post"
+      )}
+
+      ${notificationSettingRow(
+        "comments",
+        "Comments",
+        "Notify me about comments"
+      )}
+
+      ${notificationSettingRow(
+        "follows",
+        "Follows",
+        "Notify me when someone follows me"
+      )}
+
+      ${notificationSettingRow(
+        "messages",
+        "Messages",
+        "Notify me about new messages"
+      )}
+
+    </div>
+
+    <div class="settings-section">
+
+      <div class="settings-section-title">Security</div>
+
+      <div class="setting-row"
+        onclick="openChangePassword()">
+
+        ${icon("Settings")}
+
+        <div class="setting-info">
+          <div class="setting-name">Change password</div>
+          <div class="setting-desc">
+            Update your account password
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <div class="settings-section">
+
+      <div class="settings-section-title">Account</div>
+
+      <div class="setting-row danger"
+        onclick="closeModal();logout()">
+
+        <div class="setting-info">
+          <div class="setting-name">Log out</div>
+        </div>
+
+      </div>
+
+    </div>
+  `);
+}
+
+function notificationSettingRow(key,title,desc){
+  const checked=
+    state.settings.notification_settings?.[key]!==false;
+
+  return `
+    <div class="setting-row">
+
+      <div class="setting-info">
+        <div class="setting-name">${esc(title)}</div>
+        <div class="setting-desc">${esc(desc)}</div>
+      </div>
+
+      <div class="setting-control">
+        <input
+          type="checkbox"
+          ${checked?"checked":""}
+          onchange="saveNotificationSetting('${key}',this.checked)">
+      </div>
+
+    </div>
+  `;
+}
+
+async function changeThemeSetting(theme){
+  applyTheme(theme);
+
+  await saveSettingsPatch({
+    theme
+  });
+}
+
+async function saveNotificationSetting(key,value){
+  state.settings.notification_settings={
+    ...state.settings.notification_settings,
+    [key]:value
+  };
+
+  await saveSettingsPatch({
+    notification_settings:{
+      [key]:value
+    }
+  });
+}
+
+async function saveSettingsPatch(patch){
+  try{
+    const r=await api("/api/settings",{
+      method:"PATCH",
+      body:patch
+    });
+
+    if(r.settings){
+      state.settings={
+        ...state.settings,
+        ...r.settings,
+        notification_settings:{
+          ...state.settings.notification_settings,
+          ...(r.settings.notification_settings||{})
+        }
+      };
+
+      applyTheme(state.settings.theme||"system");
+    }
+
+    showToast("Settings saved");
+  }catch(e){
+    showToast(e.message);
+    await loadServerSettings();
+  }
+}
+
+/* =========================
+   CHANGE PASSWORD
+========================= */
+
+function openChangePassword(){
+  openModal(`
+    <div class="modal-head">
+      <h3>Change password</h3>
+
+      <button class="modal-close" onclick="closeModal()">
+        ${icon("Close")}
+      </button>
+    </div>
+
+    <input id="currentPassword"
+      class="field"
+      type="password"
+      autocomplete="current-password"
+      placeholder="Current password">
+
+    <input id="newPassword"
+      class="field"
+      type="password"
+      autocomplete="new-password"
+      placeholder="New password">
+
+    <input id="confirmPassword"
+      class="field"
+      type="password"
+      autocomplete="new-password"
+      placeholder="Confirm new password">
+
+    <div id="passwordStatus"
+      style="color:var(--muted);font-size:13px">
+    </div>
+
+    <button class="modal-submit"
+      onclick="changePassword()">
+      Change password
+    </button>
+  `);
+}
+
+async function changePassword(){
+  const current=$("currentPassword").value;
+  const next=$("newPassword").value;
+  const confirmPasswordValue=$("confirmPassword").value;
+  const status=$("passwordStatus");
+
+  try{
+    if(!current||!next){
+      throw new Error("Fill in all password fields.");
+    }
+
+    if(next.length<8){
+      throw new Error("New password must be at least 8 characters.");
+    }
+
+    if(next!==confirmPasswordValue){
+      throw new Error("New passwords do not match.");
+    }
+
+    await api("/api/profile/password",{
+      method:"POST",
+      body:{
+        current_password:current,
+        new_password:next
+      }
+    });
+
+    closeModal();
+    showToast("Password changed successfully.");
+  }catch(e){
+    status.textContent=e.message;
+  }
+}
+
+/* =========================
+   PROFILE TOP "MORE"
+   This is available when viewing
+   your own profile.
+========================= */
+
+document.addEventListener("click",e=>{
+  const profileView=e.target.closest("#profileView");
+  if(!profileView)return;
+});
+
+/* =========================
+   HASH POST SUPPORT
+========================= */
+
+async function handleHash(){
+  const match=location.hash.match(/^#post-(\d+)$/);
+
+  if(!match)return;
+
+  const id=Number(match[1]);
+
+  try{
+    const r=await api(`/api/posts/${id}`);
+    const p=r.post;
+
+    openModal(`
+      <div class="modal-head">
+        <h3>Shared post</h3>
+        <button class="modal-close" onclick="closeModal()">
+          ${icon("Close")}
+        </button>
+      </div>
+
+      ${postHTML(p)}
+    `);
+  }catch(e){
+    showToast(e.message);
+  }
+}
+
+window.addEventListener("hashchange",handleHash);
+
+/* =========================
+   IMPROVED OWN PROFILE MORE
+========================= */
+
+function profileMoreMenu(){
+  openModal(`
+    <div class="modal-head">
+      <h3>Profile options</h3>
+
+      <button class="modal-close" onclick="closeModal()">
+        ${icon("Close")}
+      </button>
+    </div>
+
+    <div class="choice-list">
+
+      <button class="choice"
+        onclick="closeModal();openSettings()">
+        ${icon("Settings")} Settings
+      </button>
+
+      <button class="choice"
+        onclick="closeModal();openChangePassword()">
+        Change password
+      </button>
+
+      <button class="choice"
+        onclick="closeModal();editOwnProfile()">
+        ${icon("Edit")} Edit profile
+      </button>
+
+      <button class="choice danger"
+        onclick="closeModal();logout()">
+        Log out
+      </button>
+
+    </div>
+  `);
+}
+
+/* ============================================================
+   Patch the own-profile rendering so the MORE menu is actually
+   available from the profile top section.
+============================================================ */
+
+const originalRenderProfile=renderProfile;
+
+renderProfile=function(data){
+  originalRenderProfile(data);
+
+  const view=$("profileView");
+  if(!view)return;
+
+  const hero=view.querySelector(".profile-hero");
+  if(!hero)return;
+
+  const own=
+    Number(data.user?.id)===Number(state.me?.id);
+
+  if(own){
+    const more=document.createElement("button");
+
+    more.className="header-btn";
+    more.style.position="absolute";
+    more.style.right="20px";
+    more.style.top="20px";
+    more.innerHTML=icon("More");
+
+    hero.style.position="relative";
+
+    more.onclick=profileMoreMenu;
+
+    hero.appendChild(more);
+  }
+};
+
+/* =========================
+   GROUP + DIRECT CHAT PROFILE
+========================= */
+
+async function openChatProfile(){
+  const c=state.currentChat;
+
+  if(!c)return;
+
+  if(c.is_group){
+    showGroupInfo();
+    return;
+  }
+
+  const username=c.username||c.user?.username;
+
+  if(username){
+    await openProfile(username);
+  }
+}
+
+/* =========================
+   MESSAGE HEADER CLICK FIX
+========================= */
+
+document.addEventListener("click",e=>{
+  const header=e.target.closest(".chat-header-main");
+  if(!header)return;
+});
+
+/* =========================
+   REFRESH CHAT AFTER RETURN
+========================= */
+
+async function refreshCurrentChat(){
+  if(!state.currentChat)return;
+
+  try{
+    const id=Number(state.currentChat.id);
+
+    const [c,m]=await Promise.all([
+      api(`/api/chats/${id}`),
+      api(`/api/chats/${id}/messages`)
+    ]);
+
+    state.currentChat=c.chat;
+    state.currentMessages=m.messages||[];
+
+    renderChat();
+  }catch(e){
+    showToast(e.message);
+  }
+}
+
+/* =========================
+   FINAL STARTUP
+========================= */
+
+setTimeout(handleHash,300);
+</script>
+
+</body>
+</html>
