@@ -1,0 +1,4102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#050505">
+<title>ZILNET</title>
+
+<style>
+/* =========================================================
+   ZILNET — PART 1
+   Base layout + authentication + normalized icons
+   ========================================================= */
+
+:root {
+    --bg: #050505;
+    --surface: #0d0d0d;
+    --surface-2: #151515;
+    --surface-3: #1c1c1c;
+    --border: #252525;
+    --text: #ffffff;
+    --muted: #888888;
+    --accent: #ffffff;
+    --danger: #ff5b6e;
+}
+
+* {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    min-height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Roboto,
+        Helvetica,
+        Arial,
+        sans-serif;
+}
+
+body {
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+button,
+input,
+textarea,
+select {
+    font: inherit;
+}
+
+button {
+    border: 0;
+    cursor: pointer;
+}
+
+button:active {
+    transform: scale(0.96);
+}
+
+/* =========================================================
+   GENERAL
+   ========================================================= */
+
+.hidden {
+    display: none !important;
+}
+
+.no-select {
+    user-select: none;
+}
+
+.page {
+    width: 100%;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 12px 12px 95px;
+}
+
+.muted {
+    color: var(--muted);
+}
+
+.empty {
+    text-align: center;
+    color: var(--muted);
+    padding: 45px 20px;
+}
+
+.loading {
+    text-align: center;
+    color: var(--muted);
+    padding: 45px 20px;
+}
+
+/* =========================================================
+   ICON SYSTEM
+   IMPORTANT:
+   Every icon gets the same visual box.
+   object-fit: contain prevents stretching.
+   ========================================================= */
+
+.icon-box {
+    width: 28px;
+    height: 28px;
+
+    min-width: 28px;
+    min-height: 28px;
+
+    max-width: 28px;
+    max-height: 28px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    overflow: hidden;
+}
+
+.icon {
+    width: 24px !important;
+    height: 24px !important;
+
+    min-width: 24px !important;
+    min-height: 24px !important;
+
+    max-width: 24px !important;
+    max-height: 24px !important;
+
+    object-fit: contain !important;
+    object-position: center !important;
+
+    display: block;
+
+    flex-shrink: 0;
+}
+
+.icon-sm {
+    width: 21px !important;
+    height: 21px !important;
+    min-width: 21px !important;
+    min-height: 21px !important;
+    max-width: 21px !important;
+    max-height: 21px !important;
+}
+
+.icon-lg {
+    width: 27px !important;
+    height: 27px !important;
+    min-width: 27px !important;
+    min-height: 27px !important;
+    max-width: 27px !important;
+    max-height: 27px !important;
+}
+
+/*
+   PNG files sometimes contain different amounts of
+   transparent space. The fixed box prevents the UI itself
+   from becoming inconsistent.
+*/
+
+.icon-btn {
+    width: 42px;
+    height: 42px;
+
+    min-width: 42px;
+    min-height: 42px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0;
+    background: transparent;
+    color: var(--text);
+
+    border-radius: 50%;
+
+    transition:
+        background 0.15s ease,
+        transform 0.15s ease;
+}
+
+.icon-btn:hover {
+    background: var(--surface-2);
+}
+
+/* =========================================================
+   AUTH SCREEN
+   ========================================================= */
+
+.auth-screen {
+    width: 100%;
+    min-height: 100vh;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 22px;
+
+    background:
+        radial-gradient(
+            circle at 50% 10%,
+            #222222 0%,
+            #0b0b0b 38%,
+            #030303 80%
+        );
+}
+
+.auth-card {
+    width: 100%;
+    max-width: 430px;
+
+    padding: 26px;
+
+    background: rgba(13, 13, 13, 0.96);
+
+    border: 1px solid var(--border);
+    border-radius: 24px;
+
+    box-shadow:
+        0 25px 80px rgba(0, 0, 0, 0.65);
+}
+
+.auth-logo {
+    text-align: center;
+
+    font-size: 31px;
+    line-height: 1;
+
+    font-weight: 900;
+    letter-spacing: 5px;
+
+    margin: 5px 0 10px;
+}
+
+.auth-subtitle {
+    text-align: center;
+
+    color: var(--muted);
+
+    font-size: 13px;
+
+    margin-bottom: 25px;
+}
+
+/* =========================================================
+   LOGIN / SIGNUP TABS
+   ========================================================= */
+
+.auth-tabs {
+    width: 100%;
+
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+
+    padding: 3px;
+
+    margin-bottom: 20px;
+
+    background: var(--surface-2);
+
+    border-radius: 13px;
+}
+
+.auth-tab {
+    padding: 11px;
+
+    color: var(--muted);
+    background: transparent;
+
+    border-radius: 10px;
+
+    transition:
+        background 0.15s ease,
+        color 0.15s ease;
+}
+
+.auth-tab.active {
+    background: var(--surface-3);
+    color: var(--text);
+    font-weight: 700;
+}
+
+/* =========================================================
+   FORM
+   ========================================================= */
+
+.form-group {
+    margin-bottom: 14px;
+}
+
+.form-label {
+    display: block;
+
+    margin: 0 0 7px 2px;
+
+    color: #999999;
+
+    font-size: 12px;
+}
+
+.form-input,
+.form-textarea,
+.form-select {
+    width: 100%;
+
+    padding: 13px;
+
+    color: var(--text);
+    background: #080808;
+
+    border: 1px solid #303030;
+    border-radius: 13px;
+
+    outline: none;
+
+    transition: border 0.15s ease;
+}
+
+.form-input:focus,
+.form-textarea:focus,
+.form-select:focus {
+    border-color: #777777;
+}
+
+.form-textarea {
+    min-height: 110px;
+    resize: vertical;
+}
+
+/* =========================================================
+   PRIMARY / SECONDARY BUTTONS
+   ========================================================= */
+
+.primary-btn {
+    width: 100%;
+
+    padding: 13px 16px;
+
+    margin-top: 5px;
+
+    background: #ffffff;
+    color: #000000;
+
+    border-radius: 13px;
+
+    font-weight: 800;
+
+    transition:
+        transform 0.15s ease,
+        opacity 0.15s ease;
+}
+
+.primary-btn:active {
+    transform: scale(0.98);
+}
+
+.secondary-btn {
+    padding: 11px 15px;
+
+    color: var(--text);
+    background: var(--surface-2);
+
+    border: 1px solid #333333;
+
+    border-radius: 12px;
+}
+
+.link-btn {
+    display: block;
+
+    padding: 11px 0;
+
+    color: #ffffff;
+    background: transparent;
+
+    font-size: 13px;
+
+    text-decoration: underline;
+
+    margin: 2px auto 0;
+}
+
+/*
+   This is intentionally controlled separately.
+
+   Login:
+       #forgotPasswordBtn = visible
+
+   Signup:
+       #forgotPasswordBtn = hidden
+*/
+
+.auth-message {
+    min-height: 18px;
+
+    margin: 7px 2px;
+
+    color: #ffadb7;
+
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+/* =========================================================
+   MAIN APP SHELL
+   ========================================================= */
+
+#app {
+    min-height: 100vh;
+    background: var(--bg);
+}
+
+.top-bar {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+
+    width: 100%;
+    height: 58px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 0 14px;
+
+    background: rgba(5, 5, 5, 0.94);
+
+    border-bottom: 1px solid var(--border);
+
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+}
+
+.logo {
+    font-size: 20px;
+    font-weight: 900;
+    letter-spacing: 2px;
+}
+
+.top-actions {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+}
+
+/* =========================================================
+   BOTTOM NAV
+   ========================================================= */
+
+.bottom-nav {
+    position: fixed;
+    z-index: 30;
+
+    left: 0;
+    right: 0;
+    bottom: 0;
+
+    height: 72px;
+
+    padding:
+        7px 8px
+        max(7px, env(safe-area-inset-bottom));
+
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+
+    background: rgba(7, 7, 7, 0.97);
+
+    border-top: 1px solid var(--border);
+
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+}
+
+.nav-button {
+    position: relative;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 7px;
+
+    color: #777777;
+    background: transparent;
+
+    border-radius: 13px;
+
+    transition:
+        background 0.15s ease,
+        color 0.15s ease,
+        transform 0.15s ease;
+}
+
+.nav-button.active {
+    color: #ffffff;
+    background: #151515;
+}
+
+.nav-button .icon-box {
+    width: 31px;
+    height: 31px;
+
+    min-width: 31px;
+    min-height: 31px;
+
+    max-width: 31px;
+    max-height: 31px;
+}
+
+.nav-button .icon {
+    width: 26px !important;
+    height: 26px !important;
+
+    min-width: 26px !important;
+    min-height: 26px !important;
+
+    max-width: 26px !important;
+    max-height: 26px !important;
+}
+
+/* =========================================================
+   MODAL
+   ========================================================= */
+
+.modal {
+    position: fixed;
+    z-index: 60;
+
+    inset: 0;
+
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+
+    background: rgba(0, 0, 0, 0.72);
+}
+
+.modal-sheet {
+    width: 100%;
+    max-width: 720px;
+
+    max-height: 92vh;
+
+    overflow-y: auto;
+
+    padding: 18px;
+
+    background: #101010;
+
+    border:
+        1px solid #292929;
+
+    border-bottom: 0;
+
+    border-radius:
+        23px 23px 0 0;
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+
+    margin-bottom: 14px;
+}
+
+.modal-title {
+    font-size: 20px;
+    font-weight: 800;
+}
+
+.modal-close {
+    margin-left: auto;
+}
+
+/* =========================================================
+   TOAST
+   ========================================================= */
+
+.toast {
+    position: fixed;
+    z-index: 100;
+
+    left: 50%;
+    bottom: 88px;
+
+    transform: translateX(-50%);
+
+    max-width: 90%;
+
+    padding: 10px 16px;
+
+    color: #111111;
+    background: #eeeeee;
+
+    border-radius: 22px;
+
+    font-size: 13px;
+
+    text-align: center;
+
+    box-shadow:
+        0 10px 35px rgba(0, 0, 0, 0.55);
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (min-width: 721px) {
+
+    .bottom-nav {
+        left: 50%;
+        right: auto;
+
+        width: 720px;
+
+        transform: translateX(-50%);
+
+        border-left: 1px solid var(--border);
+        border-right: 1px solid var(--border);
+    }
+
+    .modal {
+        align-items: center;
+    }
+
+    .modal-sheet {
+        border: 1px solid #292929;
+        border-radius: 23px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<!-- =======================================================
+     AUTHENTICATION SCREEN
+     ======================================================= -->
+
+<section id="authScreen" class="auth-screen">
+
+    <div class="auth-card">
+
+        <div class="auth-logo">
+            ZILNET
+        </div>
+
+        <div class="auth-subtitle">
+            Connect. Create. Discover.
+        </div>
+
+        <!-- LOGIN / SIGNUP SWITCH -->
+
+        <div class="auth-tabs">
+
+            <button
+                id="loginTab"
+                class="auth-tab active"
+                type="button"
+                onclick="showAuthMode('login')"
+            >
+                Log in
+            </button>
+
+            <button
+                id="signupTab"
+                class="auth-tab"
+                type="button"
+                onclick="showAuthMode('signup')"
+            >
+                Create account
+            </button>
+
+        </div>
+
+
+        <!-- =================================================
+             LOGIN
+             ================================================= -->
+
+        <form
+            id="loginForm"
+            onsubmit="handleLogin(event)"
+        >
+
+            <div class="form-group">
+
+                <label
+                    class="form-label"
+                    for="loginIdentity"
+                >
+                    Username or email
+                </label>
+
+                <input
+                    id="loginIdentity"
+                    class="form-input"
+                    type="text"
+                    autocomplete="username"
+                    required
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label
+                    class="form-label"
+                    for="loginPassword"
+                >
+                    Password
+                </label>
+
+                <input
+                    id="loginPassword"
+                    class="form-input"
+                    type="password"
+                    autocomplete="current-password"
+                    required
+                >
+
+            </div>
+
+
+            <div
+                id="loginMessage"
+                class="auth-message"
+            ></div>
+
+
+            <button
+                class="primary-btn"
+                type="submit"
+            >
+                Log in
+            </button>
+
+
+            <!--
+                ONLY LOGIN HAS THIS BUTTON.
+                It gets hidden automatically on signup.
+            -->
+
+            <button
+                id="forgotPasswordBtn"
+                class="link-btn"
+                type="button"
+                onclick="openForgotPassword()"
+            >
+                Forgot password?
+            </button>
+
+        </form>
+
+
+        <!-- =================================================
+             SIGNUP
+             ================================================= -->
+
+        <form
+            id="signupForm"
+            class="hidden"
+            onsubmit="handleSignup(event)"
+        >
+
+            <div class="form-group">
+
+                <label
+                    class="form-label"
+                    for="signupUsername"
+                >
+                    Username
+                </label>
+
+                <input
+                    id="signupUsername"
+                    class="form-input"
+                    type="text"
+                    autocomplete="username"
+                    minlength="3"
+                    maxlength="30"
+                    required
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label
+                    class="form-label"
+                    for="signupDisplayName"
+                >
+                    Display name
+                </label>
+
+                <input
+                    id="signupDisplayName"
+                    class="form-input"
+                    type="text"
+                    minlength="2"
+                    required
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label
+                    class="form-label"
+                    for="signupEmail"
+                >
+                    Email
+                </label>
+
+                <input
+                    id="signupEmail"
+                    class="form-input"
+                    type="email"
+                    autocomplete="email"
+                    required
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label
+                    class="form-label"
+                    for="signupPassword"
+                >
+                    Password
+                </label>
+
+                <input
+                    id="signupPassword"
+                    class="form-input"
+                    type="password"
+                    autocomplete="new-password"
+                    minlength="8"
+                    required
+                >
+
+            </div>
+
+
+            <div
+                id="signupMessage"
+                class="auth-message"
+            ></div>
+
+
+            <button
+                class="primary-btn"
+                type="submit"
+            >
+                Create account
+            </button>
+
+            <!--
+                NO FORGOT PASSWORD BUTTON HERE.
+            -->
+
+        </form>
+
+    </div>
+
+</section>
+
+
+<!-- =======================================================
+     MAIN APP
+     ======================================================= -->
+
+<div id="app" class="hidden">
+
+    <header class="top-bar">
+
+        <div class="logo">
+            ZILNET
+        </div>
+
+        <div class="top-actions">
+
+            <button
+                class="icon-btn"
+                type="button"
+                onclick="openNotifications()"
+                aria-label="Notifications"
+            >
+                <span class="icon-box">
+                    <img
+                        class="icon"
+                        src="icons/IMG_1895.png"
+                        alt=""
+                    >
+                </span>
+            </button>
+
+
+            <button
+                class="icon-btn"
+                type="button"
+                onclick="openSettings()"
+                aria-label="Settings"
+            >
+                <span class="icon-box">
+                    <img
+                        class="icon"
+                        src="icons/IMG_1891.png"
+                        alt=""
+                    >
+                </span>
+            </button>
+
+        </div>
+
+    </header>
+
+
+    <main
+        id="page"
+        class="page"
+    >
+        <div class="loading">
+            Loading ZILNET…
+        </div>
+    </main>
+
+
+    <!-- ===================================================
+         BOTTOM NAV
+         =================================================== -->
+
+    <nav class="bottom-nav">
+
+        <button
+            class="nav-button active"
+            data-page="home"
+            type="button"
+            onclick="goToPage('home')"
+            aria-label="Home"
+        >
+            <span class="icon-box">
+                <img
+                    class="icon"
+                    src="icons/IMG_1881.png"
+                    alt=""
+                >
+            </span>
+        </button>
+
+
+        <button
+            class="nav-button"
+            data-page="discover"
+            type="button"
+            onclick="goToPage('discover')"
+            aria-label="Discover"
+        >
+            <span class="icon-box">
+                <img
+                    class="icon"
+                    src="icons/IMG_1882.png"
+                    alt=""
+                >
+            </span>
+        </button>
+
+
+        <button
+            class="nav-button"
+            data-page="create"
+            type="button"
+            onclick="openCreate()"
+            aria-label="Create"
+        >
+            <span class="icon-box">
+                <img
+                    class="icon"
+                    src="icons/IMG_1899.png"
+                    alt=""
+                >
+            </span>
+        </button>
+
+
+        <button
+            class="nav-button"
+            data-page="chat"
+            type="button"
+            onclick="goToPage('chat')"
+            aria-label="Messages"
+        >
+            <span class="icon-box">
+                <img
+                    class="icon"
+                    src="icons/IMG_1883.png"
+                    alt=""
+                >
+            </span>
+        </button>
+
+
+        <button
+            class="nav-button"
+            data-page="profile"
+            type="button"
+            onclick="goToPage('profile')"
+            aria-label="Profile"
+        >
+            <span class="icon-box">
+                <img
+                    class="icon"
+                    src="icons/IMG_1885.png"
+                    alt=""
+                >
+            </span>
+        </button>
+
+    </nav>
+
+</div>
+
+
+<!-- =======================================================
+     GLOBAL MODAL
+     ======================================================= -->
+
+<div
+    id="modal"
+    class="modal hidden"
+    onclick="if(event.target === this) closeModal()"
+></div>
+
+
+<!-- =======================================================
+     TOAST
+     ======================================================= -->
+
+<div
+    id="toast"
+    class="toast hidden"
+></div>
+
+
+<!-- =======================================================
+     JAVASCRIPT STARTS IN PART 3
+     ======================================================= -->
+
+<script>
+
+/* =========================================================
+   ZILNET — PART 2
+   Main UI + Feed + Discover + Create + Posts
+   ========================================================= */
+
+const ICONS = {
+    home: "icons/IMG_1881.png",
+    search: "icons/IMG_1882.png",
+    create: "icons/IMG_1899.png",
+    reels: "icons/IMG_1893.png",
+    messages: "icons/IMG_1883.png",
+    profile: "icons/IMG_1885.png",
+    notification: "icons/IMG_1895.png",
+    settings: "icons/IMG_1891.png",
+    more: "icons/IMG_1888.png",
+    heart: "icons/IMG_1886.png",
+    comment: "icons/IMG_1897.png",
+    share1: "icons/IMG_1884.png",
+    share2: "icons/IMG_1887.png",
+    save: "icons/IMG_1892.png",
+    send: "icons/IMG_1898.png",
+    back: "icons/IMG_1890.png",
+    close: "icons/IMG_1889.png",
+    edit: "icons/IMG_1879.png",
+    camera: "icons/IMG_1880.png"
+};
+
+let currentPage = "home";
+let feedData = {
+    posts: [],
+    stories: []
+};
+
+let currentCreateMode = "post";
+let toastTimer = null;
+
+
+/* =========================================================
+   API HELPER
+   ========================================================= */
+
+async function apiRequest(url, options = {}) {
+
+    const config = {
+        credentials: "same-origin",
+        ...options,
+        headers: {
+            ...(options.headers || {})
+        }
+    };
+
+    /*
+       Automatically convert normal JS objects into JSON.
+       FormData is left untouched for uploads.
+    */
+
+    if (
+        config.body &&
+        typeof config.body !== "string" &&
+        !(config.body instanceof FormData)
+    ) {
+        config.headers["Content-Type"] = "application/json";
+        config.body = JSON.stringify(config.body);
+    }
+
+    const response = await fetch(url, config);
+
+    let data;
+
+    try {
+        data = await response.json();
+    } catch {
+        data = {
+            error: "The server returned an invalid response."
+        };
+    }
+
+    if (!response.ok) {
+        throw new Error(
+            data?.error ||
+            data?.message ||
+            `Request failed (${response.status})`
+        );
+    }
+
+    return data;
+}
+
+
+/* =========================================================
+   SMALL HELPERS
+   ========================================================= */
+
+function escapeHTML(value) {
+
+    return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+
+function icon(src, extraClass = "") {
+
+    return `
+        <span class="icon-box">
+            <img
+                class="icon ${extraClass}"
+                src="${src}"
+                alt=""
+            >
+        </span>
+    `;
+}
+
+
+function getInitial(user) {
+
+    return escapeHTML(
+        (
+            user?.display_name ||
+            user?.username ||
+            "?"
+        )
+        .trim()
+        .charAt(0)
+        .toUpperCase()
+    );
+}
+
+
+function avatar(user, extraClass = "avatar") {
+
+    if (user?.avatar_url) {
+
+        return `
+            <div class="${extraClass}">
+                <img
+                    src="${escapeHTML(user.avatar_url)}"
+                    alt=""
+                    style="
+                        width:100%;
+                        height:100%;
+                        object-fit:cover;
+                        border-radius:inherit;
+                        display:block;
+                    "
+                >
+            </div>
+        `;
+
+    }
+
+    return `
+        <div class="${extraClass}">
+            <div class="avatar-fallback">
+                ${getInitial(user)}
+            </div>
+        </div>
+    `;
+}
+
+
+function timeAgo(date) {
+
+    if (!date) {
+        return "";
+    }
+
+    const timestamp = new Date(date).getTime();
+
+    if (!Number.isFinite(timestamp)) {
+        return "";
+    }
+
+    const seconds =
+        Math.max(0, Date.now() - timestamp) / 1000;
+
+    if (seconds < 60) {
+        return "now";
+    }
+
+    if (seconds < 3600) {
+        return `${Math.floor(seconds / 60)}m`;
+    }
+
+    if (seconds < 86400) {
+        return `${Math.floor(seconds / 3600)}h`;
+    }
+
+    if (seconds < 604800) {
+        return `${Math.floor(seconds / 86400)}d`;
+    }
+
+    return new Date(date).toLocaleDateString();
+}
+
+
+/* =========================================================
+   TOAST
+   ========================================================= */
+
+function showToast(message) {
+
+    const toast = document.getElementById("toast");
+
+    if (!toast) {
+        return;
+    }
+
+    clearTimeout(toastTimer);
+
+    toast.textContent = message;
+    toast.classList.remove("hidden");
+
+    toastTimer = setTimeout(() => {
+        toast.classList.add("hidden");
+    }, 2600);
+}
+
+
+/* =========================================================
+   MODAL
+   ========================================================= */
+
+function openModal(title, content) {
+
+    const modal = document.getElementById("modal");
+
+    if (!modal) {
+        return;
+    }
+
+    modal.innerHTML = `
+        <div
+            class="modal-sheet"
+            onclick="event.stopPropagation()"
+        >
+
+            <div class="modal-header">
+
+                <div class="modal-title">
+                    ${title}
+                </div>
+
+                <button
+                    class="icon-btn modal-close"
+                    type="button"
+                    onclick="closeModal()"
+                    aria-label="Close"
+                >
+                    ${icon(ICONS.close)}
+                </button>
+
+            </div>
+
+            ${content}
+
+        </div>
+    `;
+
+    modal.classList.remove("hidden");
+}
+
+
+function closeModal() {
+
+    const modal = document.getElementById("modal");
+
+    if (!modal) {
+        return;
+    }
+
+    modal.classList.add("hidden");
+    modal.innerHTML = "";
+}
+
+
+/* =========================================================
+   NAVIGATION
+   ========================================================= */
+
+function goToPage(page) {
+
+    currentPage = page;
+
+    document
+        .querySelectorAll(".nav-button")
+        .forEach(button => {
+
+            button.classList.toggle(
+                "active",
+                button.dataset.page === page
+            );
+
+        });
+
+
+    if (page === "home") {
+
+        renderHome();
+
+    } else if (page === "discover") {
+
+        renderDiscover();
+
+    } else if (page === "chat") {
+
+        /*
+           Part 3 supplies chat functionality.
+           This fallback prevents an error if Part 3
+           hasn't been pasted yet.
+        */
+
+        if (typeof renderChats === "function") {
+            renderChats();
+        } else {
+            document.getElementById("page").innerHTML =
+                `<div class="empty">Messages are loading…</div>`;
+        }
+
+    } else if (page === "profile") {
+
+        if (typeof renderProfile === "function") {
+            renderProfile();
+        } else {
+            document.getElementById("page").innerHTML =
+                `<div class="empty">Profile is loading…</div>`;
+        }
+
+    }
+}
+
+
+/* =========================================================
+   HOME / FEED
+   ========================================================= */
+
+async function renderHome() {
+
+    const page = document.getElementById("page");
+
+    page.innerHTML = `
+        <div class="loading">
+            Loading ZILNET…
+        </div>
+    `;
+
+
+    try {
+
+        const data = await apiRequest("/api/feed");
+
+        feedData = data || {
+            posts: [],
+            stories: []
+        };
+
+        page.innerHTML = buildHome(feedData);
+
+    } catch (error) {
+
+        /*
+           This is VERY important.
+
+           If /api/me or /api/feed says the session expired,
+           we don't leave the user trapped on an error page.
+
+           We return them to the login screen.
+        */
+
+        if (
+            error.message === "Session expired" ||
+            error.message === "Login required" ||
+            error.message === "Unauthorized"
+        ) {
+
+            if (typeof me !== "undefined") {
+                me = null;
+            }
+
+            if (typeof setAuthScreen === "function") {
+                setAuthScreen(true);
+            }
+
+            if (typeof showAuthMode === "function") {
+                showAuthMode("login");
+            }
+
+            return;
+        }
+
+
+        page.innerHTML = `
+            <div class="empty">
+                ${escapeHTML(error.message)}
+            </div>
+        `;
+    }
+}
+
+
+/* =========================================================
+   HOME HTML
+   ========================================================= */
+
+function buildHome(data) {
+
+    const stories = Array.isArray(data?.stories)
+        ? data.stories
+        : [];
+
+    const posts = Array.isArray(data?.posts)
+        ? data.posts
+        : [];
+
+
+    const storyHTML = stories.length
+
+        ? stories
+            .map(story => buildStory(story))
+            .join("")
+
+        : `
+            <div
+                class="muted"
+                style="padding:15px 3px"
+            >
+                No recent moments.
+            </div>
+        `;
+
+
+    const postsHTML = posts.length
+
+        ? posts.map(post => buildPost(post)).join("")
+
+        : `
+            <div class="empty">
+                No posts yet.
+                <br><br>
+                Follow people or create your first post.
+            </div>
+        `;
+
+
+    return `
+
+        <section>
+
+            <div class="section-title">
+                Moments
+            </div>
+
+            <div class="story-row">
+                ${storyHTML}
+            </div>
+
+        </section>
+
+
+        <section>
+
+            <div class="section-title">
+                For you
+            </div>
+
+            <div id="feedPosts">
+                ${postsHTML}
+            </div>
+
+        </section>
+    `;
+}
+
+
+/* =========================================================
+   STORIES
+   ========================================================= */
+
+function buildStory(story) {
+
+    return `
+        <div
+            class="story"
+            onclick="openStory(${Number(story.id)})"
+        >
+
+            ${avatar(
+                story,
+                "story-avatar"
+            )}
+
+            <div>
+                ${escapeHTML(
+                    story.username ||
+                    story.display_name ||
+                    "user"
+                )}
+            </div>
+
+        </div>
+    `;
+}
+
+
+function openStory(id) {
+
+    showToast(`Story #${id}`);
+}
+
+
+/* =========================================================
+   POST
+   ========================================================= */
+
+function buildPost(post) {
+
+    const ownPost =
+        typeof me !== "undefined" &&
+        me &&
+        Number(post.user_id) === Number(me.id);
+
+
+    let media = "";
+
+    if (post.media_url) {
+
+        media = buildMedia(
+            post.media_url,
+            post.media_type
+        );
+
+    }
+
+
+    return `
+
+        <article
+            class="card"
+            id="post-${Number(post.id)}"
+        >
+
+            <div class="post-head">
+
+                ${avatar({
+                    username: post.username,
+                    display_name: post.display_name,
+                    avatar_url: post.avatar_url
+                })}
+
+
+                <div>
+
+                    <div class="post-user">
+                        ${escapeHTML(
+                            post.display_name ||
+                            post.username ||
+                            "User"
+                        )}
+                    </div>
+
+                    <div class="post-time">
+                        @${escapeHTML(post.username || "user")}
+                        ·
+                        ${timeAgo(post.created_at)}
+                    </div>
+
+                </div>
+
+
+                <div style="margin-left:auto"></div>
+
+
+                ${
+                    ownPost
+
+                    ? `
+                        <button
+                            class="icon-btn"
+                            type="button"
+                            onclick="openPostMenu(${Number(post.id)})"
+                            aria-label="More"
+                        >
+                            ${icon(ICONS.more)}
+                        </button>
+                    `
+
+                    : ""
+                }
+
+            </div>
+
+
+            ${media}
+
+
+            ${
+                post.content
+
+                ? `
+                    <div class="post-body">
+
+                        <div class="post-text">
+                            ${escapeHTML(post.content)}
+                        </div>
+
+                    </div>
+                `
+
+                : ""
+            }
+
+
+            <div class="post-actions">
+
+                <button
+                    class="action ${
+                        post.liked ? "active" : ""
+                    }"
+                    type="button"
+                    onclick="toggleLike(
+                        ${Number(post.id)},
+                        this
+                    )"
+                >
+
+                    ${icon(ICONS.heart)}
+
+                    <span class="count">
+                        ${
+                            Number(post.likes_count || 0)
+                            || ""
+                        }
+                    </span>
+
+                </button>
+
+
+                <button
+                    class="action"
+                    type="button"
+                    onclick="openComments(${Number(post.id)})"
+                >
+
+                    ${icon(ICONS.comment)}
+
+                    <span class="count">
+                        ${
+                            Number(post.comments_count || 0)
+                            || ""
+                        }
+                    </span>
+
+                </button>
+
+
+                <button
+                    class="action"
+                    type="button"
+                    onclick="sharePost(${Number(post.id)})"
+                >
+                    ${icon(ICONS.share1)}
+                </button>
+
+
+                <button
+                    class="action"
+                    style="margin-left:auto"
+                    type="button"
+                    onclick="toggleSave(
+                        ${Number(post.id)},
+                        this
+                    )"
+                >
+                    ${icon(ICONS.save)}
+                </button>
+
+            </div>
+
+        </article>
+    `;
+}
+
+
+/* =========================================================
+   MEDIA
+   ========================================================= */
+
+function buildMedia(url, type) {
+
+    const safeURL = escapeHTML(url);
+
+    const isVideo =
+        String(type || "").startsWith("video") ||
+        /\.(mp4|webm|mov)(\?|$)/i.test(url);
+
+
+    if (isVideo) {
+
+        return `
+            <video
+                class="post-media"
+                src="${safeURL}"
+                controls
+                playsinline
+                preload="metadata"
+            ></video>
+        `;
+    }
+
+
+    return `
+        <img
+            class="post-media"
+            src="${safeURL}"
+            loading="lazy"
+            alt=""
+        >
+    `;
+}
+
+
+/* =========================================================
+   LIKE
+   ========================================================= */
+
+async function toggleLike(postId, button) {
+
+    try {
+
+        const result =
+            await apiRequest(
+                `/api/posts/${postId}/like`,
+                {
+                    method: "POST"
+                }
+            );
+
+
+        button.classList.toggle(
+            "active",
+            !!result.liked
+        );
+
+
+        const count =
+            button.querySelector(".count");
+
+
+        if (count) {
+
+            count.textContent =
+                Number(result.likes_count || 0)
+                || "";
+
+        }
+
+    } catch (error) {
+
+        showToast(error.message);
+
+    }
+}
+
+
+/* =========================================================
+   SAVE
+   ========================================================= */
+
+async function toggleSave(postId, button) {
+
+    try {
+
+        const result =
+            await apiRequest(
+                `/api/posts/${postId}/save`,
+                {
+                    method: "POST"
+                }
+            );
+
+
+        button.classList.toggle(
+            "active",
+            !!result.saved
+        );
+
+
+    } catch (error) {
+
+        showToast(error.message);
+
+    }
+}
+
+
+/* =========================================================
+   POST MENU
+   ========================================================= */
+
+function openPostMenu(postId) {
+
+    openModal(
+        "Post options",
+
+        `
+            <button
+                class="secondary-btn"
+                style="width:100%; margin:6px 0"
+                type="button"
+                onclick="deletePost(${Number(postId)})"
+            >
+                Delete post
+            </button>
+        `
+    );
+}
+
+
+async function deletePost(postId) {
+
+    closeModal();
+
+
+    if (!confirm("Delete this post?")) {
+        return;
+    }
+
+
+    try {
+
+        await apiRequest(
+            `/api/posts/${postId}`,
+            {
+                method: "DELETE"
+            }
+        );
+
+
+        const element =
+            document.getElementById(
+                `post-${postId}`
+            );
+
+
+        if (element) {
+            element.remove();
+        }
+
+
+        showToast("Post deleted");
+
+    } catch (error) {
+
+        showToast(error.message);
+
+    }
+}
+
+
+/* =========================================================
+   COMMENTS
+   ========================================================= */
+
+async function openComments(postId) {
+
+    openModal(
+        "Comments",
+
+        `
+            <div
+                id="commentsContainer"
+                class="loading"
+            >
+                Loading comments…
+            </div>
+
+
+            <form
+                style="
+                    display:flex;
+                    gap:8px;
+                    margin-top:12px;
+                "
+                onsubmit="
+                    sendComment(event, ${Number(postId)})
+                "
+            >
+
+                <input
+                    id="commentInput"
+                    class="form-input"
+                    type="text"
+                    maxlength="3000"
+                    placeholder="Write a comment…"
+                    required
+                >
+
+                <button
+                    class="icon-btn"
+                    style="
+                        background:#fff;
+                        color:#000;
+                    "
+                    type="submit"
+                    aria-label="Send"
+                >
+                    ${icon(ICONS.send, "icon-sm")}
+                </button>
+
+            </form>
+        `
+    );
+
+
+    try {
+
+        const result =
+            await apiRequest(
+                `/api/posts/${postId}/comments`
+            );
+
+
+        const container =
+            document.getElementById(
+                "commentsContainer"
+            );
+
+
+        const comments =
+            Array.isArray(result.comments)
+                ? result.comments
+                : [];
+
+
+        if (!comments.length) {
+
+            container.className = "empty";
+
+            container.textContent =
+                "No comments yet.";
+
+            return;
+        }
+
+
+        container.className = "";
+
+
+        container.innerHTML =
+            comments
+                .map(comment => `
+
+                    <div
+                        style="
+                            display:flex;
+                            gap:10px;
+                            padding:11px 2px;
+                            border-bottom:
+                                1px solid var(--border);
+                        "
+                    >
+
+                        ${avatar(comment)}
+
+                        <div style="flex:1">
+
+                            <strong>
+                                ${escapeHTML(
+                                    comment.display_name ||
+                                    comment.username ||
+                                    "User"
+                                )}
+                            </strong>
+
+                            <div
+                                style="
+                                    margin-top:3px;
+                                    color:#ccc;
+                                    white-space:pre-wrap;
+                                "
+                            >
+                                ${escapeHTML(
+                                    comment.content
+                                )}
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                `)
+                .join("");
+
+
+    } catch (error) {
+
+        const container =
+            document.getElementById(
+                "commentsContainer"
+            );
+
+
+        if (container) {
+
+            container.className = "empty";
+
+            container.textContent =
+                error.message;
+
+        }
+
+    }
+}
+
+
+async function sendComment(event, postId) {
+
+    event.preventDefault();
+
+
+    const input =
+        document.getElementById(
+            "commentInput"
+        );
+
+
+    const content =
+        input?.value.trim();
+
+
+    if (!content) {
+        return;
+    }
+
+
+    try {
+
+        await apiRequest(
+            `/api/posts/${postId}/comments`,
+            {
+                method: "POST",
+                body: {
+                    content
+                }
+            }
+        );
+
+
+        input.value = "";
+
+        await openComments(postId);
+
+
+    } catch (error) {
+
+        showToast(error.message);
+
+    }
+}
+
+
+/* =========================================================
+   SHARE
+   ========================================================= */
+
+async function sharePost(postId) {
+
+    const url =
+        `${location.origin}${location.pathname}#post-${postId}`;
+
+
+    try {
+
+        if (navigator.share) {
+
+            await navigator.share({
+                title: "ZILNET post",
+                url
+            });
+
+            return;
+        }
+
+
+        if (navigator.clipboard) {
+
+            await navigator.clipboard.writeText(url);
+
+            showToast("Post link copied");
+
+            return;
+        }
+
+
+        showToast(url);
+
+    } catch {
+        /* User cancelled sharing. */
+    }
+}
+
+
+/* =========================================================
+   DISCOVER
+   ========================================================= */
+
+function renderDiscover() {
+
+    const page =
+        document.getElementById("page");
+
+
+    page.innerHTML = `
+
+        <div class="section-title">
+            Discover
+        </div>
+
+
+        <div
+            style="
+                display:flex;
+                gap:8px;
+                align-items:center;
+            "
+        >
+
+            <input
+                id="discoverInput"
+                class="form-input"
+                type="search"
+                placeholder="Search people or skills…"
+                onkeydown="
+                    if(event.key === 'Enter')
+                        searchDiscover()
+                "
+            >
+
+
+            <button
+                class="icon-btn"
+                style="
+                    background:#171717;
+                    border:1px solid #333;
+                "
+                type="button"
+                onclick="searchDiscover()"
+                aria-label="Search"
+            >
+                ${icon(ICONS.search)}
+            </button>
+
+        </div>
+
+
+        <div
+            id="discoverResults"
+            style="margin-top:12px"
+        >
+
+            <div class="empty">
+                Search for people or skills.
+            </div>
+
+        </div>
+    `;
+}
+
+
+async function searchDiscover() {
+
+    const input =
+        document.getElementById(
+            "discoverInput"
+        );
+
+
+    const results =
+        document.getElementById(
+            "discoverResults"
+        );
+
+
+    const query =
+        input?.value.trim();
+
+
+    if (!query) {
+
+        results.innerHTML = `
+            <div class="empty">
+                Type something to search.
+            </div>
+        `;
+
+        return;
+    }
+
+
+    results.innerHTML = `
+        <div class="loading">
+            Searching…
+        </div>
+    `;
+
+
+    try {
+
+        const data =
+            await apiRequest(
+                `/api/search?q=${encodeURIComponent(query)}`
+            );
+
+
+        const users =
+            Array.isArray(data.users)
+                ? data.users
+                : [];
+
+
+        if (!users.length) {
+
+            results.innerHTML = `
+                <div class="empty">
+                    No users found.
+                </div>
+            `;
+
+            return;
+        }
+
+
+        results.innerHTML =
+            users
+                .map(buildUserResult)
+                .join("");
+
+
+    } catch (error) {
+
+        results.innerHTML = `
+            <div class="empty">
+                ${escapeHTML(error.message)}
+            </div>
+        `;
+    }
+}
+
+
+function buildUserResult(user) {
+
+    return `
+
+        <div
+            style="
+                display:flex;
+                align-items:center;
+                gap:10px;
+                padding:12px 3px;
+                border-bottom:
+                    1px solid var(--border);
+            "
+        >
+
+            ${avatar(user)}
+
+
+            <div style="flex:1; min-width:0">
+
+                <strong>
+                    ${escapeHTML(
+                        user.display_name ||
+                        user.username ||
+                        "User"
+                    )}
+                </strong>
+
+                <div class="muted">
+                    @${escapeHTML(
+                        user.username ||
+                        ""
+                    )}
+                </div>
+
+                ${
+                    user.skills
+
+                    ? `
+                        <div
+                            class="muted"
+                            style="margin-top:3px"
+                        >
+                            ${escapeHTML(user.skills)}
+                        </div>
+                    `
+
+                    : ""
+                }
+
+            </div>
+
+
+            <button
+                class="
+                    secondary-btn
+                    follow-button
+                "
+                type="button"
+                onclick="
+                    toggleFollow(
+                        ${Number(user.id)},
+                        this
+                    )
+                "
+            >
+                ${
+                    user.following
+                        ? "Following"
+                        : "Follow"
+                }
+            </button>
+
+        </div>
+    `;
+}
+
+
+/* =========================================================
+   FOLLOW
+   ========================================================= */
+
+async function toggleFollow(userId, button) {
+
+    try {
+
+        const result =
+            await apiRequest(
+                `/api/users/${userId}/follow`,
+                {
+                    method: "POST"
+                }
+            );
+
+
+        button.textContent =
+            result.following
+                ? "Following"
+                : "Follow";
+
+
+        button.classList.toggle(
+            "active",
+            !!result.following
+        );
+
+
+    } catch (error) {
+
+        showToast(error.message);
+
+    }
+}
+
+
+/* =========================================================
+   CREATE
+   ========================================================= */
+
+function openCreate() {
+
+    openModal(
+        "Create",
+
+        `
+            <div
+                class="auth-tabs"
+                style="margin-bottom:16px"
+            >
+
+                <button
+                    id="createPostTab"
+                    class="auth-tab active"
+                    type="button"
+                    onclick="setCreateMode('post')"
+                >
+                    Post
+                </button>
+
+
+                <button
+                    id="createStoryTab"
+                    class="auth-tab"
+                    type="button"
+                    onclick="setCreateMode('story')"
+                >
+                    Story
+                </button>
+
+            </div>
+
+
+            <form
+                id="createForm"
+                onsubmit="publishContent(event)"
+            >
+
+                <div class="form-group">
+
+                    <label class="form-label">
+                        What's happening?
+                    </label>
+
+                    <textarea
+                        id="createText"
+                        class="form-textarea"
+                        maxlength="10000"
+                        placeholder="Write something…"
+                    ></textarea>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label class="form-label">
+                        Photo or video
+                    </label>
+
+
+                    <!--
+                        This is the normal phone gallery/file
+                        picker. On iPhone it opens Photos/Files.
+                    -->
+
+                    <input
+                        id="createFile"
+                        class="form-input"
+                        type="file"
+                        accept="image/*,video/*"
+                        onchange="previewCreateFile()"
+                    >
+
+
+                    <div id="createPreview"></div>
+
+                </div>
+
+
+                <div
+                    id="createMessage"
+                    class="auth-message"
+                ></div>
+
+
+                <button
+                    id="createSubmit"
+                    class="primary-btn"
+                    type="submit"
+                >
+                    Publish
+                </button>
+
+            </form>
+        `
+    );
+
+    currentCreateMode = "post";
+}
+
+
+function setCreateMode(mode) {
+
+    currentCreateMode = mode;
+
+
+    const postTab =
+        document.getElementById(
+            "createPostTab"
+        );
+
+
+    const storyTab =
+        document.getElementById(
+            "createStoryTab"
+        );
+
+
+    if (postTab) {
+
+        postTab.classList.toggle(
+            "active",
+            mode === "post"
+        );
+
+    }
+
+
+    if (storyTab) {
+
+        storyTab.classList.toggle(
+            "active",
+            mode === "story"
+        );
+
+    }
+
+
+    const submit =
+        document.getElementById(
+            "createSubmit"
+        );
+
+
+    if (submit) {
+
+        submit.textContent =
+            mode === "story"
+                ? "Add story"
+                : "Publish";
+
+    }
+}
+
+
+/* =========================================================
+   CREATE PREVIEW
+   ========================================================= */
+
+function previewCreateFile() {
+
+    const input =
+        document.getElementById(
+            "createFile"
+        );
+
+
+    const preview =
+        document.getElementById(
+            "createPreview"
+        );
+
+
+    if (!input || !preview) {
+        return;
+    }
+
+
+    preview.innerHTML = "";
+
+
+    const file =
+        input.files?.[0];
+
+
+    if (!file) {
+        return;
+    }
+
+
+    const objectURL =
+        URL.createObjectURL(file);
+
+
+    if (
+        file.type.startsWith("video/")
+    ) {
+
+        preview.innerHTML = `
+            <video
+                src="${objectURL}"
+                controls
+                playsinline
+                class="post-media"
+                style="
+                    margin-top:10px;
+                    max-height:280px;
+                    border-radius:13px;
+                "
+            ></video>
+        `;
+
+    } else {
+
+        preview.innerHTML = `
+            <img
+                src="${objectURL}"
+                alt=""
+                style="
+                    width:100%;
+                    max-height:280px;
+                    object-fit:contain;
+                    background:#080808;
+                    border-radius:13px;
+                    margin-top:10px;
+                    display:block;
+                "
+            >
+        `;
+    }
+}
+
+
+/* =========================================================
+   PUBLISH
+   ========================================================= */
+
+async function publishContent(event) {
+
+    event.preventDefault();
+
+
+    const message =
+        document.getElementById(
+            "createMessage"
+        );
+
+
+    const text =
+        document.getElementById(
+            "createText"
+        )?.value.trim() || "";
+
+
+    const file =
+        document.getElementById(
+            "createFile"
+        )?.files?.[0];
+
+
+    message.textContent =
+        "Publishing…";
+
+
+    try {
+
+        let mediaURL = "";
+        let mediaType = "";
+
+
+        /*
+           Upload media first.
+        */
+
+        if (file) {
+
+            const formData =
+                new FormData();
+
+
+            formData.append(
+                "file",
+                file
+            );
+
+
+            const uploadResult =
+                await apiRequest(
+                    "/api/upload",
+                    {
+                        method: "POST",
+                        body: formData
+                    }
+                );
+
+
+            mediaURL =
+                uploadResult.url ||
+                uploadResult.media_url ||
+                "";
+
+
+            mediaType =
+                file.type ||
+                "";
+        }
+
+
+        /*
+           Then create post/story.
+        */
+
+        const endpoint =
+            currentCreateMode === "story"
+                ? "/api/stories"
+                : "/api/posts";
+
+
+        await apiRequest(
+            endpoint,
+            {
+                method: "POST",
+                body: {
+                    content: text,
+                    media_url: mediaURL,
+                    media_type: mediaType
+                }
+            }
+        );
+
+
+        closeModal();
+
+
+        showToast(
+            currentCreateMode === "story"
+                ? "Story added"
+                : "Post published"
+        );
+
+
+        goToPage("home");
+
+
+    } catch (error) {
+
+        message.textContent =
+            error.message;
+    }
+}
+
+
+/* =========================================================
+   INITIAL PAGE
+   ========================================================= */
+
+/*
+   Part 3 contains the authentication boot sequence.
+   We intentionally don't call /api/me here yet.
+*/
+
+/*
+    Part 1 only defines the basic shell.
+
+    Part 2 + Part 3 will add the complete functionality.
+*/
+
+</script>
+<style>
+/* =========================
+   EXTRA APP STYLES
+   ========================= */
+
+.card{
+  background:#0f0f12;
+  border:1px solid #222228;
+  border-radius:18px;
+  padding:16px;
+  margin-bottom:14px;
+}
+
+.section-title{
+  font-size:18px;
+  font-weight:700;
+  margin:0 0 14px;
+}
+
+.story-row{
+  display:flex;
+  gap:14px;
+  overflow-x:auto;
+  padding:4px 2px 12px;
+  scrollbar-width:none;
+}
+
+.story-row::-webkit-scrollbar{display:none}
+
+.story{
+  min-width:68px;
+  text-align:center;
+  font-size:11px;
+  color:#aaa;
+}
+
+.story-avatar{
+  width:58px;
+  height:58px;
+  border-radius:50%;
+  margin:auto;
+  padding:2px;
+  background:linear-gradient(135deg,#ff2d55,#8a2be2,#ff9500);
+}
+
+.story-avatar img,
+.story-avatar .avatar-fallback{
+  width:100%;
+  height:100%;
+  border-radius:50%;
+  object-fit:cover;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:#19191d;
+}
+
+.post-head{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-bottom:12px;
+}
+
+.post-user{
+  flex:1;
+  min-width:0;
+}
+
+.post-user strong{
+  display:block;
+  font-size:14px;
+}
+
+.post-time{
+  color:#777;
+  font-size:11px;
+}
+
+.post-body{
+  line-height:1.45;
+}
+
+.post-text{
+  margin:0 0 12px;
+  white-space:pre-wrap;
+  word-break:break-word;
+}
+
+.post-media{
+  width:100%;
+  max-height:650px;
+  object-fit:contain;
+  border-radius:14px;
+  background:#050505;
+  display:block;
+}
+
+.post-actions{
+  display:flex;
+  align-items:center;
+  gap:18px;
+  margin-top:13px;
+}
+
+.action{
+  display:flex;
+  align-items:center;
+  gap:5px;
+  background:none;
+  border:0;
+  color:#aaa;
+  cursor:pointer;
+  padding:4px;
+}
+
+.action img{
+  width:24px;
+  height:24px;
+  object-fit:contain;
+}
+
+.action.active{
+  color:#ff375f;
+}
+
+.avatar{
+  width:42px;
+  height:42px;
+  border-radius:50%;
+  object-fit:cover;
+  background:#19191d;
+  flex:none;
+}
+
+.avatar-fallback{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:700;
+  background:#202027;
+  color:#fff;
+}
+
+.profile-header{
+  display:flex;
+  gap:16px;
+  align-items:center;
+}
+
+.profile-avatar{
+  width:82px;
+  height:82px;
+  border-radius:50%;
+  object-fit:cover;
+  background:#202027;
+}
+
+.profile-info{
+  flex:1;
+}
+
+.profile-info h2{
+  margin:0 0 4px;
+}
+
+.profile-info p{
+  margin:4px 0;
+  color:#aaa;
+}
+
+.profile-actions{
+  display:flex;
+  gap:8px;
+  margin-top:14px;
+}
+
+.z-btn{
+  border:1px solid #303038;
+  background:#17171c;
+  color:#fff;
+  border-radius:10px;
+  padding:9px 14px;
+  cursor:pointer;
+}
+
+.z-btn.primary{
+  background:#fff;
+  color:#000;
+  border-color:#fff;
+}
+
+.empty{
+  text-align:center;
+  color:#777;
+  padding:30px 10px;
+}
+
+.chat-list{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+
+.chat-item{
+  width:100%;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:12px;
+  border:1px solid #202027;
+  background:#101014;
+  color:#fff;
+  border-radius:14px;
+  cursor:pointer;
+  text-align:left;
+}
+
+.chat-item:hover{
+  background:#17171c;
+}
+
+.chat-info{
+  flex:1;
+  min-width:0;
+}
+
+.chat-info strong{
+  display:block;
+}
+
+.chat-preview{
+  color:#777;
+  font-size:12px;
+  overflow:hidden;
+  white-space:nowrap;
+  text-overflow:ellipsis;
+}
+
+.message-list{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  max-height:55vh;
+  overflow-y:auto;
+  padding:8px 0;
+}
+
+.message{
+  max-width:78%;
+  padding:9px 12px;
+  border-radius:14px;
+  background:#202027;
+  align-self:flex-start;
+  word-break:break-word;
+}
+
+.message.mine{
+  align-self:flex-end;
+  background:#fff;
+  color:#000;
+}
+
+.message-time{
+  display:block;
+  font-size:9px;
+  opacity:.55;
+  margin-top:3px;
+}
+
+.message-form{
+  display:flex;
+  gap:8px;
+  margin-top:10px;
+}
+
+.message-form input{
+  flex:1;
+  min-width:0;
+}
+
+.settings-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:15px;
+  padding:14px 0;
+  border-bottom:1px solid #222228;
+}
+
+.settings-row:last-child{
+  border-bottom:0;
+}
+
+.settings-label strong{
+  display:block;
+}
+
+.settings-label span{
+  color:#777;
+  font-size:12px;
+}
+
+.settings-row select,
+.settings-row input{
+  background:#18181d;
+  color:#fff;
+  border:1px solid #303038;
+  border-radius:9px;
+  padding:8px;
+}
+
+.user-result{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:12px;
+  border-bottom:1px solid #202027;
+}
+
+.user-result:last-child{
+  border-bottom:0;
+}
+
+.user-result-info{
+  flex:1;
+}
+
+.user-result-info strong{
+  display:block;
+}
+
+.user-result-info span{
+  color:#777;
+  font-size:12px;
+}
+
+.follow-btn{
+  border:1px solid #33333b;
+  background:#18181d;
+  color:#fff;
+  border-radius:9px;
+  padding:7px 12px;
+}
+
+.follow-btn.following{
+  background:#fff;
+  color:#000;
+}
+
+.media-preview{
+  width:100%;
+  max-height:400px;
+  object-fit:contain;
+  border-radius:14px;
+  margin-top:10px;
+  background:#050505;
+}
+
+.hidden{
+  display:none !important;
+}
+
+@media(max-width:600px){
+  .card{
+    border-radius:14px;
+    padding:13px;
+  }
+
+  .profile-header{
+    align-items:flex-start;
+  }
+
+  .profile-avatar{
+    width:68px;
+    height:68px;
+  }
+
+  .post-actions{
+    gap:12px;
+  }
+}
+</style>
+
+<script>
+/* =========================
+   ZILNET PART 3
+   AUTH + PROFILE + CHAT
+   + SETTINGS + SEARCH
+   ========================= */
+
+let currentChatId = null;
+let currentChatTimer = null;
+
+/* ---------- AUTH ---------- */
+
+function showAuthMode(mode){
+  const login = document.getElementById("loginForm");
+  const signup = document.getElementById("signupForm");
+
+  if(login) login.classList.toggle("hidden", mode !== "login");
+  if(signup) signup.classList.toggle("hidden", mode !== "signup");
+
+  const title = document.getElementById("authTitle");
+  if(title){
+    title.textContent =
+      mode === "signup" ? "Create your Zilnet account" : "Welcome back";
+  }
+
+  const message = document.getElementById("authMessage");
+  if(message) message.textContent = "";
+}
+
+function setAuthScreen(show){
+  const auth = document.getElementById("authScreen");
+  const app = document.getElementById("app");
+
+  if(auth) auth.classList.toggle("hidden", !show);
+  if(app) app.classList.toggle("hidden", show);
+}
+
+async function boot(){
+  try{
+    const result = await apiRequest("/api/me");
+
+    if(result && result.user){
+      me = result.user;
+      setAuthScreen(false);
+      await renderHome();
+      return;
+    }
+
+    setAuthScreen(true);
+    showAuthMode("login");
+
+  }catch(error){
+    setAuthScreen(true);
+    showAuthMode("login");
+  }
+}
+
+
+/* ---------- LOGIN ---------- */
+
+async function handleLogin(event){
+  event.preventDefault();
+
+  const form = event.target;
+  const login = form.login.value.trim();
+  const password = form.password.value;
+
+  if(!login || !password){
+    showToast("Enter your login details.");
+    return;
+  }
+
+  try{
+    const result = await apiRequest("/api/login", {
+      method:"POST",
+      body:{
+        login,
+        password
+      }
+    });
+
+    if(result.user){
+      me = result.user;
+      setAuthScreen(false);
+      await renderHome();
+      showToast("Welcome back!");
+    }else{
+      throw new Error("Login failed");
+    }
+
+  }catch(error){
+    showToast(error.message || "Invalid username/email or password.");
+  }
+}
+
+
+/* ---------- SIGNUP ---------- */
+
+async function handleSignup(event){
+  event.preventDefault();
+
+  const form = event.target;
+
+  const username = form.username.value.trim();
+  const displayName = form.displayName.value.trim();
+  const email = form.email.value.trim();
+  const password = form.password.value;
+
+  if(username.length < 3){
+    showToast("Username must be at least 3 characters.");
+    return;
+  }
+
+  if(displayName.length < 2){
+    showToast("Enter your display name.");
+    return;
+  }
+
+  if(!email.includes("@")){
+    showToast("Enter a valid email.");
+    return;
+  }
+
+  if(password.length < 8){
+    showToast("Password must be at least 8 characters.");
+    return;
+  }
+
+  try{
+    const result = await apiRequest("/api/signup", {
+      method:"POST",
+      body:{
+        username,
+        displayName,
+        email,
+        password
+      }
+    });
+
+    if(result.user){
+      me = result.user;
+      setAuthScreen(false);
+      await renderHome();
+      showToast("Account created!");
+    }else{
+      throw new Error("Signup failed");
+    }
+
+  }catch(error){
+    showToast(error.message || "Could not create account.");
+  }
+}
+
+
+/* ---------- LOGOUT ---------- */
+
+async function logout(){
+  try{
+    await apiRequest("/api/logout", {
+      method:"POST"
+    });
+  }catch(e){}
+
+  me = null;
+  currentChatId = null;
+
+  if(currentChatTimer){
+    clearInterval(currentChatTimer);
+    currentChatTimer = null;
+  }
+
+  setAuthScreen(true);
+  showAuthMode("login");
+}
+
+
+/* ---------- FORGOT PASSWORD ---------- */
+
+async function openForgotPassword(){
+  const email = prompt("Enter the email connected to your Zilnet account:");
+
+  if(!email) return;
+
+  try{
+    await apiRequest("/api/forgot-password", {
+      method:"POST",
+      body:{email}
+    });
+
+    showToast("If the account exists, reset instructions were created.");
+  }catch(error){
+    showToast(error.message || "Unable to request password reset.");
+  }
+}
+
+
+/* =========================
+   PROFILE
+   ========================= */
+
+async function renderProfile(userId = null){
+  try{
+    let user;
+
+    if(userId){
+      const result = await apiRequest(
+        "/api/users/" + encodeURIComponent(userId)
+      );
+
+      user = result.user || result;
+    }else{
+      user = me;
+    }
+
+    if(!user) return;
+
+    const container =
+      document.getElementById("profilePanel") ||
+      document.getElementById("mainPanel");
+
+    if(!container) return;
+
+    const avatar = user.avatar_url
+      ? `<img class="profile-avatar" src="${escapeHtml(user.avatar_url)}">`
+      : `<div class="profile-avatar avatar-fallback">${escapeHtml(
+          (user.display_name || user.username || "?")[0].toUpperCase()
+        )}</div>`;
+
+    container.innerHTML = `
+      <div class="card">
+        <div class="profile-header">
+          ${avatar}
+
+          <div class="profile-info">
+            <h2>${escapeHtml(user.display_name || user.username)}</h2>
+            <div>@${escapeHtml(user.username)}</div>
+            <p>${escapeHtml(user.bio || "")}</p>
+          </div>
+        </div>
+
+        ${
+          user.id == me?.id
+          ? `
+            <div class="profile-actions">
+              <button class="z-btn" onclick="openSettings()">
+                Settings
+              </button>
+
+              <button class="z-btn" onclick="openEditProfile()">
+                Edit profile
+              </button>
+            </div>
+          `
+          : `
+            <div class="profile-actions">
+              <button class="z-btn primary"
+                onclick="toggleFollow('${escapeHtml(user.id)}')">
+                Follow
+              </button>
+            </div>
+          `
+        }
+      </div>
+
+      <div class="card">
+        <div class="section-title">Bio</div>
+        <div>${escapeHtml(user.bio || "No bio yet.")}</div>
+      </div>
+    `;
+
+  }catch(error){
+    showToast(error.message || "Could not load profile.");
+  }
+}
+
+
+/* ---------- EDIT PROFILE ---------- */
+
+async function openEditProfile(){
+  const name = prompt(
+    "Display name:",
+    me?.display_name || ""
+  );
+
+  if(name === null) return;
+
+  const bio = prompt(
+    "Bio:",
+    me?.bio || ""
+  );
+
+  if(bio === null) return;
+
+  try{
+    const result = await apiRequest("/api/profile", {
+      method:"PATCH",
+      body:{
+        displayName:name,
+        bio
+      }
+    });
+
+    if(result.user){
+      me = result.user;
+    }else{
+      me.display_name = name;
+      me.bio = bio;
+    }
+
+    await renderProfile();
+    showToast("Profile updated.");
+
+  }catch(error){
+    showToast(error.message || "Could not update profile.");
+  }
+}
+
+
+/* ---------- FOLLOW ---------- */
+
+async function toggleFollow(userId){
+  try{
+    const result = await apiRequest(
+      "/api/users/" + encodeURIComponent(userId) + "/follow",
+      {
+        method:"POST"
+      }
+    );
+
+    showToast(
+      result.following ? "Following" : "Unfollowed"
+    );
+
+    await renderProfile(userId);
+
+  }catch(error){
+    showToast(error.message || "Could not update follow.");
+  }
+}
+
+
+/* =========================
+   SEARCH / DISCOVER
+   ========================= */
+
+async function searchUsers(){
+  const input = document.getElementById("searchInput");
+
+  if(!input) return;
+
+  const q = input.value.trim();
+
+  if(!q){
+    showToast("Type something to search.");
+    return;
+  }
+
+  try{
+    const result = await apiRequest(
+      "/api/search?q=" + encodeURIComponent(q)
+    );
+
+    const users = result.users || result.results || [];
+
+    const box =
+      document.getElementById("searchResults") ||
+      document.getElementById("discoverContent");
+
+    if(!box) return;
+
+    if(!users.length){
+      box.innerHTML = `<div class="empty">No users found.</div>`;
+      return;
+    }
+
+    box.innerHTML = users.map(user => `
+      <div class="user-result">
+        ${
+          user.avatar_url
+          ? `<img class="avatar" src="${escapeHtml(user.avatar_url)}">`
+          : `<div class="avatar avatar-fallback">
+               ${escapeHtml(
+                 (user.display_name || user.username || "?")[0]
+                   .toUpperCase()
+               )}
+             </div>`
+        }
+
+        <div class="user-result-info">
+          <strong>${escapeHtml(user.display_name || user.username)}</strong>
+          <span>@${escapeHtml(user.username)}</span>
+        </div>
+
+        <button
+          class="follow-btn"
+          onclick="renderProfile('${escapeHtml(user.id)}')">
+          View
+        </button>
+      </div>
+    `).join("");
+
+  }catch(error){
+    showToast(error.message || "Search failed.");
+  }
+}
+
+
+/* =========================
+   SETTINGS
+   ========================= */
+
+async function openSettings(){
+  const container =
+    document.getElementById("settingsPanel") ||
+    document.getElementById("mainPanel");
+
+  if(!container) return;
+
+  let settings = {
+    theme:"system",
+    profile_visibility:"public",
+    message_privacy:"everyone"
+  };
+
+  try{
+    const result = await apiRequest("/api/settings");
+    settings = result.settings || result;
+  }catch(e){}
+
+  container.innerHTML = `
+    <div class="card">
+      <div class="section-title">Settings</div>
+
+      <div class="settings-row">
+        <div class="settings-label">
+          <strong>Theme</strong>
+          <span>Choose your appearance</span>
+        </div>
+
+        <select id="settingTheme">
+          <option value="system" ${
+            settings.theme === "system" ? "selected" : ""
+          }>System</option>
+
+          <option value="dark" ${
+            settings.theme === "dark" ? "selected" : ""
+          }>Dark</option>
+
+          <option value="light" ${
+            settings.theme === "light" ? "selected" : ""
+          }>Light</option>
+        </select>
+      </div>
+
+      <div class="settings-row">
+        <div class="settings-label">
+          <strong>Profile visibility</strong>
+          <span>Who can see your profile</span>
+        </div>
+
+        <select id="settingVisibility">
+          <option value="public" ${
+            settings.profile_visibility === "public"
+              ? "selected"
+              : ""
+          }>Public</option>
+
+          <option value="private" ${
+            settings.profile_visibility === "private"
+              ? "selected"
+              : ""
+          }>Private</option>
+        </select>
+      </div>
+
+      <div class="settings-row">
+        <div class="settings-label">
+          <strong>Messages</strong>
+          <span>Who can message you</span>
+        </div>
+
+        <select id="settingMessages">
+          <option value="everyone" ${
+            settings.message_privacy === "everyone"
+              ? "selected"
+              : ""
+          }>Everyone</option>
+
+          <option value="following" ${
+            settings.message_privacy === "following"
+              ? "selected"
+              : ""
+          }>People I follow</option>
+        </select>
+      </div>
+
+      <button class="z-btn primary"
+        style="margin-top:16px"
+        onclick="saveSettings()">
+        Save settings
+      </button>
+
+      <button class="z-btn"
+        style="margin-top:8px"
+        onclick="logout()">
+        Log out
+      </button>
+    </div>
+  `;
+}
+
+
+async function saveSettings(){
+  const theme =
+    document.getElementById("settingTheme")?.value || "system";
+
+  const profile_visibility =
+    document.getElementById("settingVisibility")?.value || "public";
+
+  const message_privacy =
+    document.getElementById("settingMessages")?.value || "everyone";
+
+  try{
+    await apiRequest("/api/settings", {
+      method:"PATCH",
+      body:{
+        theme,
+        profileVisibility:profile_visibility,
+        messagePrivacy:message_privacy
+      }
+    });
+
+    showToast("Settings saved.");
+
+  }catch(error){
+    showToast(error.message || "Could not save settings.");
+  }
+}
+
+
+/* =========================
+   CHAT
+   ========================= */
+
+async function loadChats(){
+  const container =
+    document.getElementById("chatPanel") ||
+    document.getElementById("mainPanel");
+
+  if(!container) return;
+
+  try{
+    const result = await apiRequest("/api/chats");
+
+    const chats = result.chats || result || [];
+
+    if(!chats.length){
+      container.innerHTML =
+        `<div class="card empty">No conversations yet.</div>`;
+      return;
+    }
+
+    container.innerHTML = `
+      <div class="card">
+        <div class="section-title">Messages</div>
+        <div class="chat-list">
+          ${chats.map(chat => `
+            <button class="chat-item"
+              onclick="openChat('${escapeHtml(chat.id)}')">
+
+              ${
+                chat.avatar_url
+                ? `<img class="avatar"
+                     src="${escapeHtml(chat.avatar_url)}">`
+                : `<div class="avatar avatar-fallback">
+                     ${escapeHtml(
+                       (chat.name || "?")[0].toUpperCase()
+                     )}
+                   </div>`
+              }
+
+              <div class="chat-info">
+                <strong>${escapeHtml(chat.name || "Chat")}</strong>
+                <div class="chat-preview">
+                  ${escapeHtml(chat.last_message || "")}
+                </div>
+              </div>
+            </button>
+          `).join("")}
+        </div>
+      </div>
+    `;
+
+  }catch(error){
+    showToast(error.message || "Could not load chats.");
+  }
+}
+
+
+/* ---------- OPEN CHAT ---------- */
+
+async function openChat(chatId){
+  currentChatId = chatId;
+
+  const container =
+    document.getElementById("chatPanel") ||
+    document.getElementById("mainPanel");
+
+  if(!container) return;
+
+  container.innerHTML = `
+    <div class="card">
+      <button class="z-btn" onclick="loadChats()">← Back</button>
+
+      <div id="messageList" class="message-list">
+        <div class="empty">Loading...</div>
+      </div>
+
+      <form class="message-form" onsubmit="sendMessage(event)">
+        <input
+          id="messageInput"
+          type="text"
+          placeholder="Write a message..."
+          autocomplete="off">
+
+        <button class="z-btn primary" type="submit">
+          Send
+        </button>
+      </form>
+    </div>
+  `;
+
+  await loadMessages();
+
+  if(currentChatTimer){
+    clearInterval(currentChatTimer);
+  }
+
+  currentChatTimer = setInterval(() => {
+    if(currentChatId){
+      loadMessages();
+    }
+  }, 5000);
+}
+
+
+/* ---------- LOAD MESSAGES ---------- */
+
+async function loadMessages(){
+  if(!currentChatId) return;
+
+  try{
+    const result = await apiRequest(
+      "/api/chats/" + encodeURIComponent(currentChatId)
+    );
+
+    const chat = result.chat || result;
+    const messages = chat.messages || [];
+
+    const list = document.getElementById("messageList");
+
+    if(!list) return;
+
+    if(!messages.length){
+      list.innerHTML =
+        `<div class="empty">No messages yet.</div>`;
+      return;
+    }
+
+    list.innerHTML = messages.map(message => {
+      const mine =
+        String(message.user_id) === String(me?.id);
+
+      return `
+        <div class="message ${mine ? "mine" : ""}">
+          ${escapeHtml(message.body || message.content || "")}
+          <span class="message-time">
+            ${escapeHtml(message.created_at || "")}
+          </span>
+        </div>
+      `;
+    }).join("");
+
+    list.scrollTop = list.scrollHeight;
+
+  }catch(error){
+    if(error.message !== "Session expired"){
+      showToast(error.message || "Could not load messages.");
+    }
+  }
+}
+
+
+/* ---------- SEND MESSAGE ---------- */
+
+async function sendMessage(event){
+  event.preventDefault();
+
+  if(!currentChatId) return;
+
+  const input = document.getElementById("messageInput");
+
+  if(!input) return;
+
+  const body = input.value.trim();
+
+  if(!body) return;
+
+  try{
+    await apiRequest(
+      "/api/chats/" + encodeURIComponent(currentChatId) + "/messages",
+      {
+        method:"POST",
+        body:{body}
+      }
+    );
+
+    input.value = "";
+
+    await loadMessages();
+
+  }catch(error){
+    showToast(error.message || "Message could not be sent.");
+  }
+}
+
+
+/* =========================
+   CREATE POST
+   ========================= */
+
+async function createPostFromForm(event){
+  event.preventDefault();
+
+  const form = event.target;
+  const text = form.querySelector("textarea")?.value.trim() || "";
+  const file = form.querySelector('input[type="file"]')?.files?.[0];
+
+  if(!text && !file){
+    showToast("Add text or choose a photo/video.");
+    return;
+  }
+
+  try{
+    let mediaUrl = "";
+
+    if(file){
+      const data = new FormData();
+      data.append("file", file);
+
+      const upload = await fetch("/api/upload", {
+        method:"POST",
+        credentials:"include",
+        body:data
+      });
+
+      if(!upload.ok){
+        throw new Error("Upload failed");
+      }
+
+      const uploaded = await upload.json();
+      mediaUrl = uploaded.url || uploaded.media_url || "";
+    }
+
+    await apiRequest("/api/posts", {
+      method:"POST",
+      body:{
+        text,
+        mediaUrl
+      }
+    });
+
+    form.reset();
+
+    await renderHome();
+
+    showToast("Post published!");
+
+  }catch(error){
+    showToast(error.message || "Could not publish post.");
+  }
+}
+
+
+/* =========================
+   STORIES
+   ========================= */
+
+async function createStoryFromFile(file){
+  if(!file) return;
+
+  try{
+    const data = new FormData();
+    data.append("file", file);
+
+    const upload = await fetch("/api/upload", {
+      method:"POST",
+      credentials:"include",
+      body:data
+    });
+
+    if(!upload.ok){
+      throw new Error("Upload failed");
+    }
+
+    const uploaded = await upload.json();
+
+    await apiRequest("/api/stories", {
+      method:"POST",
+      body:{
+        mediaUrl:uploaded.url || uploaded.media_url || ""
+      }
+    });
+
+    showToast("Story added.");
+
+    await renderHome();
+
+  }catch(error){
+    showToast(error.message || "Could not add story.");
+  }
+}
+
+
+/* =========================
+   SAFE HTML
+   ========================= */
+
+function escapeHtml(value){
+  return String(value ?? "")
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+}
+
+
+/* =========================
+   TOAST FALLBACK
+   ========================= */
+
+function showToast(message){
+  let toast = document.getElementById("zilnetToast");
+
+  if(!toast){
+    toast = document.createElement("div");
+    toast.id = "zilnetToast";
+
+    Object.assign(toast.style,{
+      position:"fixed",
+      left:"50%",
+      bottom:"85px",
+      transform:"translateX(-50%)",
+      background:"#fff",
+      color:"#000",
+      padding:"10px 16px",
+      borderRadius:"12px",
+      zIndex:"99999",
+      fontSize:"13px",
+      boxShadow:"0 8px 30px rgba(0,0,0,.35)"
+    });
+
+    document.body.appendChild(toast);
+  }
+
+  toast.textContent = message;
+  toast.style.display = "block";
+
+  clearTimeout(window.zilnetToastTimer);
+
+  window.zilnetToastTimer = setTimeout(() => {
+    toast.style.display = "none";
+  },3000);
+}
+
+
+/* =========================
+   START APP
+   ========================= */
+
+document.addEventListener("DOMContentLoaded", () => {
+
+  const loginForm =
+    document.getElementById("loginForm");
+
+  const signupForm =
+    document.getElementById("signupForm");
+
+  if(loginForm){
+    loginForm.addEventListener(
+      "submit",
+      handleLogin
+    );
+  }
+
+  if(signupForm){
+    signupForm.addEventListener(
+      "submit",
+      handleSignup
+    );
+  }
+
+  boot();
+});
+</script>
