@@ -1,0 +1,7601 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ZILNET">
+<link rel="icon" href="/assets/IMG_2011.webp">
+<title>ZILNET</title>
+
+<style>
+*{
+  box-sizing:border-box;
+  -webkit-tap-highlight-color:transparent;
+}
+
+:root{
+  --bg:#000;
+  --surface:#090909;
+  --surface2:#111;
+  --surface3:#181818;
+  --line:#242424;
+  --text:#fff;
+  --muted:#888;
+  --soft:#aaa;
+  --accent1:#3478ff;
+  --accent2:#9b4dff;
+  --accent3:#d84dff;
+  --danger:#ff4d67;
+  --radius:18px;
+  --nav-height:68px;
+}
+
+html,
+body{
+  margin:0;
+  min-height:100%;
+  background:var(--bg);
+  color:var(--text);
+  font-family:
+    -apple-system,
+    BlinkMacSystemFont,
+    "SF Pro Display",
+    "SF Pro Text",
+    Inter,
+    Arial,
+    sans-serif;
+}
+
+body{
+  overflow-x:hidden;
+}
+
+button,
+input,
+textarea,
+select{
+  font:inherit;
+}
+
+button{
+  border:0;
+  color:inherit;
+  background:none;
+  cursor:pointer;
+}
+
+img,
+video{
+  max-width:100%;
+}
+
+.hidden{
+  display:none!important;
+}
+
+.app{
+  min-height:100vh;
+}
+
+.topbar{
+  height:66px;
+  position:fixed;
+  top:0;
+  left:0;
+  right:0;
+  z-index:50;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 22px;
+  background:rgba(0,0,0,.92);
+  backdrop-filter:blur(18px);
+  border-bottom:1px solid var(--line);
+}
+
+.logo{
+  font-size:22px;
+  font-weight:900;
+  letter-spacing:2px;
+}
+
+.top-actions{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+.icon-btn{
+  width:42px;
+  height:42px;
+  border-radius:14px;
+  display:grid;
+  place-items:center;
+  transition:
+    transform .18s ease,
+    background .18s ease,
+    opacity .18s ease;
+}
+
+.icon-btn:hover{
+  background:#161616;
+  transform:translateY(-2px);
+}
+
+.icon-btn:active{
+  transform:scale(.88);
+}
+
+.icon-btn img{
+  width:25px;
+  height:25px;
+  object-fit:contain;
+  display:block;
+}
+
+.icon-btn.small img{
+  width:22px;
+  height:22px;
+}
+
+.desktop-layout{
+  display:grid;
+  grid-template-columns:230px minmax(0,720px) 260px;
+  justify-content:center;
+  gap:25px;
+  max-width:1320px;
+  margin:auto;
+  padding-top:88px;
+  padding-bottom:90px;
+}
+
+.sidebar{
+  position:sticky;
+  top:88px;
+  height:max-content;
+}
+
+.sidebar-card{
+  border:1px solid var(--line);
+  background:var(--surface);
+  border-radius:22px;
+  padding:12px;
+}
+
+.side-item{
+  width:100%;
+  display:flex;
+  align-items:center;
+  gap:13px;
+  padding:13px;
+  border-radius:15px;
+  color:#bbb;
+  transition:.18s ease;
+  text-align:left;
+}
+
+.side-item:hover,
+.side-item.active{
+  color:#fff;
+  background:#151515;
+  transform:translateX(2px);
+}
+
+.side-item img{
+  width:24px;
+  height:24px;
+  object-fit:contain;
+}
+
+.side-item span{
+  font-size:14px;
+  font-weight:650;
+}
+
+.feed-column{
+  min-width:0;
+}
+
+.rightbar{
+  position:sticky;
+  top:88px;
+  height:max-content;
+}
+
+.right-card{
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-radius:22px;
+  padding:17px;
+}
+
+.right-title{
+  font-size:13px;
+  color:#aaa;
+  font-weight:700;
+  margin-bottom:15px;
+}
+
+.empty{
+  text-align:center;
+  padding:45px 20px;
+  color:#777;
+}
+
+.empty strong{
+  display:block;
+  color:#eee;
+  margin-bottom:6px;
+  font-size:16px;
+}
+
+.empty span{
+  font-size:13px;
+}
+
+.page{
+  display:none;
+  animation:pageIn .25s ease;
+}
+
+.page.active{
+  display:block;
+}
+
+@keyframes pageIn{
+  from{
+    opacity:0;
+    transform:translateY(7px);
+  }
+  to{
+    opacity:1;
+    transform:none;
+  }
+}
+
+.stories-wrap{
+  margin-bottom:18px;
+  overflow:hidden;
+}
+
+.stories{
+  display:flex;
+  gap:16px;
+  overflow-x:auto;
+  padding:5px 2px 10px;
+  scrollbar-width:none;
+}
+
+.stories::-webkit-scrollbar{
+  display:none;
+}
+
+.story{
+  flex:0 0 auto;
+  width:72px;
+  text-align:center;
+  cursor:pointer;
+}
+
+.story-avatar{
+  width:68px;
+  height:68px;
+  border-radius:50%;
+  padding:3px;
+  background:transparent;
+  margin:auto;
+  transition:.2s ease;
+}
+
+.story.active .story-avatar{
+  background:linear-gradient(
+    135deg,
+    #287cff,
+    #714cff,
+    #d948ff
+  );
+  animation:storyPulse 2.3s infinite;
+}
+
+@keyframes storyPulse{
+  0%,100%{
+    box-shadow:0 0 0 0 rgba(107,80,255,.15);
+  }
+  50%{
+    box-shadow:0 0 0 5px rgba(107,80,255,.08);
+  }
+}
+
+.story-avatar-inner{
+  width:100%;
+  height:100%;
+  border-radius:50%;
+  overflow:hidden;
+  background:#171717;
+  border:2px solid #000;
+}
+
+.story-avatar-inner img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}
+
+.story-name{
+  margin-top:7px;
+  font-size:11px;
+  color:#aaa;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.story-add{
+  position:relative;
+}
+
+.story-add::after{
+  content:"+";
+  position:absolute;
+  right:0;
+  bottom:18px;
+  width:22px;
+  height:22px;
+  display:grid;
+  place-items:center;
+  border-radius:50%;
+  background:#fff;
+  color:#000;
+  font-size:16px;
+  font-weight:800;
+  border:3px solid #000;
+}
+
+.composer{
+  border:1px solid var(--line);
+  background:var(--surface);
+  border-radius:20px;
+  padding:14px;
+  margin-bottom:18px;
+}
+
+.composer-row{
+  display:flex;
+  align-items:center;
+  gap:11px;
+}
+
+.avatar{
+  width:43px;
+  height:43px;
+  border-radius:50%;
+  overflow:hidden;
+  flex:0 0 auto;
+  background:#181818;
+}
+
+.avatar img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}
+
+.composer-input{
+  flex:1;
+  min-width:0;
+  border:1px solid var(--line);
+  background:#101010;
+  color:#fff;
+  border-radius:16px;
+  min-height:44px;
+  padding:11px 14px;
+  outline:none;
+  resize:none;
+}
+
+.composer-input:focus{
+  border-color:#444;
+}
+
+.composer-tools{
+  display:flex;
+  align-items:center;
+  gap:5px;
+  margin-top:11px;
+  padding-left:54px;
+}
+
+.tool{
+  width:39px;
+  height:39px;
+  border-radius:13px;
+  display:grid;
+  place-items:center;
+}
+
+.tool:hover{
+  background:#181818;
+}
+
+.tool:active{
+  transform:scale(.88);
+}
+
+.tool img{
+  width:23px;
+  height:23px;
+  object-fit:contain;
+}
+
+.post{
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-radius:20px;
+  margin-bottom:18px;
+  overflow:hidden;
+}
+
+.post-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:13px 14px;
+}
+
+.user-row{
+  display:flex;
+  align-items:center;
+  gap:11px;
+  min-width:0;
+}
+
+.user-meta{
+  min-width:0;
+}
+
+.display-name{
+  font-size:14px;
+  font-weight:750;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.username{
+  font-size:11px;
+  color:#777;
+  margin-top:2px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.post-menu{
+  width:36px;
+  height:36px;
+  border-radius:12px;
+  display:grid;
+  place-items:center;
+}
+
+.post-menu:hover{
+  background:#171717;
+}
+
+.post-menu img{
+  width:23px;
+  height:23px;
+  object-fit:contain;
+}
+
+.post-content{
+  padding:0 14px 13px;
+  white-space:pre-wrap;
+  word-break:break-word;
+  line-height:1.5;
+  color:#eee;
+  font-size:14px;
+}
+
+.text-image{
+  margin:0 14px 14px;
+  min-height:230px;
+  border-radius:18px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  padding:30px;
+  font-weight:800;
+  font-size:20px;
+  line-height:1.3;
+  background:
+    linear-gradient(
+      135deg,
+      #1d1d1d,
+      #4b4b4b
+    );
+  overflow:hidden;
+}
+
+.post-media{
+  width:100%;
+  display:block;
+  max-height:650px;
+  object-fit:cover;
+  background:#050505;
+}
+
+.post-gallery{
+  display:grid;
+  gap:2px;
+  background:#000;
+}
+
+.post-gallery.two{
+  grid-template-columns:1fr 1fr;
+}
+
+.post-gallery.three{
+  grid-template-columns:1fr 1fr;
+}
+
+.post-gallery.three img:first-child{
+  grid-row:span 2;
+}
+
+.post-actions{
+  display:flex;
+  align-items:center;
+  padding:7px 10px 11px;
+  gap:4px;
+}
+
+.post-action{
+  width:43px;
+  height:43px;
+  border-radius:14px;
+  display:grid;
+  place-items:center;
+  transition:
+    transform .2s ease,
+    background .2s ease;
+}
+
+.post-action:hover{
+  background:#171717;
+}
+
+.post-action:active{
+  transform:scale(.82);
+}
+
+.post-action img{
+  width:25px;
+  height:25px;
+  object-fit:contain;
+}
+
+.post-action.liked img,
+.post-action.saved img{
+  filter:
+    brightness(0)
+    saturate(100%)
+    invert(44%)
+    sepia(96%)
+    saturate(2837%)
+    hue-rotate(203deg)
+    brightness(104%)
+    contrast(102%);
+}
+
+.post-action.pop{
+  animation:actionPop .35s ease;
+}
+
+@keyframes actionPop{
+  0%{transform:scale(1)}
+  40%{transform:scale(1.28)}
+  70%{transform:scale(.9)}
+  100%{transform:scale(1)}
+}
+
+.like-count{
+  font-size:12px;
+  color:#aaa;
+  padding-left:2px;
+}
+
+.page-title{
+  font-size:22px;
+  font-weight:850;
+  margin:0 0 17px;
+}
+
+.search-box{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  background:#0c0c0c;
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:0 13px;
+  margin-bottom:15px;
+}
+
+.search-box img{
+  width:22px;
+  height:22px;
+  object-fit:contain;
+}
+
+.search-box input{
+  width:100%;
+  height:47px;
+  border:0;
+  outline:0;
+  color:#fff;
+  background:transparent;
+}
+
+.result-list{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+
+.result{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:11px;
+  border:1px solid var(--line);
+  background:#090909;
+  border-radius:16px;
+  cursor:pointer;
+  transition:.18s ease;
+}
+
+.result:hover{
+  background:#141414;
+  transform:translateY(-1px);
+}
+
+.result-info{
+  min-width:0;
+  flex:1;
+}
+
+.result-info strong{
+  display:block;
+  font-size:14px;
+}
+
+.result-info span{
+  display:block;
+  font-size:11px;
+  color:#777;
+  margin-top:3px;
+}
+
+.follow-btn,
+.primary-btn,
+.secondary-btn,
+.danger-btn{
+  min-height:39px;
+  padding:0 14px;
+  border-radius:13px;
+  font-size:12px;
+  font-weight:750;
+  transition:.18s ease;
+}
+
+.primary-btn{
+  color:#fff;
+  background:linear-gradient(135deg,var(--accent1),var(--accent2));
+}
+
+.primary-btn:hover{
+  transform:translateY(-2px);
+}
+
+.primary-btn:active,
+.follow-btn:active,
+.secondary-btn:active{
+  transform:scale(.93);
+}
+
+.follow-btn{
+  background:#fff;
+  color:#000;
+}
+
+.follow-btn.following{
+  background:#1b1b1b;
+  color:#fff;
+  border:1px solid #333;
+}
+
+.secondary-btn{
+  background:#181818;
+  border:1px solid #2b2b2b;
+}
+
+.danger-btn{
+  color:#ff6076;
+  background:#190b0d;
+  border:1px solid #3a151b;
+}
+
+.create-card{
+  border:1px solid var(--line);
+  background:var(--surface);
+  border-radius:20px;
+  padding:17px;
+}
+
+.create-tabs{
+  display:flex;
+  gap:7px;
+  margin-bottom:15px;
+}
+
+.create-tab{
+  flex:1;
+  padding:11px;
+  border-radius:13px;
+  background:#111;
+  color:#888;
+  font-size:12px;
+  font-weight:700;
+}
+
+.create-tab.active{
+  color:#fff;
+  background:#202020;
+}
+
+textarea.big-input{
+  width:100%;
+  min-height:150px;
+  resize:vertical;
+  color:#fff;
+  background:#0c0c0c;
+  border:1px solid var(--line);
+  border-radius:17px;
+  outline:none;
+  padding:14px;
+}
+
+.upload-area{
+  border:1px dashed #333;
+  background:#0b0b0b;
+  border-radius:18px;
+  padding:28px 18px;
+  text-align:center;
+  cursor:pointer;
+  margin-bottom:14px;
+}
+
+.upload-area:hover{
+  border-color:#666;
+  background:#111;
+}
+
+.upload-area img{
+  width:30px;
+  height:30px;
+  object-fit:contain;
+  margin-bottom:8px;
+}
+
+.upload-area strong{
+  display:block;
+  font-size:13px;
+}
+
+.upload-area span{
+  display:block;
+  color:#666;
+  font-size:11px;
+  margin-top:4px;
+}
+
+.preview{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:5px;
+  margin-bottom:14px;
+}
+
+.preview-item{
+  aspect-ratio:1;
+  overflow:hidden;
+  border-radius:12px;
+  background:#111;
+  position:relative;
+}
+
+.preview-item img,
+.preview-item video{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+.reels-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:3px;
+}
+
+.reel-tile{
+  aspect-ratio:9/15;
+  overflow:hidden;
+  background:#111;
+  position:relative;
+  cursor:pointer;
+}
+
+.reel-tile video,
+.reel-tile img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+.reel-overlay{
+  position:absolute;
+  left:8px;
+  right:8px;
+  bottom:8px;
+  font-size:11px;
+  text-shadow:0 2px 5px #000;
+}
+
+.profile-header{
+  border:1px solid var(--line);
+  background:var(--surface);
+  border-radius:21px;
+  padding:18px;
+  margin-bottom:15px;
+}
+
+.profile-top{
+  display:flex;
+  gap:17px;
+  align-items:center;
+}
+
+.profile-large-avatar{
+  width:92px;
+  height:92px;
+  border-radius:50%;
+  overflow:hidden;
+  flex:0 0 auto;
+  background:#161616;
+}
+
+.profile-large-avatar img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+.profile-info{
+  min-width:0;
+  flex:1;
+}
+
+.profile-info h2{
+  margin:0;
+  font-size:20px;
+}
+
+.profile-info .handle{
+  color:#777;
+  font-size:12px;
+  margin-top:3px;
+}
+
+.profile-bio{
+  margin-top:13px;
+  color:#bbb;
+  font-size:13px;
+  line-height:1.45;
+}
+
+.profile-stats{
+  display:flex;
+  gap:24px;
+  margin-top:15px;
+}
+
+.stat strong{
+  display:block;
+  font-size:16px;
+}
+
+.stat span{
+  color:#777;
+  font-size:10px;
+}
+
+.profile-actions{
+  display:flex;
+  gap:8px;
+  margin-top:15px;
+}
+
+.profile-actions>*{
+  flex:1;
+}
+
+.profile-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:3px;
+}
+
+.profile-grid-item{
+  aspect-ratio:1;
+  background:#111;
+  overflow:hidden;
+  cursor:pointer;
+}
+
+.profile-grid-item img,
+.profile-grid-item video{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+.chat-layout{
+  display:grid;
+  grid-template-columns:260px minmax(0,1fr);
+  min-height:calc(100vh - 110px);
+  border:1px solid var(--line);
+  border-radius:22px;
+  overflow:hidden;
+  background:#070707;
+}
+
+.chat-list{
+  border-right:1px solid var(--line);
+  overflow-y:auto;
+}
+
+.chat-list-head{
+  padding:15px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  border-bottom:1px solid var(--line);
+}
+
+.chat-list-head strong{
+  font-size:15px;
+}
+
+.chat-row{
+  display:flex;
+  align-items:center;
+  gap:11px;
+  padding:12px;
+  cursor:pointer;
+  border-bottom:1px solid #111;
+  transition:.16s ease;
+}
+
+.chat-row:hover,
+.chat-row.active{
+  background:#151515;
+}
+
+.chat-row-avatar{
+  width:45px;
+  height:45px;
+  border-radius:50%;
+  overflow:hidden;
+  flex:0 0 auto;
+  background:#191919;
+}
+
+.chat-row-avatar img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+.chat-row-info{
+  min-width:0;
+  flex:1;
+}
+
+.chat-row-info strong{
+  display:block;
+  font-size:13px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.chat-row-info span{
+  display:block;
+  font-size:11px;
+  color:#666;
+  margin-top:3px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.chat-main{
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  position:relative;
+  background:
+    linear-gradient(
+      135deg,
+      var(--chat-a,#111),
+      var(--chat-b,#222),
+      var(--chat-c,#444)
+    );
+}
+
+.chat-head{
+  min-height:67px;
+  display:flex;
+  align-items:center;
+  gap:11px;
+  padding:10px 13px;
+  background:rgba(0,0,0,.55);
+  backdrop-filter:blur(18px);
+  border-bottom:1px solid rgba(255,255,255,.08);
+  cursor:pointer;
+}
+
+.chat-head-avatar{
+  width:42px;
+  height:42px;
+  border-radius:50%;
+  overflow:hidden;
+  background:#181818;
+  flex:0 0 auto;
+}
+
+.chat-head-avatar img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+.chat-head-info{
+  min-width:0;
+  flex:1;
+}
+
+.chat-head-info strong{
+  display:block;
+  font-size:14px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.chat-head-info span{
+  color:#aaa;
+  font-size:10px;
+}
+
+.chat-head-theme{
+  width:38px;
+  height:38px;
+  border-radius:12px;
+  background:rgba(255,255,255,.08);
+  display:grid;
+  place-items:center;
+}
+
+.chat-head-theme img{
+  width:21px;
+  height:21px;
+  object-fit:contain;
+}
+
+.messages{
+  flex:1;
+  min-height:300px;
+  overflow-y:auto;
+  padding:18px 14px 15px;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+
+.message{
+  display:flex;
+  flex-direction:column;
+  max-width:76%;
+  align-self:flex-start;
+}
+
+.message.mine{
+  align-self:flex-end;
+  align-items:flex-end;
+}
+
+.message-user{
+  color:#aaa;
+  font-size:9px;
+  margin:0 7px 3px;
+}
+
+.bubble{
+  display:inline-block;
+  width:max-content;
+  max-width:100%;
+  padding:9px 12px;
+  border-radius:16px;
+  background:rgba(0,0,0,.45);
+  border:1px solid rgba(255,255,255,.07);
+  color:#fff;
+  font-size:12px;
+  line-height:1.42;
+  word-break:break-word;
+}
+
+.mine .bubble{
+  background:linear-gradient(
+    135deg,
+    rgba(48,105,255,.9),
+    rgba(137,65,255,.9)
+  );
+}
+
+.message-time{
+  color:rgba(255,255,255,.4);
+  font-size:8px;
+  margin:3px 7px 0;
+}
+
+.chat-image{
+  max-width:230px;
+  max-height:310px;
+  border-radius:15px;
+  display:block;
+  object-fit:cover;
+}
+
+.shared-post{
+  width:min(280px,75vw);
+  border:1px solid rgba(255,255,255,.12);
+  background:rgba(0,0,0,.48);
+  border-radius:16px;
+  overflow:hidden;
+  cursor:pointer;
+}
+
+.shared-post-media{
+  width:100%;
+  max-height:220px;
+  object-fit:cover;
+  display:block;
+}
+
+.shared-post-body{
+  padding:10px;
+}
+
+.shared-post-body strong{
+  font-size:11px;
+}
+
+.shared-post-body p{
+  margin:5px 0 0;
+  color:#aaa;
+  font-size:10px;
+}
+
+.chat-input-wrap{
+  display:flex;
+  align-items:flex-end;
+  gap:7px;
+  padding:10px;
+  background:rgba(0,0,0,.6);
+  backdrop-filter:blur(18px);
+  border-top:1px solid rgba(255,255,255,.08);
+}
+
+.chat-input{
+  flex:1;
+  min-width:0;
+  min-height:42px;
+  max-height:130px;
+  resize:none;
+  outline:none;
+  border:1px solid rgba(255,255,255,.12);
+  background:rgba(255,255,255,.06);
+  color:#fff;
+  border-radius:15px;
+  padding:10px 12px;
+  font-size:12px;
+}
+
+.chat-send{
+  width:43px;
+  height:43px;
+  border-radius:14px;
+  display:grid;
+  place-items:center;
+  background:linear-gradient(135deg,#3478ff,#994cff);
+}
+
+.chat-send img{
+  width:22px;
+  height:22px;
+  object-fit:contain;
+}
+
+.chat-tools{
+  display:flex;
+  gap:3px;
+}
+
+.chat-tool{
+  width:39px;
+  height:39px;
+  border-radius:12px;
+  display:grid;
+  place-items:center;
+}
+
+.chat-tool img{
+  width:21px;
+  height:21px;
+  object-fit:contain;
+}
+
+.chat-tool:hover{
+  background:rgba(255,255,255,.08);
+}
+
+.chat-info-panel{
+  position:absolute;
+  inset:0;
+  z-index:10;
+  background:#080808;
+  overflow-y:auto;
+  padding:18px;
+  animation:panelIn .2s ease;
+}
+
+@keyframes panelIn{
+  from{
+    opacity:0;
+    transform:translateX(20px);
+  }
+  to{
+    opacity:1;
+    transform:none;
+  }
+}
+
+.info-profile{
+  text-align:center;
+  padding:10px 0 22px;
+}
+
+.info-profile .avatar-big{
+  width:90px;
+  height:90px;
+  border-radius:50%;
+  overflow:hidden;
+  margin:auto;
+}
+
+.avatar-big img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+.info-profile h2{
+  font-size:18px;
+  margin:11px 0 3px;
+}
+
+.info-profile p{
+  margin:0;
+  color:#777;
+  font-size:11px;
+}
+
+.setting-section{
+  border-top:1px solid var(--line);
+  padding:16px 0;
+}
+
+.setting-title{
+  font-size:11px;
+  color:#777;
+  text-transform:uppercase;
+  letter-spacing:1px;
+  margin-bottom:10px;
+}
+
+.setting-row{
+  min-height:47px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:7px 0;
+}
+
+.setting-row strong{
+  font-size:13px;
+}
+
+.setting-row span{
+  color:#777;
+  font-size:10px;
+}
+
+.theme-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:8px;
+}
+
+.theme-option{
+  min-height:72px;
+  border:1px solid #2a2a2a;
+  border-radius:15px;
+  padding:10px;
+  text-align:left;
+  transition:.18s ease;
+}
+
+.theme-option:hover{
+  transform:translateY(-2px);
+  border-color:#555;
+}
+
+.theme-option.selected{
+  border-color:#fff;
+}
+
+.theme-preview{
+  height:30px;
+  border-radius:9px;
+  margin-bottom:7px;
+}
+
+.theme-option strong{
+  font-size:11px;
+}
+
+.modal{
+  position:fixed;
+  inset:0;
+  z-index:100;
+  background:rgba(0,0,0,.78);
+  backdrop-filter:blur(10px);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:15px;
+}
+
+.modal.open{
+  display:flex;
+}
+
+.modal-card{
+  width:min(520px,100%);
+  max-height:90vh;
+  overflow:auto;
+  background:#0b0b0b;
+  border:1px solid #292929;
+  border-radius:22px;
+  padding:18px;
+  animation:modalIn .2s ease;
+}
+
+@keyframes modalIn{
+  from{
+    opacity:0;
+    transform:scale(.96) translateY(8px);
+  }
+  to{
+    opacity:1;
+    transform:none;
+  }
+}
+
+.modal-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:15px;
+}
+
+.modal-head h3{
+  margin:0;
+  font-size:17px;
+}
+
+.form-group{
+  margin-bottom:12px;
+}
+
+.form-group label{
+  display:block;
+  color:#777;
+  font-size:10px;
+  margin-bottom:6px;
+}
+
+.form-input{
+  width:100%;
+  min-height:45px;
+  background:#111;
+  color:#fff;
+  border:1px solid #292929;
+  border-radius:14px;
+  padding:10px 12px;
+  outline:none;
+}
+
+.form-input:focus{
+  border-color:#555;
+}
+
+.share-users{
+  display:flex;
+  flex-direction:column;
+  gap:7px;
+  margin-top:10px;
+}
+
+.share-user{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:10px;
+  border-radius:14px;
+  background:#111;
+  cursor:pointer;
+}
+
+.share-user:hover{
+  background:#191919;
+}
+
+.external-share{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:7px;
+  margin-top:12px;
+}
+
+.external-share button{
+  padding:12px;
+  border-radius:13px;
+  background:#161616;
+  font-size:11px;
+}
+
+.story-viewer{
+  position:fixed;
+  inset:0;
+  z-index:150;
+  display:none;
+  background:#000;
+}
+
+.story-viewer.open{
+  display:flex;
+  flex-direction:column;
+}
+
+.story-top{
+  position:absolute;
+  top:0;
+  left:0;
+  right:0;
+  z-index:3;
+  display:flex;
+  align-items:center;
+  gap:11px;
+  padding:15px;
+  padding-top:max(15px,env(safe-area-inset-top));
+  background:linear-gradient(
+    rgba(0,0,0,.75),
+    transparent
+  );
+}
+
+.story-back{
+  width:39px;
+  height:39px;
+  border-radius:13px;
+  display:grid;
+  place-items:center;
+  background:rgba(0,0,0,.4);
+}
+
+.story-back img{
+  width:22px;
+  height:22px;
+  object-fit:contain;
+}
+
+.story-user{
+  display:flex;
+  align-items:center;
+  gap:9px;
+}
+
+.story-user-avatar{
+  width:36px;
+  height:36px;
+  border-radius:50%;
+  overflow:hidden;
+}
+
+.story-user-avatar img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+.story-user strong{
+  font-size:13px;
+}
+
+.story-canvas{
+  flex:1;
+  display:grid;
+  place-items:center;
+  min-height:0;
+  position:relative;
+}
+
+.story-canvas img,
+.story-canvas video{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+}
+
+.story-text{
+  width:100%;
+  height:100%;
+  display:grid;
+  place-items:center;
+  text-align:center;
+  padding:50px;
+  font-size:30px;
+  font-weight:850;
+  line-height:1.25;
+}
+
+.story-bottom{
+  position:absolute;
+  bottom:0;
+  left:0;
+  right:0;
+  z-index:4;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:12px;
+  padding-bottom:max(12px,env(safe-area-inset-bottom));
+  background:linear-gradient(
+    transparent,
+    rgba(0,0,0,.85)
+  );
+}
+
+.story-message{
+  flex:1;
+  min-height:44px;
+  border:1px solid rgba(255,255,255,.2);
+  background:rgba(0,0,0,.45);
+  color:#fff;
+  border-radius:16px;
+  outline:none;
+  padding:10px 12px;
+}
+
+.story-like{
+  width:45px;
+  height:45px;
+  border-radius:15px;
+  display:grid;
+  place-items:center;
+  background:rgba(255,255,255,.08);
+}
+
+.story-like img{
+  width:25px;
+  height:25px;
+  object-fit:contain;
+}
+
+.bottom-nav{
+  display:none;
+  position:fixed;
+  left:0;
+  right:0;
+  bottom:0;
+  height:var(--nav-height);
+  z-index:60;
+  padding-bottom:env(safe-area-inset-bottom);
+  background:rgba(0,0,0,.94);
+  backdrop-filter:blur(18px);
+  border-top:1px solid var(--line);
+}
+
+.bottom-nav-inner{
+  height:100%;
+  display:flex;
+  align-items:center;
+  justify-content:space-around;
+}
+
+.bottom-item{
+  width:54px;
+  height:54px;
+  display:grid;
+  place-items:center;
+  border-radius:16px;
+  transition:.18s ease;
+}
+
+.bottom-item:hover{
+  background:#171717;
+}
+
+.bottom-item:active{
+  transform:scale(.83);
+}
+
+.bottom-item img{
+  width:25px;
+  height:25px;
+  object-fit:contain;
+}
+
+.bottom-item.create img{
+  width:29px;
+  height:29px;
+}
+
+.toast{
+  position:fixed;
+  left:50%;
+  bottom:85px;
+  transform:translate(-50%,20px);
+  z-index:300;
+  background:#fff;
+  color:#000;
+  padding:11px 15px;
+  border-radius:14px;
+  font-size:12px;
+  font-weight:700;
+  opacity:0;
+  pointer-events:none;
+  transition:.2s ease;
+  max-width:90%;
+  text-align:center;
+}
+
+.toast.show{
+  opacity:1;
+  transform:translate(-50%,0);
+}
+
+.auth-screen{
+  min-height:100vh;
+  display:grid;
+  place-items:center;
+  padding:20px;
+  background:
+    radial-gradient(
+      circle at 50% 10%,
+      #151515,
+      #000 55%
+    );
+}
+
+.auth-card{
+  width:min(420px,100%);
+  background:#080808;
+  border:1px solid #252525;
+  border-radius:25px;
+  padding:25px;
+}
+
+.auth-logo{
+  font-size:28px;
+  font-weight:950;
+  letter-spacing:3px;
+  text-align:center;
+  margin-bottom:7px;
+}
+
+.auth-sub{
+  color:#666;
+  font-size:11px;
+  text-align:center;
+  margin-bottom:24px;
+}
+
+.auth-tabs{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:6px;
+  margin-bottom:15px;
+}
+
+.auth-tab{
+  padding:11px;
+  border-radius:13px;
+  background:#111;
+  color:#777;
+  font-size:12px;
+  font-weight:700;
+}
+
+.auth-tab.active{
+  color:#fff;
+  background:#222;
+}
+
+.auth-message{
+  min-height:18px;
+  color:#ff6076;
+  font-size:11px;
+  margin:5px 0 10px;
+}
+
+.auth-submit{
+  width:100%;
+  height:47px;
+  border-radius:15px;
+  background:linear-gradient(135deg,#3478ff,#994cff);
+  font-size:13px;
+  font-weight:800;
+  margin-top:6px;
+}
+
+.auth-submit:active{
+  transform:scale(.97);
+}
+
+.auth-switch{
+  margin-top:15px;
+  text-align:center;
+  color:#666;
+  font-size:11px;
+}
+
+.auth-switch button{
+  color:#fff;
+  font-weight:700;
+}
+
+.file-input{
+  display:none;
+}
+
+.notice{
+  border:1px solid #292929;
+  background:#111;
+  color:#888;
+  padding:11px;
+  border-radius:13px;
+  font-size:10px;
+  line-height:1.45;
+}
+
+@media(max-width:1050px){
+  .desktop-layout{
+    grid-template-columns:190px minmax(0,720px);
+    padding-left:15px;
+    padding-right:15px;
+  }
+
+  .rightbar{
+    display:none;
+  }
+}
+
+@media(max-width:760px){
+  :root{
+    --nav-height:70px;
+  }
+
+  .topbar{
+    height:61px;
+    padding:0 13px;
+  }
+
+  .logo{
+    font-size:19px;
+  }
+
+  .top-actions{
+    gap:1px;
+  }
+
+  .top-actions .icon-btn{
+    width:39px;
+    height:39px;
+  }
+
+  .top-actions .icon-btn img{
+    width:24px;
+    height:24px;
+  }
+
+  .desktop-layout{
+    display:block;
+    padding:76px 10px 85px;
+  }
+
+  .sidebar{
+    display:none;
+  }
+
+  .bottom-nav{
+    display:block;
+  }
+
+  .stories{
+    gap:13px;
+  }
+
+  .story{
+    width:68px;
+  }
+
+  .story-avatar{
+    width:62px;
+    height:62px;
+  }
+
+  .composer{
+    border-radius:18px;
+  }
+
+  .post{
+    border-radius:18px;
+  }
+
+  .post-media{
+    max-height:520px;
+  }
+
+  .chat-layout{
+    min-height:calc(100vh - 78px);
+    height:calc(100vh - 78px);
+    grid-template-columns:1fr;
+    border-radius:18px;
+  }
+
+  .chat-list{
+    display:block;
+  }
+
+  .chat-main{
+    display:none;
+  }
+
+  .chat-layout.chat-open .chat-list{
+    display:none;
+  }
+
+  .chat-layout.chat-open .chat-main{
+    display:flex;
+  }
+
+  .chat-list-head{
+    min-height:58px;
+  }
+
+  .message{
+    max-width:80%;
+  }
+
+  .bubble{
+    font-size:12px;
+  }
+
+  .profile-top{
+    align-items:flex-start;
+  }
+
+  .profile-large-avatar{
+    width:75px;
+    height:75px;
+  }
+
+  .profile-stats{
+    gap:16px;
+  }
+
+  .profile-actions{
+    flex-wrap:wrap;
+  }
+
+  .profile-actions>*{
+    min-width:110px;
+  }
+
+  .story-text{
+    font-size:25px;
+    padding:35px;
+  }
+}
+
+@media(min-width:761px){
+  .mobile-only{
+    display:none!important;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div id="authScreen" class="auth-screen">
+  <div class="auth-card">
+    <div class="auth-logo">ZILNET</div>
+    <div class="auth-sub">
+      Connect. Create. Discover.
+    </div>
+
+    <div class="auth-tabs">
+      <button id="loginTab" class="auth-tab active" onclick="switchAuth('login')">
+        Login
+      </button>
+      <button id="signupTab" class="auth-tab" onclick="switchAuth('signup')">
+        Sign up
+      </button>
+    </div>
+
+    <form id="authForm">
+      <div id="displayNameGroup" class="form-group hidden">
+        <label>Display name</label>
+        <input id="displayName" class="form-input" autocomplete="name">
+      </div>
+
+      <div class="form-group">
+        <label>Username or email</label>
+        <input
+          id="identity"
+          class="form-input"
+          autocomplete="username"
+          required
+        >
+      </div>
+
+      <div id="emailGroup" class="form-group hidden">
+        <label>Email</label>
+        <input
+          id="email"
+          class="form-input"
+          type="email"
+          autocomplete="email"
+        >
+      </div>
+
+      <div id="signupUsernameGroup" class="form-group hidden">
+        <label>Username</label>
+        <input
+          id="signupUsername"
+          class="form-input"
+          autocomplete="username"
+        >
+      </div>
+
+      <div class="form-group">
+        <label>Password</label>
+        <input
+          id="password"
+          class="form-input"
+          type="password"
+          autocomplete="current-password"
+          required
+        >
+      </div>
+
+      <div id="authMessage" class="auth-message"></div>
+
+      <button id="authSubmit" class="auth-submit" type="submit">
+        Continue
+      </button>
+    </form>
+
+    <div class="auth-switch">
+      <span id="authSwitchText">Don't have an account?</span>
+      <button id="authSwitchButton" onclick="switchAuth('signup')">
+        Sign up
+      </button>
+    </div>
+  </div>
+</div>
+
+<div id="app" class="app hidden">
+
+  <header class="topbar">
+    <button class="logo" onclick="navigate('home')">ZILNET</button>
+
+    <div class="top-actions">
+
+      <button
+        class="icon-btn"
+        title="Notifications"
+        onclick="openNotifications()"
+      >
+        <img src="/assets/icons/file/IMG_1895.png" alt="">
+      </button>
+
+      <button
+        class="icon-btn"
+        title="Messages"
+        onclick="navigate('chat')"
+      >
+        <img src="/assets/icons/file/IMG_1883.png" alt="">
+      </button>
+
+      <button
+        class="icon-btn"
+        title="More"
+        onclick="openMore()"
+      >
+        <img src="/assets/Icon2/IMG_1957.png" alt="">
+      </button>
+
+    </div>
+  </header>
+
+  <div class="desktop-layout">
+
+    <aside class="sidebar">
+      <div class="sidebar-card">
+
+        <button
+          class="side-item active"
+          data-page="home"
+          onclick="navigate('home')"
+        >
+          <img src="/assets/icons/file/IMG_1881.png" alt="">
+          <span>Home</span>
+        </button>
+
+        <button
+          class="side-item"
+          data-page="discover"
+          onclick="navigate('discover')"
+        >
+          <img src="/assets/Icon2/IMG_1946.png" alt="">
+          <span>Discover</span>
+        </button>
+
+        <button
+          class="side-item"
+          data-page="create"
+          onclick="navigate('create')"
+        >
+          <img src="/assets/icons/file/IMG_1899.png" alt="">
+          <span>Create</span>
+        </button>
+
+        <button
+          class="side-item"
+          data-page="reels"
+          onclick="navigate('reels')"
+        >
+          <img src="/assets/icons/file/IMG_1893.png" alt="">
+          <span>Reels</span>
+        </button>
+
+        <button
+          class="side-item"
+          data-page="chat"
+          onclick="navigate('chat')"
+        >
+          <img src="/assets/icons/file/IMG_1883.png" alt="">
+          <span>Messages</span>
+        </button>
+
+        <button
+          class="side-item"
+          data-page="profile"
+          onclick="navigate('profile')"
+        >
+          <img src="/assets/icons/file/IMG_1885.png" alt="">
+          <span>Profile</span>
+        </button>
+
+      </div>
+    </aside>
+
+    <main class="feed-column">
+
+      <!-- HOME -->
+      <section id="page-home" class="page active">
+
+        <div class="stories-wrap">
+          <div id="stories" class="stories"></div>
+        </div>
+
+        <div class="composer">
+
+          <div class="composer-row">
+
+            <div class="avatar">
+              <img id="composerAvatar" src="/assets/IMG_2011.webp" alt="">
+            </div>
+
+            <textarea
+              id="postText"
+              class="composer-input"
+              placeholder="Share something..."
+              rows="1"
+            ></textarea>
+
+          </div>
+
+          <div class="composer-tools">
+
+            <button
+              class="tool"
+              title="Photo"
+              onclick="openPostPicker('image')"
+            >
+              <img src="/assets/icons/file/IMG_1880.png" alt="">
+            </button>
+
+            <button
+              class="tool"
+              title="Video"
+              onclick="openPostPicker('video')"
+            >
+              <img src="/assets/icons/file/IMG_1893.png" alt="">
+            </button>
+
+            <button
+              class="tool"
+              title="Create"
+              onclick="navigate('create')"
+            >
+              <img src="/assets/icons/file/IMG_1899.png" alt="">
+            </button>
+
+            <button
+              class="primary-btn"
+              style="margin-left:auto"
+              onclick="createQuickPost()"
+            >
+              Post
+            </button>
+
+          </div>
+
+          <input
+            id="quickMediaInput"
+            class="file-input"
+            type="file"
+            accept="image/*,video/*"
+            multiple
+          >
+
+        </div>
+
+        <div id="feed"></div>
+
+      </section>
+
+      <!-- DISCOVER -->
+      <section id="page-discover" class="page">
+
+        <h1 class="page-title">Discover</h1>
+
+        <div class="search-box">
+          <img src="/assets/Icon2/IMG_1946.png" alt="">
+          <input
+            id="discoverSearch"
+            placeholder="Search people, usernames, skills..."
+            autocomplete="off"
+          >
+        </div>
+
+        <div id="discoverResults" class="result-list"></div>
+
+      </section>
+
+      <!-- CREATE -->
+      <section id="page-create" class="page">
+
+        <h1 class="page-title">Create</h1>
+
+        <div class="create-card">
+
+          <div class="create-tabs">
+
+            <button
+              id="createPostTab"
+              class="create-tab active"
+              onclick="switchCreate('post')"
+            >
+              Post
+            </button>
+
+            <button
+              id="createStoryTab"
+              class="create-tab"
+              onclick="switchCreate('story')"
+            >
+              Story
+            </button>
+
+            <button
+              id="createReelTab"
+              class="create-tab"
+              onclick="switchCreate('reel')"
+            >
+              Reel
+            </button>
+
+          </div>
+
+          <div id="createPostPanel">
+
+            <textarea
+              id="createPostText"
+              class="big-input"
+              placeholder="Write your post..."
+            ></textarea>
+
+            <div
+              class="upload-area"
+              onclick="document.getElementById('postMediaInput').click()"
+            >
+              <img src="/assets/icons/file/IMG_1880.png" alt="">
+              <strong>Add photos or videos</strong>
+              <span>Choose directly from your gallery or files</span>
+            </div>
+
+            <input
+              id="postMediaInput"
+              class="file-input"
+              type="file"
+              accept="image/*,video/*"
+              multiple
+            >
+
+            <div id="postPreview" class="preview"></div>
+
+            <button
+              class="primary-btn"
+              style="width:100%"
+              onclick="publishPost()"
+            >
+              Publish post
+            </button>
+
+          </div>
+
+          <div id="createStoryPanel" class="hidden">
+
+            <textarea
+              id="storyText"
+              class="big-input"
+              placeholder="Write a text story..."
+              style="min-height:110px"
+            ></textarea>
+
+            <div
+              class="upload-area"
+              onclick="document.getElementById('storyMediaInput').click()"
+            >
+              <img src="/assets/icons/file/IMG_1880.png" alt="">
+              <strong>Add story photo or video</strong>
+              <span>Or publish the story as text only</span>
+            </div>
+
+            <input
+              id="storyMediaInput"
+              class="file-input"
+              type="file"
+              accept="image/*,video/*"
+            >
+
+            <div id="storyPreview" class="preview"></div>
+
+            <button
+              class="primary-btn"
+              style="width:100%"
+              onclick="publishStory()"
+            >
+              Publish story
+            </button>
+
+          </div>
+
+          <div id="createReelPanel" class="hidden">
+
+            <textarea
+              id="reelText"
+              class="big-input"
+              placeholder="Add a caption..."
+              style="min-height:100px"
+            ></textarea>
+
+            <div
+              class="upload-area"
+              onclick="document.getElementById('reelMediaInput').click()"
+            >
+              <img src="/assets/icons/file/IMG_1893.png" alt="">
+              <strong>Add reel video</strong>
+              <span>Upload directly or use a video URL below</span>
+            </div>
+
+            <input
+              id="reelMediaInput"
+              class="file-input"
+              type="file"
+              accept="video/*"
+            >
+
+            <input
+              id="reelUrl"
+              class="form-input"
+              placeholder="Or paste a video URL"
+              style="margin-bottom:12px"
+            >
+
+            <div id="reelPreview" class="preview"></div>
+
+            <button
+              class="primary-btn"
+              style="width:100%"
+              onclick="publishReel()"
+            >
+              Publish reel
+            </button>
+
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- REELS -->
+      <section id="page-reels" class="page">
+
+        <h1 class="page-title">Reels</h1>
+
+        <div id="reelsFeed" class="reels-grid"></div>
+
+      </section>
+
+      <!-- CHAT -->
+      <section id="page-chat" class="page">
+
+        <div id="chatLayout" class="chat-layout">
+
+          <div class="chat-list">
+
+            <div class="chat-list-head">
+
+              <strong>Messages</strong>
+
+              <button
+                class="icon-btn small"
+                onclick="openGroupCreator()"
+                title="New group"
+              >
+                <img src="/assets/icons/file/IMG_1899.png" alt="">
+              </button>
+
+            </div>
+
+            <div id="chatList"></div>
+
+          </div>
+
+          <div class="chat-main">
+
+            <div id="chatEmpty" class="empty">
+              <strong>Select a conversation</strong>
+              <span>Your messages will appear here.</span>
+            </div>
+
+            <div id="chatActive" class="hidden" style="height:100%;display:flex;flex-direction:column">
+
+              <div
+                id="chatHead"
+                class="chat-head"
+                onclick="openChatInfo()"
+              ></div>
+
+              <div id="messages" class="messages"></div>
+
+              <div class="chat-input-wrap">
+
+                <div class="chat-tools">
+
+                  <button
+                    class="chat-tool"
+                    onclick="document.getElementById('chatMediaInput').click()"
+                    title="Send image"
+                  >
+                    <img src="/assets/icons/file/IMG_1880.png" alt="">
+                  </button>
+
+                </div>
+
+                <textarea
+                  id="chatInput"
+                  class="chat-input"
+                  rows="1"
+                  placeholder="Message..."
+                  onkeydown="chatKeydown(event)"
+                ></textarea>
+
+                <button
+                  class="chat-send"
+                  onclick="sendChatMessage()"
+                >
+                  <img src="/assets/icons/file/IMG_1898.png" alt="">
+                </button>
+
+                <input
+                  id="chatMediaInput"
+                  class="file-input"
+                  type="file"
+                  accept="image/*"
+                  onchange="sendChatImage(event)"
+                >
+
+              </div>
+
+            </div>
+
+            <div id="chatInfoPanel" class="chat-info-panel hidden"></div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- PROFILE -->
+      <section id="page-profile" class="page">
+
+        <div id="profileView"></div>
+
+      </section>
+
+    </main>
+
+    <aside class="rightbar">
+
+      <div class="right-card">
+
+        <div class="right-title">ZILNET</div>
+
+        <div class="notice">
+          Discover people, creators and ideas from around the world.
+        </div>
+
+        <div style="height:12px"></div>
+
+        <button
+          class="secondary-btn"
+          style="width:100%"
+          onclick="navigate('discover')"
+        >
+          Explore people
+        </button>
+
+      </div>
+
+    </aside>
+
+  </div>
+
+  <nav class="bottom-nav">
+
+    <div class="bottom-nav-inner">
+
+      <button
+        class="bottom-item"
+        onclick="navigate('home')"
+        title="Home"
+      >
+        <img src="/assets/icons/file/IMG_1881.png" alt="">
+      </button>
+
+      <button
+        class="bottom-item"
+        onclick="navigate('discover')"
+        title="Discover"
+      >
+        <img src="/assets/Icon2/IMG_1946.png" alt="">
+      </button>
+
+      <button
+        class="bottom-item create"
+        onclick="navigate('create')"
+        title="Create"
+      >
+        <img src="/assets/icons/file/IMG_1899.png" alt="">
+      </button>
+
+      <button
+        class="bottom-item"
+        onclick="navigate('reels')"
+        title="Reels"
+      >
+        <img src="/assets/icons/file/IMG_1893.png" alt="">
+      </button>
+
+      <button
+        class="bottom-item"
+        onclick="navigate('profile')"
+        title="Profile"
+      >
+        <img src="/assets/icons/file/IMG_1885.png" alt="">
+      </button>
+
+    </div>
+
+  </nav>
+
+</div>
+
+<!-- STORY VIEWER -->
+
+<div id="storyViewer" class="story-viewer">
+
+  <div class="story-top">
+
+    <button
+      class="story-back"
+      onclick="closeStoryViewer()"
+    >
+      <img src="/assets/icons/file/IMG_1890.png" alt="">
+    </button>
+
+    <div class="story-user">
+
+      <div class="story-user-avatar">
+        <img id="storyViewerAvatar" src="/assets/IMG_2011.webp" alt="">
+      </div>
+
+      <strong id="storyViewerName">Story</strong>
+
+    </div>
+
+  </div>
+
+  <div id="storyCanvas" class="story-canvas"></div>
+
+  <div class="story-bottom">
+
+    <input
+      id="storyReply"
+      class="story-message"
+      placeholder="Send message..."
+    >
+
+    <button
+      class="story-like"
+      onclick="likeCurrentStory()"
+    >
+      <img src="/assets/icons/file/IMG_1886.png" alt="">
+    </button>
+
+  </div>
+
+</div>
+
+<!-- GENERAL MODAL -->
+
+<div id="modal" class="modal">
+
+  <div id="modalCard" class="modal-card"></div>
+
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+
+  const DEFAULT_PFP = "/assets/IMG_2011.webp";
+
+const ICONS = {
+  home:"/assets/icons/file/IMG_1881.png",
+  search:"/assets/Icon2/IMG_1946.png",
+  create:"/assets/icons/file/IMG_1899.png",
+  reels:"/assets/icons/file/IMG_1893.png",
+  messages:"/assets/icons/file/IMG_1883.png",
+  profile:"/assets/icons/file/IMG_1885.png",
+  notification:"/assets/icons/file/IMG_1895.png",
+  settings:"/assets/icons/file/IMG_1891.png",
+  more:"/assets/Icon2/IMG_1957.png",
+  heart:"/assets/icons/file/IMG_1886.png",
+  comment:"/assets/icons/file/IMG_1897.png",
+  share:"/assets/icons/file/IMG_1884.png",
+  save:"/assets/Icon2/IMG_1948.png",
+  send:"/assets/icons/file/IMG_1898.png",
+  back:"/assets/icons/file/IMG_1890.png",
+  close:"/assets/icons/file/IMG_1889.png",
+  edit:"/assets/icons/file/IMG_1879.png",
+  camera:"/assets/icons/file/IMG_1880.png"
+};
+
+const state = {
+  me:null,
+  page:"home",
+  authMode:"login",
+  feed:[],
+  stories:[],
+  reels:[],
+  chats:[],
+  activeChat:null,
+  activeProfile:null,
+  currentStory:null,
+  storyIndex:0,
+  searchTimer:null,
+  selectedPost:null,
+  createMode:"post",
+  pendingPostFiles:[],
+  pendingStoryFile:null,
+  pendingReelFile:null,
+  chatTheme:null
+};
+
+const $ = id => document.getElementById(id);
+
+function esc(value){
+  return String(value ?? "").replace(
+    /[&<>"']/g,
+    c => ({
+      "&":"&amp;",
+      "<":"&lt;",
+      ">":"&gt;",
+      '"':"&quot;",
+      "'":"&#039;"
+    }[c])
+  );
+}
+
+function safeUrl(value){
+  const s = String(value || "").trim();
+
+  if(!s) return DEFAULT_PFP;
+
+  if(
+    s.startsWith("/media/") ||
+    s.startsWith("/assets/") ||
+    s.startsWith("https://") ||
+    s.startsWith("http://") ||
+    s.startsWith("blob:") ||
+    s.startsWith("data:")
+  ){
+    return s;
+  }
+
+  return DEFAULT_PFP;
+}
+
+function avatarUrl(user){
+  return safeUrl(
+    user?.avatar_url ||
+    user?.avatar ||
+    user?.profile_picture ||
+    DEFAULT_PFP
+  );
+}
+
+function displayName(user){
+  return (
+    user?.display_name ||
+    user?.name ||
+    user?.username ||
+    "ZILNET user"
+  );
+}
+
+function username(user){
+  return user?.username ? "@" + user.username : "";
+}
+
+function getId(obj){
+  return obj?.id ?? obj?.user_id ?? obj?.post_id ?? null;
+}
+
+function listFrom(data,key){
+  if(Array.isArray(data)) return data;
+  if(Array.isArray(data?.[key])) return data[key];
+  return [];
+}
+
+async function api(path,opt={}){
+  const options = {
+    credentials:"include",
+    ...opt
+  };
+
+  if(
+    options.body &&
+    typeof options.body === "object" &&
+    !(options.body instanceof FormData)
+  ){
+    options.headers = {
+      "Content-Type":"application/json",
+      ...(options.headers || {})
+    };
+
+    options.body = JSON.stringify(options.body);
+  }
+
+  const response = await fetch("/api" + path,options);
+
+  let data = {};
+
+  try{
+    data = await response.json();
+  }catch{}
+
+  if(!response.ok){
+    throw new Error(
+      data?.error ||
+      data?.message ||
+      "Request failed"
+    );
+  }
+
+  return data;
+}
+
+function toast(message){
+  const el = $("toast");
+
+  if(!el) return;
+
+  el.textContent = message;
+  el.classList.add("show");
+
+  clearTimeout(toast.timer);
+
+  toast.timer = setTimeout(()=>{
+    el.classList.remove("show");
+  },2400);
+}
+
+function openModal(html){
+  $("modalCard").innerHTML = html;
+  $("modal").classList.add("open");
+}
+
+function closeModal(){
+  $("modal").classList.remove("open");
+  $("modalCard").innerHTML = "";
+}
+
+$("modal").addEventListener("click",e=>{
+  if(e.target === $("modal")){
+    closeModal();
+  }
+});
+
+function icon(name){
+  return `<img src="${ICONS[name] || ""}" alt="">`;
+}
+
+/* =========================
+   AUTH
+========================= */
+
+function switchAuth(mode){
+  state.authMode = mode;
+
+  const login = mode === "login";
+
+  $("loginTab").classList.toggle("active",login);
+  $("signupTab").classList.toggle("active",!login);
+
+  $("displayNameGroup").classList.toggle("hidden",login);
+  $("emailGroup").classList.toggle("hidden",login);
+  $("signupUsernameGroup").classList.toggle("hidden",login);
+
+  $("authSubmit").textContent =
+    login ? "Continue" : "Create account";
+
+  $("authSwitchText").textContent =
+    login
+      ? "Don't have an account?"
+      : "Already have an account?";
+
+  $("authSwitchButton").textContent =
+    login ? "Sign up" : "Login";
+
+  $("authSwitchButton").onclick =
+    ()=>switchAuth(login ? "signup" : "login");
+
+  $("authMessage").textContent = "";
+}
+
+$("authForm").addEventListener("submit",async e=>{
+  e.preventDefault();
+
+  $("authMessage").textContent = "";
+
+  try{
+
+    if(state.authMode === "login"){
+
+      await api("/login",{
+        method:"POST",
+        body:{
+          username:$("identity").value.trim(),
+          email:$("identity").value.trim(),
+          password:$("password").value
+        }
+      });
+
+    }else{
+
+      await api("/signup",{
+        method:"POST",
+        body:{
+          username:$("signupUsername").value.trim(),
+          display_name:$("displayName").value.trim(),
+          email:$("email").value.trim(),
+          password:$("password").value
+        }
+      });
+
+    }
+
+    await boot();
+
+  }catch(error){
+
+    $("authMessage").textContent =
+      error.message || "Something went wrong.";
+
+  }
+});
+
+/* =========================
+   BOOT
+========================= */
+
+async function boot(){
+
+  try{
+
+    const meData = await api("/me");
+
+    state.me =
+      meData?.user ||
+      meData?.me ||
+      meData;
+
+    if(!state.me || !state.me.id){
+      throw new Error("Not logged in");
+    }
+
+    $("authScreen").classList.add("hidden");
+    $("app").classList.remove("hidden");
+
+    $("composerAvatar").src =
+      avatarUrl(state.me);
+
+    await Promise.allSettled([
+      loadFeed(),
+      loadStories(),
+      loadReels(),
+      loadChats()
+    ]);
+
+    renderProfile(state.me);
+
+    navigate("home");
+
+  }catch{
+
+    state.me = null;
+
+    $("authScreen").classList.remove("hidden");
+    $("app").classList.add("hidden");
+
+  }
+}
+
+/* =========================
+   NAVIGATION
+========================= */
+
+function navigate(page){
+
+  state.page = page;
+
+  document
+    .querySelectorAll(".page")
+    .forEach(el=>{
+      el.classList.remove("active");
+    });
+
+  const pageEl = $("page-" + page);
+
+  if(pageEl){
+    pageEl.classList.add("active");
+  }
+
+  document
+    .querySelectorAll(".side-item")
+    .forEach(el=>{
+      el.classList.toggle(
+        "active",
+        el.dataset.page === page
+      );
+    });
+
+  if(page === "home"){
+    loadFeed();
+    loadStories();
+  }
+
+  if(page === "discover"){
+    renderDiscoverStart();
+  }
+
+  if(page === "reels"){
+    loadReels();
+  }
+
+  if(page === "chat"){
+    loadChats();
+  }
+
+  if(page === "profile"){
+    renderProfile(state.me);
+  }
+
+  window.scrollTo({
+    top:0,
+    behavior:"smooth"
+  });
+}
+
+/* =========================
+   FEED
+========================= */
+
+async function loadFeed(){
+
+  try{
+
+    const data = await api("/feed");
+
+    state.feed =
+      listFrom(data,"posts");
+
+    renderFeed();
+
+  }catch(error){
+
+    $("feed").innerHTML = `
+      <div class="empty">
+        <strong>Couldn't load your feed</strong>
+        <span>${esc(error.message)}</span>
+      </div>
+    `;
+
+  }
+}
+
+function renderFeed(){
+
+  if(!state.feed.length){
+
+    $("feed").innerHTML = `
+      <div class="empty">
+        <strong>Your feed is empty</strong>
+        <span>Follow people or create your first post.</span>
+      </div>
+    `;
+
+    return;
+  }
+
+  $("feed").innerHTML =
+    state.feed.map(renderPost).join("");
+}
+
+function renderPost(post){
+
+  const author =
+    post.author ||
+    post.user ||
+    {
+      username:post.username,
+      display_name:post.display_name,
+      avatar_url:post.avatar_url
+    };
+
+  const postId =
+    post.id ||
+    post.post_id;
+
+  const text =
+    post.content ||
+    post.text ||
+    "";
+
+  const media =
+    normalizeMedia(post);
+
+  const liked =
+    Boolean(
+      post.liked ||
+      post.is_liked ||
+      post.user_liked
+    );
+
+  const saved =
+    Boolean(
+      post.saved ||
+      post.is_saved ||
+      post.user_saved
+    );
+
+  const likes =
+    Number(
+      post.likes_count ??
+      post.like_count ??
+      post.likes ??
+      0
+    );
+
+  let mediaHtml = "";
+
+  if(media.length === 1){
+
+    const m = media[0];
+
+    if(m.type === "video"){
+
+      mediaHtml = `
+        <video
+          class="post-media"
+          controls
+          playsinline
+          preload="metadata"
+          src="${safeUrl(m.url)}"
+        ></video>
+      `;
+
+    }else{
+
+      mediaHtml = `
+        <img
+          class="post-media"
+          src="${safeUrl(m.url)}"
+          alt=""
+          loading="lazy"
+        >
+      `;
+
+    }
+
+  }else if(media.length > 1){
+
+    const cls =
+      media.length === 2
+        ? "two"
+        : media.length >= 3
+          ? "three"
+          : "";
+
+    mediaHtml = `
+      <div class="post-gallery ${cls}">
+        ${media.slice(0,6).map(m=>`
+          <img
+            class="post-media"
+            src="${safeUrl(m.url)}"
+            alt=""
+            loading="lazy"
+          >
+        `).join("")}
+      </div>
+    `;
+
+  }else if(text){
+
+    mediaHtml = `
+      <div class="text-image"
+           style="${randomGradient(postId)}">
+        ${esc(text)}
+      </div>
+    `;
+
+  }
+
+  return `
+    <article class="post" data-post-id="${esc(postId)}">
+
+      <div class="post-head">
+
+        <div
+          class="user-row"
+          onclick="openProfileByUsername('${esc(author.username || "")}')"
+        >
+
+          <div class="avatar">
+            <img
+              src="${avatarUrl(author)}"
+              alt=""
+              onerror="this.src='${DEFAULT_PFP}'"
+            >
+          </div>
+
+          <div class="user-meta">
+            <div class="display-name">
+              ${esc(displayName(author))}
+            </div>
+            <div class="username">
+              ${esc(username(author))}
+            </div>
+          </div>
+
+        </div>
+
+        <button
+          class="post-menu"
+          onclick="openPostMenu('${esc(postId)}')"
+        >
+          ${icon("more")}
+        </button>
+
+      </div>
+
+      ${mediaHtml}
+
+      ${
+        text && media.length
+          ? `<div class="post-content">${esc(text)}</div>`
+          : ""
+      }
+
+      <div class="post-actions">
+
+        <button
+          id="like-${esc(postId)}"
+          class="post-action ${liked ? "liked" : ""}"
+          onclick="toggleLike('${esc(postId)}',this)"
+        >
+          ${icon("heart")}
+        </button>
+
+        <button
+          class="post-action"
+          onclick="openComments('${esc(postId)}')"
+        >
+          ${icon("comment")}
+        </button>
+
+        <button
+          class="post-action"
+          onclick="openShare('${esc(postId)}')"
+        >
+          ${icon("share")}
+        </button>
+
+        <button
+          id="save-${esc(postId)}"
+          class="post-action ${saved ? "saved" : ""}"
+          onclick="toggleSave('${esc(postId)}',this)"
+          style="margin-left:auto"
+        >
+          ${icon("save")}
+        </button>
+
+        <span class="like-count">
+          ${likes}
+        </span>
+
+      </div>
+
+    </article>
+  `;
+}
+
+function randomGradient(seed){
+
+  const gradients = [
+    "background:linear-gradient(135deg,#18233d,#503a78)",
+    "background:linear-gradient(135deg,#142b2c,#513b66)",
+    "background:linear-gradient(135deg,#302018,#624d26)",
+    "background:linear-gradient(135deg,#1c1c3a,#5a315a)",
+    "background:linear-gradient(135deg,#162b20,#374f28)",
+    "background:linear-gradient(135deg,#321d2d,#58334d)"
+  ];
+
+  let n = 0;
+
+  for(const c of String(seed || "")){
+    n = (n + c.charCodeAt(0)) % gradients.length;
+  }
+
+  return gradients[n];
+}
+
+function normalizeMedia(post){
+
+  let media =
+    post.media ||
+    post.media_urls ||
+    post.images ||
+    post.attachments ||
+    [];
+
+  if(typeof media === "string"){
+
+    try{
+      media = JSON.parse(media);
+    }catch{
+      media = [media];
+    }
+
+  }
+
+  if(!Array.isArray(media)){
+    media = [];
+  }
+
+  if(
+    post.media_url &&
+    !media.some(x=>
+      (typeof x === "string" ? x : x?.url)
+      === post.media_url
+    )
+  ){
+    media.push({
+      url:post.media_url,
+      type:post.media_type || "image"
+    });
+  }
+
+  return media
+    .map(item=>{
+
+      if(typeof item === "string"){
+        return {
+          url:item,
+          type:
+            /\.(mp4|webm|mov|m4v)(\?|$)/i.test(item)
+              ? "video"
+              : "image"
+        };
+      }
+
+      return {
+        url:
+          item?.url ||
+          item?.media_url ||
+          item?.src,
+        type:
+          item?.type ||
+          item?.media_type ||
+          "image"
+      };
+
+    })
+    .filter(x=>x.url);
+}
+
+/* =========================
+   LIKE / SAVE
+========================= */
+
+async function toggleLike(postId,button){
+
+  try{
+
+    const data =
+      await api(`/posts/${encodeURIComponent(postId)}/like`,{
+        method:"POST"
+      });
+
+    const liked =
+      Boolean(
+        data?.liked ??
+        data?.is_liked
+      );
+
+    button.classList.toggle("liked",liked);
+    button.classList.add("pop");
+
+    setTimeout(()=>{
+      button.classList.remove("pop");
+    },350);
+
+  }catch(error){
+
+    toast(error.message);
+
+  }
+}
+
+async function toggleSave(postId,button){
+
+  try{
+
+    const data =
+      await api(`/posts/${encodeURIComponent(postId)}/save`,{
+        method:"POST"
+      });
+
+    const saved =
+      Boolean(
+        data?.saved ??
+        data?.is_saved
+      );
+
+    button.classList.toggle("saved",saved);
+    button.classList.add("pop");
+
+    setTimeout(()=>{
+      button.classList.remove("pop");
+    },350);
+
+  }catch(error){
+
+    toast(error.message);
+
+  }
+}
+
+/* =========================
+   POST MENU / COMMENTS
+========================= */
+
+function findPost(postId){
+
+  return state.feed.find(
+    p=>String(
+      p.id ?? p.post_id
+    ) === String(postId)
+  );
+
+}
+
+function openPostMenu(postId){
+
+  const post = findPost(postId);
+
+  const own =
+    post &&
+    state.me &&
+    String(
+      post.user_id ??
+      post.author_id ??
+      post.author?.id
+    ) === String(state.me.id);
+
+  openModal(`
+    <div class="modal-head">
+      <h3>Post</h3>
+      <button
+        class="icon-btn"
+        onclick="closeModal()"
+      >${icon("close")}</button>
+    </div>
+
+    <button
+      class="setting-row"
+      style="width:100%"
+      onclick="openShare('${esc(postId)}')"
+    >
+      <strong>Share post</strong>
+      <span>Send it to ZILNET chats</span>
+    </button>
+
+    <button
+      class="setting-row"
+      style="width:100%"
+      onclick="copyPostLink('${esc(postId)}')"
+    >
+      <strong>Copy post link</strong>
+      <span>Copy a shareable link</span>
+    </button>
+
+    ${
+      own
+        ? `
+          <button
+            class="setting-row"
+            style="width:100%"
+            onclick="deletePost('${esc(postId)}')"
+          >
+            <strong style="color:#ff6076">
+              Delete post
+            </strong>
+            <span>Remove your post</span>
+          </button>
+        `
+        : ""
+    }
+
+  `);
+}
+
+async function deletePost(postId){
+
+  closeModal();
+
+  if(!confirm("Delete this post?")) return;
+
+  try{
+
+    await api(`/posts/${encodeURIComponent(postId)}`,{
+      method:"DELETE"
+    });
+
+    state.feed =
+      state.feed.filter(
+        p=>String(p.id ?? p.post_id) !== String(postId)
+      );
+
+    renderFeed();
+
+    toast("Post deleted");
+
+  }catch(error){
+
+    toast(error.message);
+
+  }
+}
+
+async function openComments(postId){
+
+  try{
+
+    const data =
+      await api(`/posts/${encodeURIComponent(postId)}/comments`);
+
+    const comments =
+      listFrom(data,"comments");
+
+    openModal(`
+      <div class="modal-head">
+        <h3>Comments</h3>
+        <button
+          class="icon-btn"
+          onclick="closeModal()"
+        >
+          ${icon("close")}
+        </button>
+      </div>
+
+      <div class="result-list">
+
+        ${
+          comments.length
+            ? comments.map(c=>`
+              <div class="result">
+                <div class="avatar">
+                  <img
+                    src="${avatarUrl(c.user || c)}"
+                    alt=""
+                  >
+                </div>
+
+                <div class="result-info">
+                  <strong>
+                    ${esc(
+                      displayName(c.user || c)
+                    )}
+                  </strong>
+
+                  <span>
+                    ${esc(c.content || c.text || "")}
+                  </span>
+                </div>
+              </div>
+            `).join("")
+            : `
+              <div class="empty">
+                <strong>No comments yet</strong>
+                <span>Start the conversation.</span>
+              </div>
+            `
+        }
+
+      </div>
+
+      <div style="height:12px"></div>
+
+      <div style="display:flex;gap:7px">
+
+        <input
+          id="commentInput"
+          class="form-input"
+          placeholder="Write a comment..."
+        >
+
+        <button
+          class="primary-btn"
+          onclick="sendComment('${esc(postId)}')"
+        >
+          Send
+        </button>
+
+      </div>
+    `);
+
+  }catch(error){
+
+    toast(error.message);
+
+  }
+}
+
+async function sendComment(postId){
+
+  const input = $("commentInput");
+
+  if(!input || !input.value.trim()) return;
+
+  try{
+
+    await api(`/posts/${encodeURIComponent(postId)}/comments`,{
+      method:"POST",
+      body:{
+        content:input.value.trim()
+      }
+    });
+
+    input.value = "";
+
+    await openComments(postId);
+
+  }catch(error){
+
+    toast(error.message);
+
+  }
+}
+
+/* =========================
+   SHARE
+========================= */
+
+async function openShare(postId){
+
+  closeModal();
+
+  state.selectedPost = postId;
+
+  openModal(`
+    <div class="modal-head">
+      <h3>Share post</h3>
+
+      <button
+        class="icon-btn"
+        onclick="closeModal()"
+      >
+        ${icon("close")}
+      </button>
+    </div>
+
+    <div class="search-box">
+      ${icon("search")}
+      <input
+        id="shareSearch"
+        placeholder="Search ZILNET people..."
+        oninput="searchShareUsers(this.value)"
+      >
+    </div>
+
+    <div
+      id="shareUsers"
+      class="share-users"
+    ></div>
+
+    <div class="external-share">
+
+      <button onclick="externalShare('system')">
+        Share...
+      </button>
+
+      <button onclick="externalShare('whatsapp')">
+        WhatsApp
+      </button>
+
+      <button onclick="copyPostLink('${esc(postId)}')">
+        Copy link
+      </button>
+
+      <button onclick="closeModal()">
+        Cancel
+      </button>
+
+    </div>
+  `);
+
+  await searchShareUsers("");
+}
+
+async function searchShareUsers(query){
+
+  try{
+
+    const data =
+      await api(
+        `/search?q=${encodeURIComponent(query || "")}`
+      );
+
+    const users =
+      listFrom(data,"users");
+
+    $("shareUsers").innerHTML =
+      users
+        .filter(u=>
+          !state.me ||
+          String(u.id) !== String(state.me.id)
+        )
+        .slice(0,10)
+        .map(u=>`
+          <div
+            class="share-user"
+            onclick="sharePostToUser('${esc(u.id)}')"
+          >
+
+            <div class="avatar">
+              <img
+                src="${avatarUrl(u)}"
+                alt=""
+              >
+            </div>
+
+            <div class="result-info">
+              <strong>
+                ${esc(displayName(u))}
+              </strong>
+              <span>
+                ${esc(username(u))}
+              </span>
+            </div>
+
+          </div>
+        `)
+        .join("");
+
+  }catch{
+
+    $("shareUsers").innerHTML = `
+      <div class="empty" style="padding:20px">
+        <strong>No people found</strong>
+        <span>Try another username.</span>
+      </div>
+    `;
+
+  }
+}
+
+async function sharePostToUser(userId){
+
+  try{
+
+    const chat =
+      await findOrCreateDirectChat(userId);
+
+    if(!chat){
+      throw new Error("Could not open chat");
+    }
+
+    await api(
+      `/chats/${encodeURIComponent(chat.id)}/messages`,
+      {
+        method:"POST",
+        body:{
+          content:`[[ZPOST:${state.selectedPost}]]`
+        }
+      }
+    );
+
+    closeModal();
+    navigate("chat");
+
+    await loadChats();
+    await openChat(chat.id);
+
+    toast("Post shared");
+
+  }catch(error){
+
+    toast(error.message);
+
+  }
+}
+
+async function findOrCreateDirectChat(userId){
+
+  const existing =
+    state.chats.find(chat=>{
+      const members =
+        chat.members ||
+        chat.users ||
+        [];
+
+      return members.some(
+        m=>String(m.id ?? m.user_id) === String(userId)
+      );
+    });
+
+  if(existing) return existing;
+
+  try{
+
+    const data =
+      await api("/chats",{
+        method:"POST",
+        body:{
+          user_id:Number(userId)
+        }
+      });
+
+    return data.chat || data;
+
+  }catch{
+
+    return null;
+
+  }
+}
+
+async function copyPostLink(postId){
+
+  const link =
+    `${location.origin}/?post=${encodeURIComponent(postId)}`;
+
+  try{
+
+    await navigator.clipboard.writeText(link);
+
+    toast("Post link copied");
+
+  }catch{
+
+    toast(link);
+
+  }
+
+  closeModal();
+}
+
+async function externalShare(type){
+
+  const postId =
+    state.selectedPost;
+
+  const link =
+    `${location.origin}/?post=${encodeURIComponent(postId)}`;
+
+  if(type === "whatsapp"){
+
+    const url =
+      `https://wa.me/?text=${encodeURIComponent(link)}`;
+
+    window.open(url,"_blank");
+
+    return;
+  }
+
+  if(
+    type === "system" &&
+    navigator.share
+  ){
+
+    try{
+
+      await navigator.share({
+        title:"ZILNET",
+        text:"Check out this post on ZILNET",
+        url:link
+      });
+
+    }catch{}
+
+    return;
+  }
+
+  await copyPostLink(postId);
+}
+
+/* =========================
+   STORIES
+========================= */
+
+async function loadStories(){
+
+  try{
+
+    const data =
+      await api("/stories/feed");
+
+    state.stories =
+      listFrom(data,"stories");
+
+    renderStories();
+
+  }catch{
+
+    $("stories").innerHTML = `
+      <div class="story story-add" onclick="navigate('create')">
+        <div class="story-avatar">
+          <div class="story-avatar-inner">
+            <img src="${DEFAULT_PFP}" alt="">
+          </div>
+        </div>
+        <div class="story-name">Your story</div>
+      </div>
+    `;
+
+  }
+}
+
+function renderStories(){
+
+  const mine =
+    state.stories.some(s=>
+      String(
+        s.user_id ??
+        s.author_id ??
+        s.user?.id
+      ) === String(state.me?.id)
+    );
+
+  const yourStory = `
+    <div
+      class="story story-add ${mine ? "active" : ""}"
+      onclick="${
+        mine
+          ? `openStoryForUser('${esc(state.me.id)}')`
+          : `navigate('create')`
+      }"
+    >
+
+      <div class="story-avatar">
+
+        <div class="story-avatar-inner">
+          <img
+            src="${avatarUrl(state.me)}"
+            alt=""
+            onerror="this.src='${DEFAULT_PFP}'"
+          >
+        </div>
+
+      </div>
+
+      <div class="story-name">Your story</div>
+
+    </div>
+  `;
+
+  const groups = new Map();
+
+  state.stories.forEach(story=>{
+
+    const user =
+      story.user ||
+      story.author ||
+      {
+        id:
+          story.user_id ||
+          story.author_id,
+        username:story.username,
+        display_name:story.display_name,
+        avatar_url:story.avatar_url
+      };
+
+    const id =
+      user.id ??
+      user.user_id ??
+      user.username;
+
+    if(!groups.has(id)){
+      groups.set(id,{
+        user,
+        stories:[]
+      });
+    }
+
+    groups.get(id).stories.push(story);
+
+  });
+
+  $("stories").innerHTML =
+    yourStory +
+    [...groups.values()].map(group=>`
+      <div
+        class="story active"
+        onclick="openStoryGroup('${esc(
+          group.user.id ??
+          group.user.username
+        )}')"
+      >
+
+        <div class="story-avatar">
+          <div class="story-avatar-inner">
+            <img
+              src="${avatarUrl(group.user)}"
+              alt=""
+              onerror="this.src='${DEFAULT_PFP}'"
+            >
+          </div>
+        </div>
+
+        <div class="story-name">
+          ${esc(displayName(group.user))}
+        </div>
+
+      </div>
+    `).join("");
+
+}
+
+function openStoryGroup(userId){
+
+  const group =
+    state.stories.filter(s=>
+      String(
+        s.user_id ??
+        s.author_id ??
+        s.user?.id
+      ) === String(userId)
+    );
+
+  if(!group.length){
+
+    const byUsername =
+      state.stories.filter(s=>
+        String(
+          s.username ??
+          s.user?.username
+        ) === String(userId)
+      );
+
+    if(byUsername.length){
+      state.stories = state.stories;
+      openStoryData(byUsername,0);
+    }
+
+    return;
+  }
+
+  openStoryData(group,0);
+}
+
+function openStoryForUser(userId){
+
+  const group =
+    state.stories.filter(s=>
+      String(
+        s.user_id ??
+        s.author_id ??
+        s.user?.id
+      ) === String(userId)
+    );
+
+  if(group.length){
+    openStoryData(group,0);
+    return;
+  }
+
+  navigate("create");
+  switchCreate("story");
+}
+
+function openStoryData(stories,index){
+
+  state.currentStory = stories;
+  state.storyIndex = index;
+
+  renderCurrentStory();
+
+  $("storyViewer").classList.add("open");
+
+}
+
+function renderCurrentStory(){
+
+  const story =
+    state.currentStory?.[state.storyIndex];
+
+  if(!story) return;
+
+  const user =
+    story.user ||
+    story.author ||
+    {
+      username:story.username,
+      display_name:story.display_name,
+      avatar_url:story.avatar_url
+    };
+
+  $("storyViewerAvatar").src =
+    avatarUrl(user);
+
+  $("storyViewerName").textContent =
+    displayName(user);
+
+  const canvas =
+    $("storyCanvas");
+
+  const media =
+    story.media_url ||
+    story.media ||
+    story.url;
+
+  const text =
+    story.content ||
+    story.text ||
+    "";
+
+  if(media){
+
+    const isVideo =
+      story.media_type === "video" ||
+      /\.(mp4|webm|mov|m4v)(\?|$)/i.test(media);
+
+    canvas.innerHTML =
+      isVideo
+        ? `
+          <video
+            src="${safeUrl(media)}"
+            controls
+            autoplay
+            playsinline
+          ></video>
+        `
+        : `
+          <img
+            src="${safeUrl(media)}"
+            alt=""
+          >
+        `;
+
+  }else{
+
+    canvas.innerHTML = `
+      <div
+        class="story-text"
+        style="${randomGradient(
+          story.id || state.storyIndex
+        )}"
+      >
+        ${esc(text)}
+      </div>
+    `;
+
+  }
+
+}
+
+function closeStoryViewer(){
+
+  $("storyViewer").classList.remove("open");
+
+  $("storyCanvas").innerHTML = "";
+
+  state.currentStory = null;
+
+}
+
+async function likeCurrentStory(){
+
+  const story =
+    state.currentStory?.[state.storyIndex];
+
+  if(!story) return;
+
+  const button =
+    document.querySelector(".story-like");
+
+  button.classList.add("pop");
+
+  setTimeout(()=>{
+    button.classList.remove("pop");
+  },350);
+
+  try{
+
+    await api(
+      `/stories/${encodeURIComponent(story.id)}/like`,
+      {
+        method:"POST"
+      }
+    );
+
+  }catch{
+
+    /* Current Worker may not expose story likes yet. */
+
+  }
+
+}
+
+/* =========================
+   CREATE
+========================= */
+
+function switchCreate(mode){
+
+  state.createMode = mode;
+
+  $("createPostTab")
+    .classList.toggle("active",mode==="post");
+
+  $("createStoryTab")
+    .classList.toggle("active",mode==="story");
+
+  $("createReelTab")
+    .classList.toggle("active",mode==="reel");
+
+  $("createPostPanel")
+    .classList.toggle("hidden",mode!=="post");
+
+  $("createStoryPanel")
+    .classList.toggle("hidden",mode!=="story");
+
+  $("createReelPanel")
+    .classList.toggle("hidden",mode!=="reel");
+
+}
+
+function openPostPicker(type){
+
+  $("quickMediaInput").accept =
+    type === "video"
+      ? "video/*"
+      : "image/*";
+
+  $("quickMediaInput").click();
+
+}
+
+$("quickMediaInput").addEventListener("change",async e=>{
+
+  const files =
+    [...(e.target.files || [])];
+
+  if(!files.length) return;
+
+  $("postText").focus();
+
+  state.pendingPostFiles = files;
+
+  toast(
+    `${files.length} file${files.length===1?"":"s"} selected`
+  );
+
+});
+
+$("postMediaInput").addEventListener("change",e=>{
+
+  state.pendingPostFiles =
+    [...(e.target.files || [])];
+
+  renderPostPreview();
+
+});
+
+function renderPostPreview(){
+
+  $("postPreview").innerHTML =
+    state.pendingPostFiles.map(file=>{
+
+      const url =
+        URL.createObjectURL(file);
+
+      return `
+        <div class="preview-item">
+
+          ${
+            file.type.startsWith("video/")
+              ? `
+                <video
+                  src="${url}"
+                  muted
+                  playsinline
+                  controls
+                ></video>
+              `
+              : `
+                <img src="${url}" alt="">
+              `
+          }
+
+        </div>
+      `;
+
+    }).join("");
+
+}
+
+async function uploadFile(file){
+
+  const form =
+    new FormData();
+
+  form.append("file",file);
+
+  const data =
+    await fetch("/api/upload",{
+      method:"POST",
+      credentials:"include",
+      body:form
+    });
+
+  let result = {};
+
+  try{
+    result = await data.json();
+  }catch{}
+
+  if(!data.ok){
+
+    throw new Error(
+      result?.error ||
+      "Upload failed"
+    );
+
+  }
+
+  return (
+    result.url ||
+    result.media_url ||
+    result.path ||
+    result.key
+  );
+
+}
+
+async function createQuickPost(){
+
+  const text =
+    $("postText").value.trim();
+
+  const files =
+    state.pendingPostFiles || [];
+
+  if(!text && !files.length){
+
+    toast("Write something or add media");
+
+    return;
+  }
+
+  try{
+
+    const media = [];
+
+    for(const file of files){
+
+      const url =
+        await uploadFile(file);
+
+      media.push({
+        url,
+        type:
+          file.type.startsWith("video/")
+            ? "video"
+            : "image"
+      });
+
+    }
+
+    await api("/posts",{
+      method:"POST",
+      body:{
+        content:text,
+        media
+      }
+    });
+
+    $("postText").value = "";
+
+    state.pendingPostFiles = [];
+
+    $("quickMediaInput").value = "";
+
+    await loadFeed();
+
+    toast("Post published");
+
+  }catch(error){
+
+    toast(error.message);
+
+  }
+
+}
+
+async function publishPost(){
+
+  const text =
+    $("createPostText").value.trim();
+
+  const files =
+    state.pendingPostFiles || [];
+
+  if(!text && !files.length){
+
+    toast("Add text or media");
+
+    return;
+  }
+
+  try{
+
+    const media = [];
+
+    for(const file of files){
+
+      const url =
+        await uploadFile(file);
+
+      media.push({
+        url,
+        type:
+          file.type.startsWith("video/")
+            ? "video"
+            : "image"
+      });
+
+    }
+
+    await api("/posts",{
+      method:"POST",
+      body:{
+        content:text,
+        media
+      }
+    });
+
+    $("createPostText").value = "";
+
+    $("postMediaInput").value = "";
+
+    state.pendingPostFiles = [];
+
+    $("postPreview").innerHTML = "";
+
+    await loadFeed();
+
+    navigate("home");
+
+    toast("Post published");
+
+  }catch(error){
+
+    toast(error.message);
+
+  }
+
+}
+
+$("storyMediaInput").addEventListener("change",e=>{
+
+  state.pendingStoryFile =
+    e.target.files?.[0] || null;
+
+  const file =
+    state.pendingStoryFile;
+
+  $("storyPreview").innerHTML =
+    file
+      ? `
+        <div class="preview-item">
+          ${
+            file.type.startsWith("video/")
+              ? `
+                <video
+                  src="${URL.createObjectURL(file)}"
+                  controls
+                ></video>
+              `
+              : `
+                <img
+                  src="${URL.createObjectURL(file)}"
+                  alt=""
+                >
+              `
+          }
+        </div>
+      `
+      : "";
+
+});
+
+async function publishStory(){
+
+  const text =
+    $("storyText").value.trim();
+
+  const file =
+    state.pendingStoryFile;
+
+  if(!text && !file){
+
+    toast("Add text or media");
+
+    return;
+  }
+
+  try{
+
+    let media_url = "";
+
+    let media_type = "";
+
+    if(file){
+
+      media_url =
+        await uploadFile(file);
+
+      media_type =
+        file.type.startsWith("video/")
+          ? "video"
+          : "image";
+
+    }
+
+    await api("/stories",{
+      method:"POST",
+      body:{
+        content:text,
+        media_url,
+        media_type
+      }
+    });
+
+    $("storyText").value = "";
+
+    $("storyMediaInput").value = "";
+
+    state.pendingStoryFile = null;
+
+    $("storyPreview").innerHTML = "";
+
+    await loadStories();
+
+    navigate("home");
+
+    toast("Story published");
+
+  }catch(error){
+
+    toast(error.message);
+
+  }
+
+}
+
+$("reelMediaInput").addEventListener("change",e=>{
+
+  state.pendingReelFile =
+    e.target.files?.[0] || null;
+
+  const file =
+    state.pendingReelFile;
+
+  $("reelPreview").innerHTML =
+    file
+      ? `
+        <div class="preview-item">
+          <video
+            src="${URL.createObjectURL(file)}"
+            controls
+          ></video>
+        </div>
+      `
+      : "";
+
+});
+
+async function publishReel(){
+
+  const text =
+    $("reelText").value.trim();
+
+  const urlInput =
+    $("reelUrl").value.trim();
+
+  const file =
+    state.pendingReelFile;
+
+  if(!file && !urlInput){
+
+    toast("Add a reel video");
+
+    return;
+  }
+
+  try{
+
+    let media_url =
+      urlInput;
+
+    if(file){
+
+      media_url =
+        await uploadFile(file);
+
+    }
+
+    await api("/reels",{
+      method:"POST",
+      body:{
+        content:text,
+        media_url
+      }
+    });
+
+    $("reelText").value = "";
+    $("reelUrl").value = "";
+    $("reelMediaInput").value = "";
+
+    state.pendingReelFile = null;
+
+    $("reelPreview").innerHTML = "";
+
+    await loadReels();
+
+    navigate("reels");
+
+    toast("Reel published");
+
+  }catch(error){
+
+    toast(error.message);
+
+  }
+
+}
+
+/* =========================
+   REELS
+========================= */
+
+async function loadReels(){
+
+  try{
+
+    const data =
+      await api("/reels/feed");
+
+    state.reels =
+      listFrom(data,"reels");
+
+    renderReels();
+
+  }catch(error){
+
+    $("reelsFeed").innerHTML = `
+      <div class="empty">
+        <strong>No reels available</strong>
+        <span>${esc(error.message)}</span>
+      </div>
+    `;
+
+  }
+
+}
+
+function renderReels(){
+
+  if(!state.reels.length){
+
+    $("reelsFeed").innerHTML = `
+      <div class="empty"
+           style="grid-column:1/-1">
+        <strong>No reels yet</strong>
+        <span>Be one of the first creators.</span>
+      </div>
+    `;
+
+    return;
+  }
+
+  $("reelsFeed").innerHTML =
+    state.reels.map(reel=>{
+
+      const url =
+        reel.media_url ||
+        reel.url ||
+        reel.video_url;
+
+      const caption =
+        reel.content ||
+        reel.caption ||
+        "";
+
+      const video =
+        url &&
+        /\.(mp4|webm|mov|m4v)(\?|$)/i.test(url);
+
+      return `
+        <div
+          class="reel-tile"
+          onclick="openReel('${esc(reel.id)}')"
+        >
+
+          ${
+            video
+              ? `
+                <video
+                  src="${safeUrl(url)}"
+                  muted
+                  playsinline
+                  preload="metadata"
+                ></video>
+              `
+              : `
+                <img
+                  src="${safeUrl(url)}"
+                  alt=""
+                >
+              `
+          }
+
+          ${
+            caption
+              ? `
+                <div class="reel-overlay">
+                  ${esc(caption)}
+                </div>
+              `
+              : ""
+          }
+
+        </div>
+      `;
+
+    }).join("");
+
+}
+
+function openReel(id){
+
+  const reel =
+    state.reels.find(
+      r=>String(r.id)===String(id)
+    );
+
+  if(!reel) return;
+
+  const url =
+    reel.media_url ||
+    reel.url ||
+    reel.video_url;
+
+  openModal(`
+    <div class="modal-head">
+      <h3>Reel</h3>
+
+      <button
+        class="icon-btn"
+        onclick="closeModal()"
+      >
+        ${icon("close")}
+      </button>
+    </div>
+
+    <video
+      src="${safeUrl(url)}"
+      controls
+      autoplay
+      playsinline
+      style="
+        width:100%;
+        max-height:70vh;
+        border-radius:17px;
+        background:#000
+      "
+    ></video>
+
+    <div style="height:10px"></div>
+
+    <div class="post-content"
+         style="padding:0">
+      ${esc(
+        reel.content ||
+        reel.caption ||
+        ""
+      )}
+    </div>
+  `);
+
+}
+
+/* =========================
+   DISCOVER
+========================= */
+
+function renderDiscoverStart(){
+
+  $("discoverResults").innerHTML = `
+    <div class="empty">
+      <strong>Find people</strong>
+      <span>
+        Search usernames, creators and skills.
+      </span>
+    </div>
+  `;
+
+}
+
+$("discoverSearch").addEventListener("input",e=>{
+
+  clearTimeout(state.searchTimer);
+
+  const query =
+    e.target.value.trim();
+
+  state.searchTimer =
+    setTimeout(
+      ()=>searchDiscover(query),
+      250
+    );
+
+});
+
+async function searchDiscover(query){
+
+  if(!query){
+
+    renderDiscoverStart();
+
+    return;
+  }
+
+  try{
+
+    const data =
+      await api(
+        `/search?q=${encodeURIComponent(query)}`
+      );
+
+    const users =
+      listFrom(data,"users");
+
+    $("discoverResults").innerHTML =
+      users.length
+        ? users.map(renderUserResult).join("")
+        : `
+          <div class="empty">
+            <strong>No results</strong>
+            <span>Try another search.</span>
+          </div>
+        `;
+
+  }catch(error){
+
+    toast(error.message);
+
+  }
+
+}
+
+function renderUserResult(user){
+
+  const id =
+    user.id;
+
+  const following =
+    Boolean(
+      user.following ||
+      user.is_following
+    );
+
+  return `
+    <div class="result">
+
+      <div
+        class="avatar"
+        onclick="openProfile('${esc(id)}')"
+      >
+        <img
+          src="${avatarUrl(user)}"
+          alt=""
+          onerror="this.src='${DEFAULT_PFP}'"
+        >
+      </div>
+
+      <div
+        class="result-info"
+        onclick="openProfile('${esc(id)}')"
+      >
+        <strong>
+          ${esc(displayName(user))}
+        </strong>
+
+        <span>
+          ${esc(username(user))}
+        </span>
+      </div>
+
+      ${
+        String(user.id) !== String(state.me?.id)
+          ? `
+            <button
+              class="follow-btn ${following ? "following" : ""}"
+              onclick="toggleFollow('${esc(id)}',this)"
+            >
+              ${following ? "Following" : "Follow"}
+            </button>
+          `
+          : ""
+      }
+
+    </div>
+  `;
+
+}
+
+async function toggleFollow(userId,button){
+
+  try{
+
+    const data =
+      await api(
+        `/users/${encodeURIComponent(userId)}/follow`,
+        {
+          method:"POST"
+        }
+      );
+
+    const following =
+      Boolean(
+        data?.following ??
+        data?.is_following
+      );
+
+    button.classList.toggle(
+      "following",
+      following
+    );
+
+    button.textContent =
+      following
+        ? "Following"
+        : "Follow";
+
+  }catch(error){
+
+    toast(error.message);
+
+  }
+
+}
+
+/* =========================
+   PROFILES
+========================= */
+
+async function openProfile(userId){
+
+  try{
+
+    const data =
+      await api(
+        `/profile/${encodeURIComponent(userId)}`
+      );
+
+    state.activeProfile =
+      data?.user ||
+      data?.profile ||
+      data;
+
+    renderProfile(
+      state.activeProfile,
+      data
+    );
+
+    navigate("profile");
+
+  }catch(error){
+
+    toast(error.message);
+
+  }
+
+}
+
+async function openProfileByUsername(name){
+
+  if(!name) return;
+
+  try{
+
+    const data =
+      await api(
+        `/profile/${encodeURIComponent(name)}`
+      );
+
+    const profile =
+      data?.user ||
+      data?.profile ||
+      data;
+
+    renderProfile(profile,data);
+
+    navigate("profile");
+
+  }catch(error){
+
+    toast(error.message);
+
+  }
+
+}
+
+function renderProfile(user,data={}){
+
+  if(!user) return;
+
+  const posts =
+    data.posts ||
+    user.posts ||
+    [];
+
+  const followers =
+    data.followers_count ??
+    user.followers_count ??
+    data.followers ??
+    0;
+
+  const following =
+    data.following_count ??
+    user.following_count ??
+    data.following ??
+    0;
+
+  const postCount =
+    data.posts_count ??
+    user.posts_count ??
+    posts.length;
+
+  const own =
+    state.me &&
+    String(user.id) === String(state.me.id);
+
+  const isFollowing =
+    Boolean(
+      data.following ||
+      user.following ||
+      user.is_following
+    );
+
+  $("profileView").innerHTML = `
+
+    <div class="profile-header">
+
+      <div class="profile-top">
+
+        <div class="profile-large-avatar">
+          <img
+            src="${avatarUrl(user)}"
+            alt=""
+            onerror="this.src='${DEFAULT_PFP}'"
+          >
+        </div>
+
+        <div class="profile-info">
+
+          <h2>
+            ${esc(displayName(user))}
+          </h2>
+
+          <div class="handle">
+            ${esc(username(user))}
+          </div>
+
+          <div class="profile-stats">
+
+            <div class="stat">
+              <strong>${postCount}</strong>
+              <span>Posts</span>
+            </div>
+
+            <div class="stat">
+              <strong>${followers}</strong>
+              <span>Followers</span>
+            </div>
+
+            <div class="stat">
+              <strong>${following}</strong>
+              <span>Following</span>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+      ${
+        user.bio
+          ? `
+            <div class="profile-bio">
+              ${esc(user.bio)}
+            </div>
+          `
+          : ""
+      }
+
+      <div class="profile-actions">
+
+        ${
+          own
+            ? `
+              <button
+                class="secondary-btn"
+                onclick="openEditProfile()"
+              >
+                Edit profile
+              </button>
+
+              <button
+                class="secondary-btn"
+                onclick="openMore()"
+              >
+                Settings
+              </button>
+            `
+            : `
+              <button
+                class="follow-btn ${isFollowing ? "following" : ""}"
+                onclick="toggleFollow('${esc(user.id)}',this)"
+              >
+                ${isFollowing ? "Following" : "Follow"}
+              </button>
+
+              <button
+                class="secondary-btn"
+                onclick="startChatFromProfile('${esc(user.id)}')"
+              >
+                Message
+              </button>
+            `
+        }
+
+        <button
+          class="secondary-btn"
+          onclick="shareProfile('${esc(user.username || user.id)}')"
+        >
+          Share
+        </button>
+
+      </div>
+
+    </div>
+
+    <div class="profile-grid">
+
+      ${
+        posts.length
+          ? posts.map(p=>{
+
+              const media =
+                normalizeMedia(p)[0];
+
+              return `
+                <div
+                  class="profile-grid-item"
+                  onclick="openProfilePost('${esc(p.id)}')"
+                >
+                  ${
+                    media
+                      ? media.type === "video"
+                        ? `
+                          <video
+                            src="${safeUrl(media.url)}"
+                            muted
+                          ></video>
+                        `
+                        : `
+                          <img
+                            src="${safeUrl(media.url)}"
+                            alt=""
+                          >
+                        `
+                      : `
+                        <div
+                          class="text-image"
+                          style="
+                            width:100%;
+                            height:100%;
+                            margin:0;
+                            border-radius:0;
+                            font-size:13px;
+                            padding:15px;
+                          "
+                        >
+                          ${esc(
+                            p.content ||
+                            p.text ||
+                            ""
+                          )}
+                        </div>
+                      `
+                  }
+                </div>
+              `;
+
+            }).join("")
+          : `
+            <div
+              class="empty"
+              style="grid-column:1/-1"
+            >
+              <strong>No posts yet</strong>
+              <span>
+                Posts will appear here.
+              </span>
+            </div>
+          `
+      }
+
+    </div>
+  `;
+
+}
+
+async function openProfilePost(postId){
+
+  const post =
+    state.feed.find(
+      p=>String(p.id)===String(postId)
+    );
+
+  if(post){
+
+    openModal(`
+      <div class="modal-head">
+        <h3>Post</h3>
+        <button
+          class="icon-btn"
+          onclick="closeModal()"
+        >
+          ${icon("close")}
+        </button>
+      </div>
+
+      ${renderPost(post)}
+    `);
+
+    return;
+  }
+
+  toast("Post unavailable");
+
+}
+
+function shareProfile(usernameValue){
+
+  const link =
+    `${location.origin}/profile/${encodeURIComponent(usernameValue)}`;
+
+  if(navigator.share){
+
+    navigator.share({
+      title:"ZILNET profile",
+      url:link
+    }).catch(()=>{});
+
+  }else{
+
+    navigator.clipboard
+      ?.writeText(link)
+      .then(()=>toast("Profile link copied"));
+
+  }
+
+}
+
+async function startChatFromProfile(userId){
+
+  const chat =
+    await findOrCreateDirectChat(userId);
+
+  if(!chat){
+
+    toast("Could not open chat");
+
+    return;
+  }
+
+  navigate("chat");
+
+  await loadChats();
+
+  await openChat(chat.id);
+
+}
+
+async function openEditProfile(){
+
+  const user =
+    state.me;
+
+  openModal(`
+    <div class="modal-head">
+
+      <h3>Edit profile</h3>
+
+      <button
+        class="icon-btn"
+        onclick="closeModal()"
+      >
+        ${icon("close")}
+      </button>
+
+    </div>
+
+    <div class="form-group">
+      <label>Display name</label>
+      <input
+        id="editDisplayName"
+        class="form-input"
+        value="${esc(user.display_name || "")}"
+      >
+    </div>
+
+    <div class="form-group">
+      <label>Username</label>
+      <input
+        id="editUsername"
+        class="form-input"
+        value="${esc(user.username || "")}"
+      >
+    </div>
+
+    <div class="form-group">
+      <label>Bio</label>
+      <textarea
+        id="editBio"
+        class="form-input"
+        style="min-height:110px"
+      >${esc(user.bio || "")}</textarea>
+    </div>
+
+    <div class="form-group">
+      <label>Profile picture URL</label>
+      <input
+        id="editAvatar"
+        class="form-input"
+        value="${esc(user.avatar_url || "")}"
+        placeholder="https://..."
+      >
+    </div>
+
+    <button
+      class="primary-btn"
+      style="width:100%"
+      onclick="saveProfile()"
+    >
+      Save changes
+    </button>
+  `);
+
+}
+
+async function saveProfile(){
+
+  try{
+
+    const data =
+      await api("/profile/update",{
+        method:"POST",
+        body:{
+          display_name:$("editDisplayName").value.trim(),
+          username:$("editUsername").value.trim(),
+          bio:$("editBio").value.trim(),
+          avatar_url:$("editAvatar").value.trim()
+        }
+      });
+
+    state.me =
+      data?.user ||
+      data ||
+      state.me;
+
+    closeModal();
+
+    renderProfile(state.me);
+
+    $("composerAvatar").src =
+      avatarUrl(state.me);
+
+    toast("Profile updated");
+
+  }catch(error){
+
+    toast(error.message);
+
+  }
+
+}
+
+/* =========================
+   MORE / SETTINGS
+========================= */
+
+async function openMore(){
+
+  openModal(`
+    <div class="modal-head">
+
+      <h3>More</h3>
+
+      <button
+        class="icon-btn"
+        onclick="closeModal()"
+      >
+        ${icon("close")}
+      </button>
+
+    </div>
+
+    <button
+      class="setting-row"
+      style="width:100%"
+      onclick="openSettings()"
+    >
+      <strong>Settings & privacy</strong>
+      <span>Theme, privacy and account</span>
+    </button>
+
+    <button
+      class="setting-row"
+      style="width:100%"
+      onclick="openEditProfile()"
+    >
+      <strong>Edit profile</strong>
+      <span>Change your public profile</span>
+    </button>
+
+    <button
+      class="setting-row"
+      style="width:100%"
+      onclick="copyProfileLink()"
+    >
+      <strong>Share profile</strong>
+      <span>Copy your ZILNET profile link</span>
+    </button>
+
+    <button
+      class="setting-row"
+      style="width:100%"
+      onclick="logout()"
+    >
+      <strong style="color:#ff6076">
+        Log out
+      </strong>
+      <span>End this session</span>
+    </button>
+  `);
+
+}
+
+async function openSettings(){
+
+  try{
+
+    const data =
+      await api("/settings");
+
+    const settings =
+      data?.settings ||
+      data ||
+      {};
+
+    renderSettings(settings);
+
+  }catch{
+
+    renderSettings({});
+
+  }
+
+}
+
+function renderSettings(settings){
+
+  const currentTheme =
+    settings.theme ||
+    localStorage.getItem("zilnet-theme") ||
+    "dark";
+
+  openModal(`
+    <div class="modal-head">
+
+      <h3>Settings & privacy</h3>
+
+      <button
+        class="icon-btn"
+        onclick="closeModal()"
+      >
+        ${icon("close")}
+      </button>
+
+    </div>
+
+    <div class="setting-section">
+
+      <div class="setting-title">
+        Appearance
+      </div>
+
+      <div class="theme-grid">
+
+        ${[
+          ["dark","Dark"],
+          ["light","Light"],
+          ["system","System"]
+        ].map(([value,label])=>`
+
+          <button
+            class="theme-option ${
+              currentTheme === value
+                ? "selected"
+                : ""
+            }"
+            onclick="setSiteTheme('${value}')"
+          >
+
+            <div
+              class="theme-preview"
+              style="${
+                value === "dark"
+                  ? "background:linear-gradient(135deg,#000,#333)"
+                  : value === "light"
+                    ? "background:linear-gradient(135deg,#fff,#ddd)"
+                    : "background:linear-gradient(135deg,#fff,#000)"
+              }"
+            ></div>
+
+            <strong>${label}</strong>
+
+          </button>
+
+        `).join("")}
+
+      </div>
+
+    </div>
+
+    <div class="setting-section">
+
+      <div class="setting-title">
+        Privacy
+      </div>
+
+      <div class="setting-row">
+
+        <div>
+          <strong>Profile visibility</strong>
+          <span>Control who can view your profile.</span>
+        </div>
+
+        <select
+          id="profileVisibility"
+          class="form-input"
+          style="width:130px;min-height:39px"
+        >
+          <option value="public">
+            Public
+          </option>
+          <option value="private">
+            Private
+          </option>
+        </select>
+
+      </div>
+
+      <div class="setting-row">
+
+        <div>
+          <strong>Messages</strong>
+          <span>Who can message you.</span>
+        </div>
+
+        <select
+          id="messagePrivacy"
+          class="form-input"
+          style="width:130px;min-height:39px"
+        >
+          <option value="everyone">
+            Everyone
+          </option>
+          <option value="following">
+            Following
+          </option>
+        </select>
+
+      </div>
+
+      <button
+        class="primary-btn"
+        style="width:100%;margin-top:8px"
+        onclick="saveSettings()"
+      >
+        Save privacy
+      </button>
+
+    </div>
+
+    <div class="setting-section">
+
+      <div class="setting-title">
+        Account
+      </div>
+
+      <button
+        class="danger-btn"
+        style="width:100%;height:43px"
+        onclick="logout()"
+      >
+        Log out
+      </button>
+
+    </div>
+  `);
+
+  if(settings.profile_visibility){
+    $("profileVisibility").value =
+      settings.profile_visibility;
+  }
+
+  if(settings.message_privacy){
+    $("messagePrivacy").value =
+      settings.message_privacy;
+  }
+
+}
+
+function setSiteTheme(theme){
+
+  localStorage.setItem(
+    "zilnet-theme",
+    theme
+  );
+
+  applySiteTheme(theme);
+
+  openSettings();
+
+}
+
+function applySiteTheme(theme){
+
+  if(theme === "light"){
+
+    document.documentElement.style.setProperty(
+      "--bg",
+      "#f5f5f5"
+    );
+
+    document.documentElement.style.setProperty(
+      "--surface",
+      "#fff"
+    );
+
+    document.documentElement.style.setProperty(
+      "--surface2",
+      "#eee"
+    );
+
+    document.documentElement.style.setProperty(
+      "--surface3",
+      "#ddd"
+    );
+
+    document.documentElement.style.setProperty(
+      "--line",
+      "#ddd"
+    );
+
+    document.documentElement.style.setProperty(
+      "--text",
+      "#000"
+    );
+
+    document.documentElement.style.setProperty(
+      "--muted",
+      "#666"
+    );
+
+    document.documentElement.style.setProperty(
+      "--soft",
+      "#444"
+    );
+
+    document.body.style.background = "#f5f5f5";
+
+  }else if(theme === "system"){
+
+    const light =
+      matchMedia("(prefers-color-scheme:light)").matches;
+
+    applySiteTheme(
+      light ? "light" : "dark"
+    );
+
+  }else{
+
+    document.documentElement.style.setProperty(
+      "--bg",
+      "#000"
+    );
+
+    document.documentElement.style.setProperty(
+      "--surface",
+      "#090909"
+    );
+
+    document.documentElement.style.setProperty(
+      "--surface2",
+      "#111"
+    );
+
+    document.documentElement.style.setProperty(
+      "--surface3",
+      "#181818"
+    );
+
+    document.documentElement.style.setProperty(
+      "--line",
+      "#242424"
+    );
+
+    document.documentElement.style.setProperty(
+      "--text",
+      "#fff"
+    );
+
+    document.documentElement.style.setProperty(
+      "--muted",
+      "#888"
+    );
+
+    document.documentElement.style.setProperty(
+      "--soft",
+      "#aaa"
+    );
+
+    document.body.style.background = "#000";
+
+  }
+
+}
+
+async function saveSettings(){
+
+  try{
+
+    await api("/settings",{
+      method:"POST",
+      body:{
+        profile_visibility:
+          $("profileVisibility").value,
+
+        message_privacy:
+          $("messagePrivacy").value,
+
+        theme:
+          localStorage.getItem(
+            "zilnet-theme"
+          ) || "dark"
+      }
+    });
+
+    toast("Settings saved");
+
+  }catch(error){
+
+    toast(error.message);
+
+  }
+
+}
+
+async function copyProfileLink(){
+
+  const name =
+    state.me?.username ||
+    state.me?.id;
+
+  const link =
+    `${location.origin}/profile/${encodeURIComponent(name)}`;
+
+  try{
+
+    await navigator.clipboard.writeText(link);
+
+    toast("Profile link copied");
+
+  }catch{
+
+    toast(link);
+
+  }
+
+  closeModal();
+
+}
+
+async function logout(){
+
+  try{
+
+    await api("/logout",{
+      method:"POST"
+    });
+
+  }catch{}
+
+  location.reload();
+
+}
+
+/* =========================
+   NOTIFICATIONS
+========================= */
+
+async function openNotifications(){
+
+  try{
+
+    const data =
+      await api("/notifications");
+
+    const notifications =
+      listFrom(data,"notifications");
+
+    openModal(`
+      <div class="modal-head">
+
+        <h3>Notifications</h3>
+
+        <button
+          class="icon-btn"
+          onclick="closeModal()"
+        >
+          ${icon("close")}
+        </button>
+
+      </div>
+
+      ${
+        notifications.length
+          ? `
+            <div class="result-list">
+              ${notifications.map(n=>`
+
+                <div class="result">
+
+                  <div class="avatar">
+                    <img
+                      src="${avatarUrl(n.user || n)}"
+                      alt=""
+                    >
+                  </div>
+
+                  <div class="result-info">
+                    <strong>
+                      ${esc(
+                        n.message ||
+                        n.text ||
+                        "New activity"
+                      )}
+                    </strong>
+
+                    <span>
+                      ${esc(
+                        n.created_at ||
+                        ""
+                      )}
+                    </span>
+                  </div>
+
+                </div>
+
+              `).join("")}
+            </div>
+          `
+          : `
+            <div class="empty">
+              <strong>No notifications</strong>
+              <span>You're all caught up.</span>
+            </div>
+          `
+      }
+
+    `);
+
+    try{
+
+      await api("/notifications/read",{
+        method:"POST"
+      });
+
+    }catch{}
+
+  }catch(error){
+
+    toast(error.message);
+
+  }
+
+}
+  /* =========================
+   CHATS
+========================= */
+
+async function loadChats(){
+
+  try{
+
+    const data =
+      await api("/chats");
+
+    state.chats =
+      listFrom(data,"chats");
+
+    renderChats();
+
+  }catch(error){
+
+    $("chatList").innerHTML = `
+      <div class="empty">
+        <strong>Couldn't load chats</strong>
+        <span>${esc(error.message)}</span>
+      </div>
+    `;
+
+  }
+
+}
+
+function chatMembers(chat){
+
+  return (
+    chat.members ||
+    chat.users ||
+    chat.chat_members ||
+    []
+  );
+}
+
+function chatTitle(chat){
+
+  if(chat.name){
+    return chat.name;
+  }
+
+  const members =
+    chatMembers(chat);
+
+  const others =
+    members.filter(m=>
+      String(m.id ?? m.user_id)
+      !==
+      String(state.me?.id)
+    );
+
+  if(others.length){
+
+    return others
+      .map(m=>
+        displayName(
+          m.user ||
+          m
+        )
+      )
+      .slice(0,3)
+      .join(", ");
+
+  }
+
+  return "Conversation";
+
+}
+
+function chatAvatar(chat){
+
+  if(chat.avatar_url){
+    return safeUrl(chat.avatar_url);
+  }
+
+  if(chat.avatar){
+    return safeUrl(chat.avatar);
+  }
+
+  const members =
+    chatMembers(chat);
+
+  const other =
+    members.find(m=>
+      String(m.id ?? m.user_id)
+      !==
+      String(state.me?.id)
+    );
+
+  return avatarUrl(
+    other?.user ||
+    other
+  );
+
+}
+
+function chatPreview(chat){
+
+  return (
+    chat.last_message?.content ||
+    chat.last_message ||
+    chat.preview ||
+    "Start a conversation"
+  );
+
+}
+
+function renderChats(){
+
+  if(!state.chats.length){
+
+    $("chatList").innerHTML = `
+      <div class="empty">
+        <strong>No conversations</strong>
+        <span>
+          Start a conversation from someone's profile.
+        </span>
+      </div>
+    `;
+
+    return;
+  }
+
+  $("chatList").innerHTML =
+    state.chats.map(chat=>`
+
+      <div
+        class="chat-row ${
+          String(state.activeChat?.id) ===
+          String(chat.id)
+            ? "active"
+            : ""
+        }"
+        onclick="openChat('${esc(chat.id)}')"
+      >
+
+        <div class="chat-row-avatar">
+
+          <img
+            src="${chatAvatar(chat)}"
+            alt=""
+            onerror="this.src='${DEFAULT_PFP}'"
+          >
+
+        </div>
+
+        <div class="chat-row-info">
+
+          <strong>
+            ${esc(chatTitle(chat))}
+          </strong>
+
+          <span>
+            ${esc(
+              chatPreview(chat)
+            )}
+          </span>
+
+        </div>
+
+      </div>
+
+    `).join("");
+
+}
+
+async function openChat(chatId){
+
+  try{
+
+    const data =
+      await api(
+        `/chats/${encodeURIComponent(chatId)}`
+      );
+
+    const chat =
+      data?.chat ||
+      state.chats.find(
+        c=>String(c.id)===String(chatId)
+      ) ||
+      data;
+
+    state.activeChat =
+      chat;
+
+    $("chatLayout")
+      .classList.add("chat-open");
+
+    $("chatEmpty")
+      .classList.add("hidden");
+
+    $("chatActive")
+      .classList.remove("hidden");
+
+    renderChatHead(chat);
+
+    renderChats();
+
+    await loadChatTheme(chatId);
+
+    await loadMessages(chatId);
+
+  }catch(error){
+
+    toast(error.message);
+
+  }
+
+}
+
+function renderChatHead(chat){
+
+  const members =
+    chatMembers(chat);
+
+  const group =
+    Boolean(
+      chat.is_group ||
+      chat.type === "group" ||
+      chat.group
+    );
+
+  $("chatHead").innerHTML = `
+
+    <div class="chat-head-avatar">
+      <img
+        src="${chatAvatar(chat)}"
+        alt=""
+        onerror="this.src='${DEFAULT_PFP}'"
+      >
+    </div>
+
+    <div class="chat-head-info">
+
+      <strong>
+        ${esc(chatTitle(chat))}
+      </strong>
+
+      <span>
+        ${
+          group
+            ? `${members.length} members`
+            : "Direct message"
+        }
+      </span>
+
+    </div>
+
+    <button
+      class="chat-head-theme"
+      onclick="event.stopPropagation();openChatInfo()"
+    >
+      ${icon("more")}
+    </button>
+
+  `;
+
+}
+
+async function loadMessages(chatId){
+
+  try{
+
+    const data =
+      await api(
+        `/chats/${encodeURIComponent(chatId)}/messages`
+      );
+
+    const messages =
+      listFrom(data,"messages");
+
+    renderMessages(messages);
+
+  }catch(error){
+
+    $("messages").innerHTML = `
+      <div class="empty">
+        <strong>Couldn't load messages</strong>
+        <span>${esc(error.message)}</span>
+      </div>
+    `;
+
+  }
+
+}
+
+function renderMessages(messages){
+
+  $("messages").innerHTML =
+    messages.map(renderMessage).join("");
+
+  $("messages").scrollTop =
+    $("messages").scrollHeight;
+
+}
+
+function renderMessage(message){
+
+  const sender =
+    message.user ||
+    message.sender ||
+    {
+      id:message.user_id,
+      username:message.username,
+      display_name:message.display_name,
+      avatar_url:message.avatar_url
+    };
+
+  const mine =
+    String(
+      sender.id ??
+      message.user_id
+    ) === String(state.me?.id);
+
+  const content =
+    String(
+      message.content ??
+      message.text ??
+      ""
+    );
+
+  const created =
+    message.created_at ||
+    message.sent_at ||
+    "";
+
+  if(content.startsWith("[[ZIMG:")){
+
+    const url =
+      content
+        .replace("[[ZIMG:","")
+        .replace("]]","");
+
+    return `
+      <div class="message ${mine ? "mine" : ""}">
+
+        ${
+          !mine
+            ? `
+              <div class="message-user">
+                @${esc(sender.username || "")}
+              </div>
+            `
+            : ""
+        }
+
+        <div class="bubble">
+          <img
+            class="chat-image"
+            src="${safeUrl(url)}"
+            alt=""
+            onclick="openImageViewer('${esc(url)}')"
+          >
+        </div>
+
+        <div class="message-time">
+          ${esc(formatTime(created))}
+        </div>
+
+      </div>
+    `;
+
+  }
+
+  if(content.startsWith("[[ZPOST:")){
+
+    const postId =
+      content
+        .replace("[[ZPOST:","")
+        .replace("]]","");
+
+    return `
+      <div class="message ${mine ? "mine" : ""}">
+
+        ${
+          !mine
+            ? `
+              <div class="message-user">
+                @${esc(sender.username || "")}
+              </div>
+            `
+            : ""
+        }
+
+        <div
+          id="shared-post-${esc(postId)}"
+          class="shared-post"
+          onclick="openSharedPost('${esc(postId)}')"
+        >
+          <div
+            class="shared-post-body"
+            style="padding:14px"
+          >
+            Loading post...
+          </div>
+        </div>
+
+        <div class="message-time">
+          ${esc(formatTime(created))}
+        </div>
+
+      </div>
+    `;
+
+  }
+
+  return `
+    <div class="message ${mine ? "mine" : ""}">
+
+      ${
+        !mine
+          ? `
+            <div class="message-user">
+              @${esc(sender.username || "")}
+            </div>
+          `
+          : ""
+      }
+
+      <div class="bubble">
+        ${esc(content)}
+      </div>
+
+      <div class="message-time">
+        ${esc(formatTime(created))}
+      </div>
+
+    </div>
+  `;
+
+}
+
+function formatTime(value){
+
+  if(!value) return "";
+
+  const date =
+    new Date(value);
+
+  if(Number.isNaN(date.getTime())){
+    return "";
+  }
+
+  return date.toLocaleTimeString([],{
+    hour:"numeric",
+    minute:"2-digit"
+  });
+
+}
+
+async function openSharedPost(postId){
+
+  let post =
+    findPost(postId);
+
+  if(!post){
+
+    try{
+
+      const data =
+        await api(
+          `/posts/${encodeURIComponent(postId)}`
+        );
+
+      post =
+        data?.post ||
+        data;
+
+    }catch{}
+
+  }
+
+  if(!post){
+
+    toast("Post unavailable");
+
+    return;
+  }
+
+  openModal(`
+    <div class="modal-head">
+
+      <h3>Shared post</h3>
+
+      <button
+        class="icon-btn"
+        onclick="closeModal()"
+      >
+        ${icon("close")}
+      </button>
+
+    </div>
+
+    ${renderPost(post)}
+
+  `);
+
+  const holder =
+    document.getElementById(
+      `shared-post-${postId}`
+    );
+
+  if(holder){
+
+    holder.innerHTML = `
+      <div class="shared-post-body">
+
+        <strong>
+          ${esc(
+            displayName(
+              post.author ||
+              post.user ||
+              post
+            )
+          )}
+        </strong>
+
+        <p>
+          ${esc(
+            post.content ||
+            post.text ||
+            "Shared ZILNET post"
+          ).slice(0,160)}
+        </p>
+
+      </div>
+    `;
+
+  }
+
+}
+
+async function sendChatMessage(){
+
+  const input =
+    $("chatInput");
+
+  const content =
+    input.value.trim();
+
+  if(!content || !state.activeChat){
+    return;
+  }
+
+  try{
+
+    await api(
+      `/chats/${encodeURIComponent(
+        state.activeChat.id
+      )}/messages`,
+      {
+        method:"POST",
+        body:{
+          content
+        }
+      }
+    );
+
+    input.value = "";
+
+    await loadMessages(
+      state.activeChat.id
+    );
+
+    await loadChats();
+
+  }catch(error){
+
+    toast(error.message);
+
+  }
+
+}
+
+function chatKeydown(event){
+
+  if(
+    event.key === "Enter" &&
+    !event.shiftKey
+  ){
+
+    event.preventDefault();
+
+    sendChatMessage();
+
+  }
+
+}
+
+async function sendChatImage(event){
+
+  const file =
+    event.target.files?.[0];
+
+  event.target.value = "";
+
+  if(!file || !state.activeChat){
+    return;
+  }
+
+  try{
+
+    const url =
+      await uploadFile(file);
+
+    await api(
+      `/chats/${encodeURIComponent(
+        state.activeChat.id
+      )}/messages`,
+      {
+        method:"POST",
+        body:{
+          content:`[[ZIMG:${url}]]`
+        }
+      }
+    );
+
+    await loadMessages(
+      state.activeChat.id
+    );
+
+    await loadChats();
+
+  }catch(error){
+
+    toast(error.message);
+
+  }
+
+}
+
+/* =========================
+   CHAT THEMES
+========================= */
+
+const LOCAL_CHAT_THEMES = {
+  default:["#101010","#252525","#414141"],
+  ocean:["#061c38","#075b7c","#37256b"],
+  sunset:["#42170e","#77213e","#7d4c19"],
+  neon:["#042e27","#064e64","#3d176e"],
+  berry:["#250b43","#4d0e68","#63152f"],
+  forest:["#06251c","#07553f","#344f0b"],
+  fire:["#3c0909","#6b1b10","#6c4100"],
+  sky:["#0b1d4a","#075b70","#35458d"],
+  candy:["#4c0b2f","#4a1470","#173f76"],
+  royal:["#11123c","#30206f","#56195c"]
+};
+
+async function loadChatTheme(chatId){
+
+  try{
+
+    const data =
+      await api(
+        `/chats/${encodeURIComponent(chatId)}/theme`
+      );
+
+    state.chatTheme =
+      data?.theme ||
+      "default";
+
+    renderChatTheme(
+      state.chatTheme
+    );
+
+  }catch{
+
+    state.chatTheme =
+      localStorage.getItem(
+        `chat-theme-${chatId}`
+      ) ||
+      "default";
+
+    renderChatTheme(
+      state.chatTheme
+    );
+
+  }
+
+}
+
+function renderChatTheme(theme){
+
+  const colors =
+    LOCAL_CHAT_THEMES[theme] ||
+    LOCAL_CHAT_THEMES.default;
+
+  document.documentElement.style.setProperty(
+    "--chat-a",
+    colors[0]
+  );
+
+  document.documentElement.style.setProperty(
+    "--chat-b",
+    colors[1]
+  );
+
+  document.documentElement.style.setProperty(
+    "--chat-c",
+    colors[2]
+  );
+
+  if(state.activeChat){
+
+    localStorage.setItem(
+      `chat-theme-${state.activeChat.id}`,
+      theme
+    );
+
+  }
+
+}
+
+async function setChatTheme(theme){
+
+  if(!state.activeChat) return;
+
+  try{
+
+    await api(
+      `/chats/${encodeURIComponent(
+        state.activeChat.id
+      )}/theme`,
+      {
+        method:"POST",
+        body:{
+          theme
+        }
+      }
+    );
+
+    state.chatTheme = theme;
+
+    renderChatTheme(theme);
+
+    openChatInfo();
+
+    toast("Chat theme updated");
+
+  }catch(error){
+
+    toast(error.message);
+
+  }
+
+}
+
+/* =========================
+   CHAT INFO / SETTINGS
+========================= */
+
+function openChatInfo(){
+
+  if(!state.activeChat) return;
+
+  const chat =
+    state.activeChat;
+
+  const group =
+    Boolean(
+      chat.is_group ||
+      chat.type === "group" ||
+      chat.group ||
+      chat.name
+    );
+
+  const members =
+    chatMembers(chat);
+
+  const other =
+    members.find(m=>
+      String(m.id ?? m.user_id)
+      !== String(state.me?.id)
+    );
+
+  const person =
+    other?.user ||
+    other;
+
+  $("chatInfoPanel").innerHTML = `
+
+    <div class="modal-head">
+
+      <h3>
+        ${group ? "Group info" : "Contact"}
+      </h3>
+
+      <button
+        class="icon-btn"
+        onclick="closeChatInfo()"
+      >
+        ${icon("close")}
+      </button>
+
+    </div>
+
+    <div class="info-profile">
+
+      <div class="avatar-big">
+        <img
+          src="${
+            group
+              ? chatAvatar(chat)
+              : avatarUrl(person)
+          }"
+          alt=""
+          onerror="this.src='${DEFAULT_PFP}'"
+        >
+      </div>
+
+      <h2>
+        ${esc(
+          group
+            ? chatTitle(chat)
+            : displayName(person)
+        )}
+      </h2>
+
+      <p>
+        ${
+          group
+            ? `${members.length} members`
+            : username(person)
+        }
+      </p>
+
+    </div>
+
+    ${
+      !group
+        ? `
+          <div class="setting-section">
+
+            <div class="setting-title">
+              Profile
+            </div>
+
+            <button
+              class="setting-row"
+              style="width:100%"
+              onclick="openProfile('${esc(person?.id)}')"
+            >
+              <strong>Open profile</strong>
+              <span>
+                View public profile
+              </span>
+            </button>
+
+          </div>
+        `
+        : `
+          <div class="setting-section">
+
+            <div class="setting-title">
+              Group
+            </div>
+
+            <button
+              class="setting-row"
+              style="width:100%"
+              onclick="editGroupAvatar()"
+            >
+              <strong>Group picture</strong>
+              <span>
+                Change by URL or upload
+              </span>
+            </button>
+
+            <button
+              class="setting-row"
+              style="width:100%"
+              onclick="editGroupName()"
+            >
+              <strong>Group name</strong>
+              <span>
+                Change group name
+              </span>
+            </button>
+
+          </div>
+
+          <div class="setting-section">
+
+            <div class="setting-title">
+              Members
+            </div>
+
+            <div class="result-list">
+              ${
+                members.map(m=>{
+
+                  const u =
+                    m.user ||
+                    m;
+
+                  return `
+                    <div class="result">
+
+                      <div class="avatar">
+                        <img
+                          src="${avatarUrl(u)}"
+                          alt=""
+                        >
+                      </div>
+
+                      <div class="result-info">
+
+                        <strong>
+                          ${esc(displayName(u))}
+                        </strong>
+
+                        <span>
+                          ${esc(username(u))}
+                        </span>
+
+                      </div>
+
+                      <button
+                        class="secondary-btn"
+                        onclick="openProfile('${esc(u.id)}')"
+                      >
+                        View
+                      </button>
+
+                    </div>
+                  `;
+
+                }).join("")
+              }
+            </div>
+
+          </div>
+        `
+    }
+
+    <div class="setting-section">
+
+      <div class="setting-title">
+        Chat theme
+      </div>
+
+      <div class="theme-grid">
+
+        ${Object.entries(
+          LOCAL_CHAT_THEMES
+        ).map(([name,colors])=>`
+
+          <button
+            class="theme-option ${
+              state.chatTheme === name
+                ? "selected"
+                : ""
+            }"
+            onclick="setChatTheme('${name}')"
+          >
+
+            <div
+              class="theme-preview"
+              style="
+                background:linear-gradient(
+                  135deg,
+                  ${colors[0]},
+                  ${colors[1]},
+                  ${colors[2]}
+                )
+              "
+            ></div>
+
+            <strong>
+              ${esc(
+                name.charAt(0).toUpperCase() +
+                name.slice(1)
+              )}
+            </strong>
+
+          </button>
+
+        `).join("")}
+
+      </div>
+
+    </div>
+
+    <div class="setting-section">
+
+      <div class="setting-title">
+        Chat background
+      </div>
+
+      <input
+        id="chatBgUrl"
+        class="form-input"
+        placeholder="Background image URL"
+        value="${
+          localStorage.getItem(
+            `chat-bg-${chat.id}`
+          ) || ""
+        }"
+      >
+
+      <div style="height:7px"></div>
+
+      <button
+        class="secondary-btn"
+        style="width:100%"
+        onclick="setChatBackgroundUrl()"
+      >
+        Apply background
+      </button>
+
+      <div style="height:7px"></div>
+
+      <button
+        class="secondary-btn"
+        style="width:100%"
+        onclick="document.getElementById('chatBgInput').click()"
+      >
+        Upload background
+      </button>
+
+      <input
+        id="chatBgInput"
+        class="file-input"
+        type="file"
+        accept="image/*"
+        onchange="setChatBackgroundFile(event)"
+      >
+
+    </div>
+
+    <div class="setting-section">
+
+      <div class="setting-title">
+        Messages
+      </div>
+
+      <div class="setting-row">
+
+        <div>
+          <strong>Disappearing messages</strong>
+          <span>
+            Automatically remove messages after 9 hours.
+          </span>
+        </div>
+
+        <input
+          id="disappearingToggle"
+          type="checkbox"
+          ${
+            localStorage.getItem(
+              `chat-disappearing-${chat.id}`
+            ) === "true"
+              ? "checked"
+              : ""
+          }
+          onchange="setDisappearingLocal(this.checked)"
+        >
+
+      </div>
+
+      <div class="notice">
+        This option is stored locally until a server-side
+        disappearing-message route is available.
+      </div>
+
+    </div>
+
+  `;
+
+  $("chatInfoPanel")
+    .classList.remove("hidden");
+
+}
+
+function closeChatInfo(){
+
+  $("chatInfoPanel")
+    .classList.add("hidden");
+
+}
+
+function setChatBackgroundUrl(){
+
+  const url =
+    $("chatBgUrl").value.trim();
+
+  if(!state.activeChat) return;
+
+  if(!url){
+
+    localStorage.removeItem(
+      `chat-bg-${state.activeChat.id}`
+    );
+
+    applyChatBackground("");
+
+    return;
+  }
+
+  localStorage.setItem(
+    `chat-bg-${state.activeChat.id}`,
+    url
+  );
+
+  applyChatBackground(url);
+
+  toast("Background updated");
+
+}
+
+async function setChatBackgroundFile(event){
+
+  const file =
+    event.target.files?.[0];
+
+  event.target.value = "";
+
+  if(!file || !state.activeChat) return;
+
+  try{
+
+    const url =
+      await uploadFile(file);
+
+    localStorage.setItem(
+      `chat-bg-${state.activeChat.id}`,
+      url
+    );
+
+    applyChatBackground(url);
+
+    openChatInfo();
+
+    toast("Background updated");
+
+  }catch(error){
+
+    toast(error.message);
+
+  }
+
+}
+
+function applyChatBackground(url){
+
+  const chatMain =
+    document.querySelector(".chat-main");
+
+  if(!chatMain) return;
+
+  if(url){
+
+    chatMain.style.backgroundImage =
+      `linear-gradient(
+        rgba(0,0,0,.48),
+        rgba(0,0,0,.48)
+      ),url("${safeUrl(url)}")`;
+
+    chatMain.style.backgroundSize =
+      "cover";
+
+    chatMain.style.backgroundPosition =
+      "center";
+
+  }else{
+
+    chatMain.style.backgroundImage =
+      "";
+
+  }
+
+}
+
+function setDisappearingLocal(enabled){
+
+  if(!state.activeChat) return;
+
+  localStorage.setItem(
+    `chat-disappearing-${state.activeChat.id}`,
+    String(enabled)
+  );
+
+  toast(
+    enabled
+      ? "9-hour disappearing mode enabled locally"
+      : "Disappearing mode disabled"
+  );
+
+}
+
+function editGroupName(){
+
+  openModal(`
+    <div class="modal-head">
+
+      <h3>Group name</h3>
+
+      <button
+        class="icon-btn"
+        onclick="closeModal()"
+      >
+        ${icon("close")}
+      </button>
+
+    </div>
+
+    <input
+      id="newGroupName"
+      class="form-input"
+      value="${esc(
+        state.activeChat?.name || ""
+      )}"
+      placeholder="Group name"
+    >
+
+    <div style="height:10px"></div>
+
+    <button
+      class="primary-btn"
+      style="width:100%"
+      onclick="saveGroupNameLocal()"
+    >
+      Save
+    </button>
+
+    <div style="height:8px"></div>
+
+    <div class="notice">
+      Your current Worker does not expose a group-name
+      update endpoint, so this won't claim server persistence.
+    </div>
+  `);
+
+}
+
+function saveGroupNameLocal(){
+
+  const name =
+    $("newGroupName").value.trim();
+
+  if(!name) return;
+
+  state.activeChat.name = name;
+
+  closeModal();
+
+  renderChatHead(state.activeChat);
+  renderChats();
+
+  openChatInfo();
+
+  toast("Group name updated for this session");
+
+}
+
+function editGroupAvatar(){
+
+  openModal(`
+    <div class="modal-head">
+
+      <h3>Group picture</h3>
+
+      <button
+        class="icon-btn"
+        onclick="closeModal()"
+      >
+        ${icon("close")}
+      </button>
+
+    </div>
+
+    <input
+      id="groupAvatarUrl"
+      class="form-input"
+      placeholder="Image URL"
+    >
+
+    <div style="height:8px"></div>
+
+    <button
+      class="secondary-btn"
+      style="width:100%"
+      onclick="document.getElementById('groupAvatarInput').click()"
+    >
+      Upload image
+    </button>
+
+    <input
+      id="groupAvatarInput"
+      class="file-input"
+      type="file"
+      accept="image/*"
+      onchange="setGroupAvatarFile(event)"
+    >
+
+    <div style="height:8px"></div>
+
+    <button
+      class="primary-btn"
+      style="width:100%"
+      onclick="saveGroupAvatarUrl()"
+    >
+      Apply
+    </button>
+
+    <div style="height:8px"></div>
+
+    <div class="notice">
+      Your current Worker does not expose persistent
+      group-avatar settings, so the frontend won't pretend
+      this is server-saved.
+    </div>
+  `);
+
+}
+
+function saveGroupAvatarUrl(){
+
+  const url =
+    $("groupAvatarUrl").value.trim();
+
+  if(!url) return;
+
+  state.activeChat.avatar_url =
+    url;
+
+  closeModal();
+
+  renderChatHead(state.activeChat);
+  renderChats();
+  openChatInfo();
+
+  toast("Group picture updated for this session");
+
+}
+
+async function setGroupAvatarFile(event){
+
+  const file =
+    event.target.files?.[0];
+
+  event.target.value = "";
+
+  if(!file) return;
+
+  try{
+
+    const url =
+      await uploadFile(file);
+
+    state.activeChat.avatar_url =
+      url;
+
+    closeModal();
+
+    renderChatHead(state.activeChat);
+    renderChats();
+    openChatInfo();
+
+    toast("Group picture updated for this session");
+
+  }catch(error){
+
+    toast(error.message);
+
+  }
+
+}
+
+/* =========================
+   GROUP CREATION
+========================= */
+
+async function openGroupCreator(){
+
+  try{
+
+    const data =
+      await api("/suggestions");
+
+    const users =
+      listFrom(data,"users");
+
+    openModal(`
+      <div class="modal-head">
+
+        <h3>Create group</h3>
+
+        <button
+          class="icon-btn"
+          onclick="closeModal()"
+        >
+          ${icon("close")}
+        </button>
+
+      </div>
+
+      <input
+        id="groupName"
+        class="form-input"
+        placeholder="Group name"
+      >
+
+      <div style="height:12px"></div>
+
+      <div class="result-list">
+
+        ${
+          users.map(u=>`
+
+            <label class="result">
+
+              <input
+                type="checkbox"
+                class="group-member-check"
+                value="${esc(u.id)}"
+              >
+
+              <div class="avatar">
+                <img
+                  src="${avatarUrl(u)}"
+                  alt=""
+                >
+              </div>
+
+              <div class="result-info">
+                <strong>
+                  ${esc(displayName(u))}
+                </strong>
+                <span>
+                  ${esc(username(u))}
+                </span>
+              </div>
+
+            </label>
+
+          `).join("")
+        }
+
+      </div>
+
+      <div style="height:12px"></div>
+
+      <button
+        class="primary-btn"
+        style="width:100%"
+        onclick="createGroup()"
+      >
+        Create group
+      </button>
+
+    `);
+
+  }catch(error){
+
+    toast(error.message);
+
+  }
+
+}
+
+async function createGroup(){
+
+  const name =
+    $("groupName").value.trim();
+
+  const members =
+    [...document.querySelectorAll(
+      ".group-member-check:checked"
+    )].map(
+      el=>Number(el.value)
+    );
+
+  if(!name){
+
+    toast("Enter a group name");
+
+    return;
+  }
+
+  if(!members.length){
+
+    toast("Select at least one person");
+
+    return;
+  }
+
+  try{
+
+    const data =
+      await api("/groups",{
+        method:"POST",
+        body:{
+          name,
+          member_ids:members
+        }
+      });
+
+    closeModal();
+
+    await loadChats();
+
+    const chat =
+      data?.chat ||
+      data?.group ||
+      data;
+
+    if(chat?.id){
+
+      await openChat(chat.id);
+
+    }
+
+    toast("Group created");
+
+  }catch(error){
+
+    toast(error.message);
+
+  }
+
+}
+
+/* =========================
+   IMAGE VIEWER
+========================= */
+
+function openImageViewer(url){
+
+  openModal(`
+    <div class="modal-head">
+
+      <h3>Image</h3>
+
+      <button
+        class="icon-btn"
+        onclick="closeModal()"
+      >
+        ${icon("close")}
+      </button>
+
+    </div>
+
+    <img
+      src="${safeUrl(url)}"
+      style="
+        width:100%;
+        max-height:75vh;
+        object-fit:contain;
+        border-radius:17px;
+        background:#000
+      "
+      alt=""
+    >
+  `);
+
+}
+
+/* =========================
+   CHAT MOBILE BACK
+========================= */
+
+$("chatLayout").addEventListener("click",e=>{
+
+  if(
+    window.innerWidth <= 760 &&
+    e.target.closest(".chat-head")
+  ){
+    return;
+  }
+
+});
+
+function closeMobileChat(){
+
+  $("chatLayout")
+    .classList.remove("chat-open");
+
+  state.activeChat = null;
+
+}
+
+/* =========================
+   QUERY PARAMETER
+========================= */
+
+async function handleIncomingLink(){
+
+  const params =
+    new URLSearchParams(
+      location.search
+    );
+
+  const postId =
+    params.get("post");
+
+  if(postId){
+
+    let post =
+      findPost(postId);
+
+    if(!post){
+
+      try{
+
+        const data =
+          await api(
+            `/posts/${encodeURIComponent(postId)}`
+          );
+
+        post =
+          data?.post ||
+          data;
+
+      }catch{}
+
+    }
+
+    if(post){
+
+      openModal(`
+        <div class="modal-head">
+
+          <h3>Post</h3>
+
+          <button
+            class="icon-btn"
+            onclick="closeModal()"
+          >
+            ${icon("close")}
+          </button>
+
+        </div>
+
+        ${renderPost(post)}
+      `);
+
+    }
+
+  }
+
+}
+
+/* =========================
+   INITIAL UI
+========================= */
+
+function initializeTheme(){
+
+  const saved =
+    localStorage.getItem(
+      "zilnet-theme"
+    ) || "dark";
+
+  applySiteTheme(saved);
+
+}
+
+document.addEventListener(
+  "DOMContentLoaded",
+  ()=>{
+    initializeTheme();
+    switchAuth("login");
+    boot();
+  }
+);
+
+/* =========================
+   WINDOW HELPERS
+========================= */
+
+window.navigate = navigate;
+window.switchAuth = switchAuth;
+window.openMore = openMore;
+window.openNotifications = openNotifications;
+window.openSettings = openSettings;
+window.openEditProfile = openEditProfile;
+window.logout = logout;
+
+window.openPostPicker = openPostPicker;
+window.createQuickPost = createQuickPost;
+window.publishPost = publishPost;
+window.publishStory = publishStory;
+window.publishReel = publishReel;
+window.switchCreate = switchCreate;
+
+window.toggleLike = toggleLike;
+window.toggleSave = toggleSave;
+window.openPostMenu = openPostMenu;
+window.openComments = openComments;
+window.sendComment = sendComment;
+window.openShare = openShare;
+window.copyPostLink = copyPostLink;
+window.externalShare = externalShare;
+
+window.openStoryGroup = openStoryGroup;
+window.openStoryForUser = openStoryForUser;
+window.closeStoryViewer = closeStoryViewer;
+window.likeCurrentStory = likeCurrentStory;
+
+window.openProfile = openProfile;
+window.openProfileByUsername = openProfileByUsername;
+window.startChatFromProfile = startChatFromProfile;
+window.shareProfile = shareProfile;
+
+window.openChat = openChat;
+window.openChatInfo = openChatInfo;
+window.closeChatInfo = closeChatInfo;
+window.sendChatMessage = sendChatMessage;
+window.sendChatImage = sendChatImage;
+window.setChatTheme = setChatTheme;
+window.setChatBackgroundUrl = setChatBackgroundUrl;
+window.setChatBackgroundFile = setChatBackgroundFile;
+window.setDisappearingLocal = setDisappearingLocal;
+
+window.openGroupCreator = openGroupCreator;
+window.createGroup = createGroup;
+window.editGroupName = editGroupName;
+window.editGroupAvatar = editGroupAvatar;
+window.setGroupAvatarFile = setGroupAvatarFile;
+
+window.openImageViewer = openImageViewer;
+window.openSharedPost = openSharedPost;
+window.setSiteTheme = setSiteTheme;
+window.saveSettings = saveSettings;
+window.copyProfileLink = copyProfileLink;
+window.openReel = openReel;
+</script>
+
+</body>
+</html>
