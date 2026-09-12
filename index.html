@@ -1,0 +1,4286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ZILNET">
+<link rel="icon" href="/assets/IMG_2011.webp">
+
+<title>ZILNET</title>
+
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;min-height:100%;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif}
+body{
+  background:#000;
+  color:#fff;
+  overflow-x:hidden;
+}
+button,input,textarea,select{font:inherit}
+button{cursor:pointer}
+img{max-width:100%}
+
+:root{
+  --bg:#000;
+  --panel:#090909;
+  --panel2:#111;
+  --border:#222;
+  --text:#fff;
+  --muted:#888;
+  --soft:#151515;
+  --accent1:#2875ff;
+  --accent2:#9b35ff;
+}
+
+.hidden{display:none!important}
+
+.app{
+  min-height:100vh;
+  padding-bottom:78px;
+}
+
+.topbar{
+  position:sticky;
+  top:0;
+  z-index:50;
+  height:64px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 18px;
+  background:rgba(0,0,0,.92);
+  backdrop-filter:blur(18px);
+  border-bottom:1px solid #151515;
+}
+
+.logo{
+  font-size:23px;
+  font-weight:900;
+  letter-spacing:2px;
+}
+
+.top-actions{
+  display:flex;
+  align-items:center;
+  gap:7px;
+}
+
+.icon-btn{
+  width:42px;
+  height:42px;
+  border:0;
+  background:transparent;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:14px;
+  transition:transform .18s ease,background .18s ease;
+}
+
+.icon-btn:hover{
+  background:#111;
+  transform:scale(1.07);
+}
+
+.icon-btn:active{
+  transform:scale(.9);
+}
+
+.icon-btn img{
+  width:25px;
+  height:25px;
+  object-fit:contain;
+  display:block;
+  filter:brightness(0) invert(1);
+}
+
+.top-actions .icon-btn img{
+  width:27px;
+  height:27px;
+}
+
+.main{
+  width:min(760px,100%);
+  margin:auto;
+  padding:14px 12px 30px;
+}
+
+.page{
+  display:none;
+  animation:pageIn .22s ease;
+}
+
+.page.active{
+  display:block;
+}
+
+@keyframes pageIn{
+  from{opacity:0;transform:translateY(8px)}
+  to{opacity:1;transform:none}
+}
+
+/* STORIES */
+
+.stories-wrap{
+  width:100%;
+  overflow-x:auto;
+  scrollbar-width:none;
+  padding:3px 0 15px;
+}
+
+.stories-wrap::-webkit-scrollbar{display:none}
+
+.stories{
+  display:flex;
+  gap:15px;
+  min-width:max-content;
+}
+
+.story-item{
+  width:70px;
+  text-align:center;
+  flex:none;
+}
+
+.story-avatar{
+  width:66px;
+  height:66px;
+  padding:2px;
+  border-radius:50%;
+  background:transparent;
+  margin:auto;
+  position:relative;
+}
+
+.story-avatar.active{
+  background:linear-gradient(135deg,#286cff,#7d27ff,#d43cff);
+  animation:storyPulse 2s infinite;
+}
+
+@keyframes storyPulse{
+  0%,100%{box-shadow:0 0 0 rgba(80,60,255,0)}
+  50%{box-shadow:0 0 18px rgba(100,70,255,.35)}
+}
+
+.story-avatar-inner{
+  width:100%;
+  height:100%;
+  border-radius:50%;
+  background:#111;
+  overflow:hidden;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.story-avatar-inner img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+.story-name{
+  margin-top:6px;
+  font-size:11px;
+  color:#aaa;
+  overflow:hidden;
+  white-space:nowrap;
+  text-overflow:ellipsis;
+}
+
+.story-add{
+  position:absolute;
+  right:-1px;
+  bottom:-1px;
+  width:21px;
+  height:21px;
+  border-radius:50%;
+  border:2px solid #000;
+  background:#fff;
+  color:#000;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:900;
+}
+
+/* COMPOSER */
+
+.composer{
+  background:#090909;
+  border:1px solid #1b1b1b;
+  border-radius:18px;
+  padding:13px;
+  margin-bottom:15px;
+}
+
+.composer-row{
+  display:flex;
+  gap:11px;
+  align-items:center;
+}
+
+.avatar{
+  width:43px;
+  height:43px;
+  border-radius:50%;
+  overflow:hidden;
+  background:#171717;
+  flex:none;
+}
+
+.avatar img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+.composer-input{
+  flex:1;
+  min-width:0;
+  background:#121212;
+  border:1px solid #202020;
+  color:#fff;
+  border-radius:14px;
+  padding:12px 14px;
+  outline:none;
+}
+
+.composer-input:focus{
+  border-color:#444;
+}
+
+.composer-actions{
+  display:flex;
+  justify-content:flex-end;
+  gap:5px;
+  margin-top:10px;
+}
+
+/* POSTS */
+
+.post{
+  background:#090909;
+  border:1px solid #1a1a1a;
+  border-radius:18px;
+  margin-bottom:15px;
+  overflow:hidden;
+}
+
+.post-head{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:13px;
+}
+
+.post-user{
+  flex:1;
+  min-width:0;
+}
+
+.post-display{
+  font-size:14px;
+  font-weight:700;
+}
+
+.post-username{
+  color:#777;
+  font-size:12px;
+  margin-top:2px;
+}
+
+.post-menu{
+  width:34px;
+  height:34px;
+  border:0;
+  background:transparent;
+  color:#aaa;
+  font-size:22px;
+}
+
+.post-media{
+  width:100%;
+  background:#111;
+  position:relative;
+}
+
+.post-media img,
+.post-media video{
+  display:block;
+  width:100%;
+  max-height:700px;
+  object-fit:contain;
+  background:#050505;
+}
+
+.text-post{
+  min-height:270px;
+  padding:35px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  font-size:22px;
+  font-weight:800;
+  line-height:1.35;
+  background:linear-gradient(135deg,#161616,#282828,#111);
+}
+
+.post-body{
+  padding:12px 13px 15px;
+}
+
+.post-actions{
+  display:flex;
+  align-items:center;
+  gap:5px;
+  margin-bottom:8px;
+}
+
+.post-action{
+  width:40px;
+  height:40px;
+  padding:0;
+  border:0;
+  background:transparent;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:12px;
+  transition:transform .18s ease,background .18s ease;
+}
+
+.post-action:hover{
+  background:#151515;
+  transform:scale(1.08);
+}
+
+.post-action:active{
+  transform:scale(.84);
+}
+
+.post-action img{
+  width:25px;
+  height:25px;
+  object-fit:contain;
+  filter:brightness(0) invert(1);
+}
+
+.post-action.big img{
+  width:27px;
+  height:27px;
+}
+
+.post-action.liked img,
+.post-action.saved img{
+  filter:none;
+  background:linear-gradient(135deg,#2875ff,#9b35ff,#e23bff);
+  -webkit-mask-image:var(--icon-mask);
+  mask-image:var(--icon-mask);
+}
+
+.post-action.liked,
+.post-action.saved{
+  animation:iconPop .3s ease;
+}
+
+@keyframes iconPop{
+  0%{transform:scale(.7)}
+  60%{transform:scale(1.2)}
+  100%{transform:scale(1)}
+}
+
+.post-likes{
+  font-size:13px;
+  font-weight:700;
+}
+
+.post-caption{
+  margin-top:7px;
+  font-size:14px;
+  line-height:1.45;
+  color:#ddd;
+}
+
+.post-caption b{
+  color:#fff;
+}
+
+.post-time{
+  color:#666;
+  font-size:11px;
+  margin-top:8px;
+}
+
+/* EMPTY */
+
+.empty{
+  border:1px dashed #252525;
+  border-radius:18px;
+  padding:42px 20px;
+  text-align:center;
+  color:#777;
+}
+
+.empty-title{
+  color:#ddd;
+  font-weight:700;
+  margin-bottom:6px;
+}
+
+/* DISCOVER */
+
+.search-box{
+  display:flex;
+  gap:8px;
+  background:#0b0b0b;
+  border:1px solid #222;
+  padding:9px 12px;
+  border-radius:15px;
+  margin-bottom:15px;
+}
+
+.search-box input{
+  flex:1;
+  border:0;
+  outline:0;
+  background:transparent;
+  color:#fff;
+}
+
+.user-result{
+  display:flex;
+  align-items:center;
+  gap:11px;
+  padding:12px;
+  border-bottom:1px solid #151515;
+}
+
+.user-result:last-child{border-bottom:0}
+
+.user-result-info{
+  flex:1;
+  min-width:0;
+}
+
+.user-result-name{
+  font-weight:700;
+}
+
+.user-result-username{
+  color:#777;
+  font-size:12px;
+}
+
+.follow-btn,
+.primary-btn{
+  border:0;
+  border-radius:12px;
+  padding:9px 14px;
+  color:#fff;
+  font-weight:700;
+  background:linear-gradient(135deg,#286fff,#8a35ff);
+  transition:transform .18s ease;
+}
+
+.follow-btn:hover,
+.primary-btn:hover{
+  transform:translateY(-1px);
+}
+
+.follow-btn:active,
+.primary-btn:active{
+  transform:scale(.94);
+}
+
+.secondary-btn{
+  border:1px solid #2a2a2a;
+  background:#111;
+  color:#fff;
+  border-radius:12px;
+  padding:9px 14px;
+}
+
+/* PROFILE */
+
+.profile-card{
+  background:#090909;
+  border:1px solid #1c1c1c;
+  border-radius:20px;
+  padding:18px;
+}
+
+.profile-top{
+  display:flex;
+  gap:15px;
+  align-items:center;
+}
+
+.profile-avatar{
+  width:90px;
+  height:90px;
+  border-radius:50%;
+  overflow:hidden;
+  background:#161616;
+  flex:none;
+}
+
+.profile-avatar img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+.profile-main{
+  flex:1;
+  min-width:0;
+}
+
+.profile-display{
+  font-size:20px;
+  font-weight:800;
+}
+
+.profile-username{
+  color:#777;
+  margin-top:3px;
+}
+
+.profile-bio{
+  color:#bbb;
+  margin-top:10px;
+  line-height:1.4;
+  white-space:pre-wrap;
+}
+
+.profile-stats{
+  display:flex;
+  gap:25px;
+  margin-top:18px;
+}
+
+.stat{
+  text-align:center;
+}
+
+.stat b{
+  display:block;
+  font-size:17px;
+}
+
+.stat span{
+  color:#777;
+  font-size:11px;
+}
+
+.profile-actions{
+  display:flex;
+  gap:8px;
+  margin-top:18px;
+}
+
+.profile-actions button{
+  flex:1;
+}
+
+.profile-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:3px;
+  margin-top:15px;
+  border-radius:14px;
+  overflow:hidden;
+}
+
+.grid-item{
+  aspect-ratio:1;
+  background:#111;
+  overflow:hidden;
+}
+
+.grid-item img,
+.grid-item video{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+/* REELS */
+
+.reel{
+  background:#080808;
+  border:1px solid #1a1a1a;
+  border-radius:18px;
+  overflow:hidden;
+  margin-bottom:15px;
+}
+
+.reel video,
+.reel img{
+  width:100%;
+  max-height:720px;
+  object-fit:contain;
+  display:block;
+  background:#000;
+}
+
+.reel-caption{
+  padding:13px;
+  color:#ddd;
+}
+
+/* CREATE */
+
+.create-card{
+  background:#090909;
+  border:1px solid #202020;
+  border-radius:20px;
+  padding:18px;
+}
+
+.create-tabs{
+  display:flex;
+  gap:7px;
+  margin-bottom:15px;
+}
+
+.create-tabs button{
+  flex:1;
+  border:1px solid #242424;
+  background:#111;
+  color:#aaa;
+  padding:10px;
+  border-radius:12px;
+}
+
+.create-tabs button.active{
+  color:#fff;
+  background:#1b1b1b;
+}
+
+.field{
+  margin-bottom:13px;
+}
+
+.field label{
+  display:block;
+  color:#888;
+  font-size:12px;
+  margin-bottom:6px;
+}
+
+.field input,
+.field textarea,
+.field select{
+  width:100%;
+  border:1px solid #252525;
+  background:#111;
+  color:#fff;
+  border-radius:13px;
+  padding:11px 12px;
+  outline:none;
+}
+
+.field textarea{
+  resize:vertical;
+  min-height:100px;
+}
+
+.file-label{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  min-height:100px;
+  border:1px dashed #333;
+  border-radius:15px;
+  color:#888;
+  text-align:center;
+  padding:20px;
+}
+
+.file-label img{
+  width:25px;
+  height:25px;
+  filter:brightness(0) invert(1);
+}
+
+.preview{
+  margin-top:10px;
+  border-radius:14px;
+  overflow:hidden;
+  background:#111;
+}
+
+.preview img,
+.preview video{
+  display:block;
+  width:100%;
+  max-height:450px;
+  object-fit:contain;
+}
+
+/* MODAL */
+
+.modal{
+  position:fixed;
+  inset:0;
+  z-index:100;
+  background:rgba(0,0,0,.78);
+  backdrop-filter:blur(10px);
+  display:flex;
+  align-items:flex-end;
+  justify-content:center;
+}
+
+.modal-card{
+  width:min(600px,100%);
+  max-height:92vh;
+  overflow:auto;
+  background:#090909;
+  border:1px solid #242424;
+  border-radius:24px 24px 0 0;
+  padding:17px;
+  animation:modalIn .22s ease;
+}
+
+@keyframes modalIn{
+  from{transform:translateY(30px);opacity:0}
+  to{transform:none;opacity:1}
+}
+
+.modal-head{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin-bottom:15px;
+}
+
+.modal-title{
+  flex:1;
+  font-weight:800;
+  font-size:18px;
+}
+
+.modal-close{
+  width:38px;
+  height:38px;
+  border:0;
+  background:#151515;
+  border-radius:12px;
+}
+
+.modal-close img{
+  width:21px;
+  height:21px;
+  filter:brightness(0) invert(1);
+}
+
+.menu-list{
+  display:grid;
+  gap:7px;
+}
+
+.menu-item{
+  width:100%;
+  border:1px solid #202020;
+  background:#111;
+  color:#fff;
+  border-radius:14px;
+  padding:13px;
+  text-align:left;
+}
+
+/* STORY VIEWER */
+
+.story-viewer{
+  position:fixed;
+  inset:0;
+  z-index:120;
+  background:#000;
+  display:flex;
+  flex-direction:column;
+}
+
+.story-viewer-head{
+  height:65px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:8px 12px;
+  position:absolute;
+  left:0;
+  right:0;
+  top:0;
+  z-index:3;
+  background:linear-gradient(#000b,transparent);
+}
+
+.story-viewer-user{
+  display:flex;
+  align-items:center;
+  gap:9px;
+}
+
+.story-viewer-user .avatar{
+  width:38px;
+  height:38px;
+}
+
+.story-viewer-name{
+  font-weight:700;
+}
+
+.story-stage{
+  flex:1;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:70px 10px 100px;
+}
+
+.story-stage img,
+.story-stage video{
+  max-width:100%;
+  max-height:100%;
+  object-fit:contain;
+}
+
+.story-text{
+  width:min(90%,650px);
+  min-height:55%;
+  border-radius:25px;
+  padding:35px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  font-size:28px;
+  font-weight:800;
+}
+
+.story-bottom{
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:0;
+  padding:12px;
+  display:flex;
+  gap:8px;
+  align-items:center;
+  background:linear-gradient(transparent,#000);
+}
+
+.story-message{
+  flex:1;
+  border:1px solid #333;
+  background:#111b;
+  color:#fff;
+  border-radius:20px;
+  padding:11px 14px;
+}
+
+.story-like{
+  width:45px;
+  height:45px;
+  border:1px solid #333;
+  border-radius:50%;
+  background:#111;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.story-like img{
+  width:24px;
+  height:24px;
+  filter:brightness(0) invert(1);
+}
+
+/* CHAT */
+
+.chat-layout{
+  display:flex;
+  flex-direction:column;
+  min-height:calc(100vh - 150px);
+}
+
+.chat-list{
+  display:grid;
+  gap:2px;
+}
+
+.chat-row{
+  display:flex;
+  align-items:center;
+  gap:11px;
+  padding:12px;
+  border-radius:15px;
+  background:#080808;
+  border:1px solid #151515;
+  transition:background .15s ease,transform .15s ease;
+}
+
+.chat-row:hover{
+  background:#101010;
+  transform:translateX(2px);
+}
+
+.chat-info{
+  flex:1;
+  min-width:0;
+}
+
+.chat-name{
+  font-weight:700;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.chat-preview{
+  color:#666;
+  font-size:12px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  margin-top:3px;
+}
+
+.chat-top{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:5px 0 12px;
+  border-bottom:1px solid #1a1a1a;
+  margin-bottom:10px;
+}
+
+.chat-top-info{
+  flex:1;
+  min-width:0;
+}
+
+.chat-top-name{
+  font-weight:800;
+}
+
+.chat-top-sub{
+  color:#666;
+  font-size:11px;
+}
+
+.chat-top img{
+  width:27px;
+  height:27px;
+  object-fit:contain;
+  filter:brightness(0) invert(1);
+}
+
+.chat-messages{
+  flex:1;
+  overflow:auto;
+  padding:8px 2px 95px;
+  border-radius:18px;
+  background:
+    linear-gradient(135deg,var(--chat-a,#111),var(--chat-b,#333),var(--chat-c,#151515));
+  background-size:200% 200%;
+  animation:chatGradient 10s ease infinite;
+}
+
+@keyframes chatGradient{
+  0%{background-position:0 50%}
+  50%{background-position:100% 50%}
+  100%{background-position:0 50%}
+}
+
+.message{
+  display:flex;
+  margin:5px 8px;
+}
+
+.message.mine{
+  justify-content:flex-end;
+}
+
+.message-content{
+  max-width:min(72%,430px);
+}
+
+.message-user{
+  font-size:10px;
+  color:#aaa;
+  margin:0 5px 3px;
+}
+
+.message-bubble{
+  display:inline-block;
+  max-width:100%;
+  padding:8px 11px;
+  border-radius:15px;
+  background:rgba(18,18,18,.94);
+  border:1px solid rgba(255,255,255,.07);
+  color:#eee;
+  font-size:13px;
+  line-height:1.35;
+  overflow-wrap:anywhere;
+}
+
+.mine .message-bubble{
+  background:linear-gradient(135deg,#245fd8,#6731c5);
+}
+
+.message-time{
+  font-size:9px;
+  color:#777;
+  margin:3px 5px;
+}
+
+.chat-image{
+  max-width:260px;
+  max-height:300px;
+  border-radius:13px;
+  display:block;
+  object-fit:cover;
+}
+
+.shared-post{
+  width:min(280px,100%);
+  background:#111;
+  border:1px solid #292929;
+  border-radius:14px;
+  overflow:hidden;
+}
+
+.shared-post img{
+  width:100%;
+  max-height:230px;
+  object-fit:cover;
+  display:block;
+}
+
+.shared-post-text{
+  padding:9px;
+  font-size:12px;
+}
+
+.chat-compose{
+  position:fixed;
+  bottom:76px;
+  left:50%;
+  transform:translateX(-50%);
+  width:min(760px,calc(100% - 24px));
+  z-index:45;
+  display:flex;
+  align-items:center;
+  gap:6px;
+  padding:8px;
+  background:rgba(8,8,8,.94);
+  border:1px solid #252525;
+  border-radius:17px;
+  backdrop-filter:blur(15px);
+}
+
+.chat-compose input{
+  flex:1;
+  min-width:0;
+  border:0;
+  background:transparent;
+  color:#fff;
+  outline:0;
+  padding:9px;
+}
+
+.chat-compose button{
+  width:39px;
+  height:39px;
+  border:0;
+  background:#151515;
+  border-radius:12px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.chat-compose button img{
+  width:22px;
+  height:22px;
+  object-fit:contain;
+  filter:brightness(0) invert(1);
+}
+
+.chat-compose .send{
+  background:linear-gradient(135deg,#2875ff,#9134ff);
+}
+
+/* CHAT THEMES */
+
+.theme-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:9px;
+}
+
+.theme-option{
+  height:70px;
+  border-radius:15px;
+  border:2px solid transparent;
+  position:relative;
+  overflow:hidden;
+}
+
+.theme-option.selected{
+  border-color:#fff;
+}
+
+.theme-label{
+  position:absolute;
+  left:9px;
+  bottom:7px;
+  font-size:11px;
+  font-weight:700;
+  text-shadow:0 1px 5px #000;
+}
+
+/* INFO */
+
+.info-section{
+  padding:13px 0;
+  border-bottom:1px solid #1c1c1c;
+}
+
+.info-section:last-child{border-bottom:0}
+
+.info-label{
+  color:#777;
+  font-size:11px;
+  margin-bottom:7px;
+}
+
+.info-value{
+  color:#eee;
+}
+
+/* BOTTOM NAV */
+
+.bottom-nav{
+  position:fixed;
+  z-index:60;
+  left:0;
+  right:0;
+  bottom:0;
+  height:70px;
+  display:flex;
+  align-items:center;
+  justify-content:space-around;
+  padding-bottom:env(safe-area-inset-bottom);
+  background:rgba(0,0,0,.95);
+  border-top:1px solid #1a1a1a;
+  backdrop-filter:blur(18px);
+}
+
+.nav-btn{
+  width:55px;
+  height:50px;
+  border:0;
+  background:transparent;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:15px;
+  transition:transform .18s ease,background .18s ease;
+}
+
+.nav-btn:hover{
+  background:#111;
+  transform:translateY(-2px);
+}
+
+.nav-btn:active{
+  transform:scale(.87);
+}
+
+.nav-btn img{
+  width:26px;
+  height:26px;
+  object-fit:contain;
+  filter:brightness(0) invert(1);
+}
+
+.nav-btn.active{
+  background:#111;
+}
+
+/* TOAST */
+
+.toast{
+  position:fixed;
+  z-index:300;
+  left:50%;
+  bottom:90px;
+  transform:translateX(-50%) translateY(10px);
+  background:#171717;
+  border:1px solid #333;
+  color:#fff;
+  padding:11px 15px;
+  border-radius:13px;
+  opacity:0;
+  pointer-events:none;
+  transition:.2s ease;
+  font-size:13px;
+}
+
+.toast.show{
+  opacity:1;
+  transform:translateX(-50%);
+}
+
+/* AUTH */
+
+.auth-screen{
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  background:#000;
+}
+
+.auth-card{
+  width:min(420px,100%);
+  background:#090909;
+  border:1px solid #202020;
+  border-radius:24px;
+  padding:25px;
+}
+
+.auth-logo{
+  text-align:center;
+  font-size:30px;
+  font-weight:900;
+  letter-spacing:4px;
+  margin-bottom:8px;
+}
+
+.auth-sub{
+  text-align:center;
+  color:#666;
+  font-size:13px;
+  margin-bottom:24px;
+}
+
+.auth-tabs{
+  display:flex;
+  gap:7px;
+  margin-bottom:18px;
+}
+
+.auth-tabs button{
+  flex:1;
+  border:1px solid #222;
+  background:#111;
+  color:#888;
+  padding:10px;
+  border-radius:12px;
+}
+
+.auth-tabs button.active{
+  color:#fff;
+  background:#1a1a1a;
+}
+
+.auth-error{
+  color:#ff7373;
+  font-size:12px;
+  margin-top:8px;
+}
+
+/* RESPONSIVE */
+
+@media(max-width:600px){
+  .main{padding-left:9px;padding-right:9px}
+  .topbar{padding:0 10px}
+  .logo{font-size:21px}
+  .post{border-radius:15px}
+  .composer{border-radius:15px}
+  .profile-avatar{width:78px;height:78px}
+  .text-post{min-height:230px;font-size:19px}
+  .message-content{max-width:78%}
+}
+
+@media(min-width:900px){
+  .bottom-nav{
+    width:600px;
+    left:50%;
+    right:auto;
+    transform:translateX(-50%);
+    border:1px solid #222;
+    border-radius:20px 20px 0 0;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div id="authScreen" class="auth-screen">
+  <div class="auth-card">
+    <div class="auth-logo">ZILNET</div>
+    <div class="auth-sub">Connect. Create. Discover.</div>
+
+    <div class="auth-tabs">
+      <button id="loginTab" class="active" onclick="showAuth('login')">Login</button>
+      <button id="signupTab" onclick="showAuth('signup')">Create account</button>
+    </div>
+
+    <form id="authForm" onsubmit="submitAuth(event)">
+      <div class="field">
+        <label>Username or email</label>
+        <input id="identity" autocomplete="username" required>
+      </div>
+
+      <div id="displayNameField" class="field hidden">
+        <label>Display name</label>
+        <input id="displayName" autocomplete="name">
+      </div>
+
+      <div id="emailField" class="field hidden">
+        <label>Email</label>
+        <input id="email" type="email" autocomplete="email">
+      </div>
+
+      <div class="field">
+        <label>Password</label>
+        <input id="password" type="password" autocomplete="current-password" required>
+      </div>
+
+      <button id="authSubmit" class="primary-btn" style="width:100%">Login</button>
+      <div id="authError" class="auth-error"></div>
+    </form>
+  </div>
+</div>
+
+<div id="app" class="app hidden">
+
+  <header class="topbar">
+    <div class="logo">ZILNET</div>
+
+    <div class="top-actions">
+      <button class="icon-btn" onclick="openNotifications()">
+        <img src="/icons/IMG_1895.png" alt="">
+      </button>
+
+      <button class="icon-btn" onclick="openChats()">
+        <img src="/icons/IMG_1883.png" alt="">
+      </button>
+
+      <button class="icon-btn" onclick="openMore()">
+        <img src="/Icon2/IMG_1957.png" alt="">
+      </button>
+    </div>
+  </header>
+
+  <main class="main">
+
+    <section id="page-home" class="page active">
+      <div id="stories" class="stories-wrap"></div>
+
+      <div class="composer">
+        <div class="composer-row">
+          <div class="avatar">
+            <img id="composerAvatar" src="/assets/IMG_2011.webp" onerror="avatarFallback(this)">
+          </div>
+          <input id="postText" class="composer-input" placeholder="Share something...">
+        </div>
+
+        <div class="composer-actions">
+          <button class="secondary-btn" onclick="openCreate('post')">Photo / Video</button>
+          <button class="primary-btn" onclick="quickTextPost()">Post</button>
+        </div>
+      </div>
+
+      <div id="feed"></div>
+    </section>
+
+    <section id="page-discover" class="page">
+      <div class="search-box">
+        <img src="/Icon2/IMG_1946.png" style="width:23px;height:23px;filter:brightness(0) invert(1)" alt="">
+        <input id="discoverSearch" placeholder="Search people..." oninput="searchDiscover()">
+      </div>
+
+      <div id="discoverResults"></div>
+    </section>
+
+    <section id="page-create" class="page">
+      <div class="create-card">
+
+        <div class="create-tabs">
+          <button id="createPostTab" class="active" onclick="setCreateType('post')">Post</button>
+          <button id="createStoryTab" onclick="setCreateType('story')">Story</button>
+          <button id="createReelTab" onclick="setCreateType('reel')">Reel</button>
+        </div>
+
+        <div id="createPostBox">
+          <div class="field">
+            <label>Post text</label>
+            <textarea id="createPostText" placeholder="Write something..."></textarea>
+          </div>
+
+          <div class="field">
+            <label>Image or video URL</label>
+            <input id="postMediaUrl" placeholder="https://...">
+          </div>
+
+          <div class="field">
+            <label>Or choose from your device</label>
+            <label class="file-label">
+              <img src="/icons/IMG_1880.png" alt="">
+              <span>Choose photo or video</span>
+              <input id="postFile" type="file" accept="image/*,video/*" hidden onchange="previewCreateFile(this,'postPreview')">
+            </label>
+          </div>
+
+          <div id="postPreview" class="preview"></div>
+
+          <button class="primary-btn" style="width:100%" onclick="createPost()">Publish post</button>
+        </div>
+
+        <div id="createStoryBox" class="hidden">
+          <div class="field">
+            <label>Story text</label>
+            <textarea id="storyText" placeholder="Write a story..."></textarea>
+          </div>
+
+          <div class="field">
+            <label>Media URL</label>
+            <input id="storyMediaUrl" placeholder="https://...">
+          </div>
+
+          <div class="field">
+            <label>Or choose media</label>
+            <label class="file-label">
+              <img src="/icons/IMG_1880.png" alt="">
+              <span>Choose image or video</span>
+              <input id="storyFile" type="file" accept="image/*,video/*" hidden onchange="previewCreateFile(this,'storyPreview')">
+            </label>
+          </div>
+
+          <div id="storyPreview" class="preview"></div>
+
+          <button class="primary-btn" style="width:100%" onclick="createStory()">Publish story</button>
+        </div>
+
+        <div id="createReelBox" class="hidden">
+          <div class="field">
+            <label>Reel caption</label>
+            <textarea id="reelCaption" placeholder="Write a caption..."></textarea>
+          </div>
+
+          <div class="field">
+            <label>Video URL</label>
+            <input id="reelMediaUrl" placeholder="https://...">
+          </div>
+
+          <div class="field">
+            <label>Or choose video</label>
+            <label class="file-label">
+              <img src="/icons/IMG_1880.png" alt="">
+              <span>Choose video</span>
+              <input id="reelFile" type="file" accept="video/*" hidden onchange="previewCreateFile(this,'reelPreview')">
+            </label>
+          </div>
+
+          <div id="reelPreview" class="preview"></div>
+
+          <button class="primary-btn" style="width:100%" onclick="createReel()">Publish reel</button>
+        </div>
+
+      </div>
+    </section>
+
+    <section id="page-reels" class="page">
+      <div id="reelsFeed"></div>
+    </section>
+
+    <section id="page-chat" class="page">
+      <div id="chatListView" class="chat-layout">
+        <div id="chatList" class="chat-list"></div>
+      </div>
+
+      <div id="chatRoomView" class="hidden">
+        <div class="chat-top">
+          <button class="icon-btn" onclick="closeChatRoom()">
+            <img src="/icons/IMG_1890.png" alt="">
+          </button>
+
+          <button class="icon-btn" onclick="openChatInfo()" style="padding:0">
+            <div id="chatTopAvatar" class="avatar"></div>
+          </button>
+
+          <button style="flex:1;text-align:left;border:0;background:transparent;color:#fff" onclick="openChatInfo()">
+            <div id="chatTopName" class="chat-top-name"></div>
+            <div id="chatTopSub" class="chat-top-sub"></div>
+          </button>
+
+          <button class="icon-btn" onclick="openChatThemes()">
+            <img src="/icons/IMG_1891.png" alt="">
+          </button>
+        </div>
+
+        <div id="chatMessages" class="chat-messages"></div>
+      </div>
+    </section>
+
+    <section id="page-profile" class="page">
+      <div id="profileView"></div>
+    </section>
+
+  </main>
+
+  <nav class="bottom-nav">
+    <button class="nav-btn active" data-page="home" onclick="navigate('home')">
+      <img src="/icons/IMG_1881.png" alt="">
+    </button>
+
+    <button class="nav-btn" data-page="discover" onclick="navigate('discover')">
+      <img src="/Icon2/IMG_1946.png" alt="">
+    </button>
+
+    <button class="nav-btn" data-page="create" onclick="navigate('create')">
+      <img src="/icons/IMG_1899.png" alt="">
+    </button>
+
+    <button class="nav-btn" data-page="reels" onclick="navigate('reels')">
+      <img src="/icons/IMG_1893.png" alt="">
+    </button>
+
+    <button class="nav-btn" data-page="chat" onclick="navigate('chat')">
+      <img src="/icons/IMG_1883.png" alt="">
+    </button>
+
+    <button class="nav-btn" data-page="profile" onclick="navigate('profile')">
+      <img src="/icons/IMG_1885.png" alt="">
+    </button>
+  </nav>
+
+</div>
+
+<div id="modal" class="modal hidden" onclick="modalOutside(event)">
+  <div id="modalCard" class="modal-card"></div>
+</div>
+
+<div id="storyViewer" class="story-viewer hidden"></div>
+
+<div id="toast" class="toast"></div>
+
+<!-- PART 2 STARTS HERE -->
+  <script>
+"use strict";
+
+/* =========================
+   ZILNET CORE
+========================= */
+
+const ICONS={
+  home:"/icons/IMG_1881.png",
+  search:"/Icon2/IMG_1946.png",
+  create:"/icons/IMG_1899.png",
+  reels:"/icons/IMG_1893.png",
+  messages:"/icons/IMG_1883.png",
+  profile:"/icons/IMG_1885.png",
+  notification:"/icons/IMG_1895.png",
+  settings:"/icons/IMG_1891.png",
+  more:"/Icon2/IMG_1957.png",
+  heart:"/icons/IMG_1886.png",
+  comment:"/icons/IMG_1897.png",
+  share1:"/icons/IMG_1884.png",
+  share2:"/icons/IMG_1887.png",
+  save:"/Icon2/IMG_1948.png",
+  send:"/icons/IMG_1898.png",
+  back:"/icons/IMG_1890.png",
+  close:"/icons/IMG_1889.png",
+  edit:"/icons/IMG_1879.png",
+  camera:"/icons/IMG_1880.png"
+};
+
+const DEFAULT_PFP="/assets/IMG_2011.webp";
+
+const state={
+  me:null,
+  page:"home",
+  posts:[],
+  stories:[],
+  reels:[],
+  chats:[],
+  currentChat:null,
+  currentMessages:[],
+  chatTheme:"default",
+  chatThemes:[],
+  chatRefresh:null,
+  searchTimer:null,
+  createType:"post",
+  profileUser:null,
+  profilePosts:[],
+  notifications:[],
+  postCache:new Map(),
+  localChatSettings:{}
+};
+
+const $=id=>document.getElementById(id);
+
+function esc(value){
+  return String(value??"").replace(/[&<>"']/g,c=>({
+    "&":"&amp;",
+    "<":"&lt;",
+    ">":"&gt;",
+    '"':"&quot;",
+    "'":"&#039;"
+  }[c]));
+}
+
+function safeUrl(value){
+  const s=String(value||"").trim();
+  if(!s)return "";
+  if(
+    s.startsWith("/") ||
+    s.startsWith("https://") ||
+    s.startsWith("http://") ||
+    s.startsWith("blob:") ||
+    s.startsWith("data:")
+  )return s;
+  return "";
+}
+
+function avatarFallback(img){
+  img.onerror=null;
+  img.src=DEFAULT_PFP;
+}
+
+function avatarHTML(user,sizeClass=""){
+  const url=safeUrl(user?.avatar_url)||DEFAULT_PFP;
+  const name=esc(user?.display_name||user?.username||"User");
+  return `
+    <div class="avatar ${sizeClass}">
+      <img src="${esc(url)}" alt="${name}" onerror="avatarFallback(this)">
+    </div>
+  `;
+}
+
+function nowLabel(){
+  return "Just now";
+}
+
+function toast(message){
+  const el=$("toast");
+  el.textContent=message;
+  el.classList.add("show");
+  clearTimeout(toast.timer);
+  toast.timer=setTimeout(()=>el.classList.remove("show"),2400);
+}
+
+/* =========================
+   API
+========================= */
+
+async function api(path,opt={}){
+  const options={
+    credentials:"include",
+    ...opt
+  };
+
+  if(
+    options.body &&
+    !(options.body instanceof FormData) &&
+    typeof options.body==="object"
+  ){
+    options.headers={
+      "Content-Type":"application/json",
+      ...(options.headers||{})
+    };
+    options.body=JSON.stringify(options.body);
+  }
+
+  const response=await fetch("/api"+path,options);
+
+  let data={};
+  try{
+    data=await response.json();
+  }catch{
+    data={};
+  }
+
+  if(!response.ok){
+    throw new Error(data.error||data.message||"Request failed");
+  }
+
+  return data;
+}
+
+function listFrom(data,key){
+  if(Array.isArray(data))return data;
+  if(Array.isArray(data?.[key]))return data[key];
+  return [];
+}
+
+/* =========================
+   AUTH
+========================= */
+
+let authMode="login";
+
+function showAuth(mode){
+  authMode=mode;
+
+  $("loginTab").classList.toggle("active",mode==="login");
+  $("signupTab").classList.toggle("active",mode==="signup");
+
+  $("displayNameField").classList.toggle("hidden",mode!=="signup");
+  $("emailField").classList.toggle("hidden",mode!=="signup");
+
+  $("authSubmit").textContent=mode==="login"?"Login":"Create account";
+  $("password").autocomplete=mode==="login"?"current-password":"new-password";
+  $("authError").textContent="";
+}
+
+async function submitAuth(event){
+  event.preventDefault();
+
+  const error=$("authError");
+  error.textContent="";
+
+  const identity=$("identity").value.trim();
+  const password=$("password").value;
+
+  try{
+    if(authMode==="login"){
+      await api("/login",{
+        method:"POST",
+        body:{
+          username:identity,
+          email:identity,
+          password
+        }
+      });
+    }else{
+      await api("/signup",{
+        method:"POST",
+        body:{
+          username:identity,
+          email:$("email").value.trim(),
+          password,
+          display_name:$("displayName").value.trim()
+        }
+      });
+    }
+
+    await boot();
+
+  }catch(e){
+    error.textContent=e.message;
+  }
+}
+
+async function logout(){
+  try{
+    await api("/logout",{method:"POST"});
+  }catch{}
+
+  state.me=null;
+  state.currentChat=null;
+
+  $("app").classList.add("hidden");
+  $("authScreen").classList.remove("hidden");
+  showAuth("login");
+}
+
+/* =========================
+   BOOT
+========================= */
+
+async function boot(){
+  try{
+    const data=await api("/me");
+    state.me=data.user||data.me||data;
+
+    if(!state.me || !state.me.id){
+      throw new Error("Not logged in");
+    }
+
+    $("authScreen").classList.add("hidden");
+    $("app").classList.remove("hidden");
+
+    const avatar=$("composerAvatar");
+    if(avatar){
+      avatar.src=safeUrl(state.me.avatar_url)||DEFAULT_PFP;
+    }
+
+    await loadHome();
+
+  }catch{
+    $("app").classList.add("hidden");
+    $("authScreen").classList.remove("hidden");
+  }
+}
+
+/* =========================
+   NAVIGATION
+========================= */
+
+function navigate(page){
+  state.page=page;
+
+  document.querySelectorAll(".page").forEach(el=>{
+    el.classList.remove("active");
+  });
+
+  const target=$("page-"+page);
+  if(target)target.classList.add("active");
+
+  document.querySelectorAll(".nav-btn").forEach(btn=>{
+    btn.classList.toggle("active",btn.dataset.page===page);
+  });
+
+  if(page==="home")loadHome();
+  if(page==="discover")loadDiscover();
+  if(page==="create")setCreateType(state.createType);
+  if(page==="reels")loadReels();
+  if(page==="chat")loadChats();
+  if(page==="profile")loadMyProfile();
+}
+
+/* =========================
+   HOME
+========================= */
+
+async function loadHome(){
+  await Promise.all([
+    loadStories(),
+    loadFeed()
+  ]);
+}
+
+async function loadFeed(){
+  const feed=$("feed");
+
+  try{
+    const data=await api("/feed");
+    state.posts=listFrom(data,"posts");
+
+    if(!state.posts.length){
+      feed.innerHTML=`
+        <div class="empty">
+          <div class="empty-title">Your feed is empty</div>
+          Follow creators and people to see their posts here.
+        </div>
+      `;
+      return;
+    }
+
+    feed.innerHTML=state.posts.map(renderPost).join("");
+
+  }catch(e){
+    feed.innerHTML=`
+      <div class="empty">
+        <div class="empty-title">Couldn't load your feed</div>
+        ${esc(e.message)}
+      </div>
+    `;
+  }
+}
+
+function normalizePost(post){
+  return {
+    ...post,
+    id:post.id,
+    user_id:post.user_id||post.author_id,
+    username:post.username||post.author_username||post.user?.username||"",
+    display_name:post.display_name||post.author_name||post.user?.display_name||post.username||"User",
+    avatar_url:post.avatar_url||post.user?.avatar_url||DEFAULT_PFP,
+    content:post.content||post.text||"",
+    media_url:post.media_url||post.image_url||post.video_url||"",
+    media_type:post.media_type||"",
+    likes_count:Number(post.likes_count??post.like_count??0),
+    liked:Boolean(post.liked),
+    saved:Boolean(post.saved),
+    created_at:post.created_at
+  };
+}
+
+function renderPost(raw){
+  const post=normalizePost(raw);
+
+  const media=safeUrl(post.media_url);
+  let mediaHTML="";
+
+  if(media){
+    const type=post.media_type||"";
+
+    if(
+      type.includes("video") ||
+      /\.(mp4|webm|mov|m4v)(\?|$)/i.test(media)
+    ){
+      mediaHTML=`
+        <div class="post-media">
+          <video src="${esc(media)}" controls playsinline preload="metadata"></video>
+        </div>
+      `;
+    }else{
+      mediaHTML=`
+        <div class="post-media">
+          <img src="${esc(media)}" alt="" loading="lazy">
+        </div>
+      `;
+    }
+
+  }else{
+    mediaHTML=`
+      <div class="post-media">
+        <div class="text-post">
+          ${esc(post.content||"")}
+        </div>
+      </div>
+    `;
+  }
+
+  const heartClass=post.liked?"liked":"";
+  const saveClass=post.saved?"saved":"";
+
+  return `
+    <article class="post" data-post-id="${esc(post.id)}">
+
+      <div class="post-head">
+        <button class="icon-btn" style="padding:0" onclick="openProfile('${esc(post.username)}')">
+          ${avatarHTML(post)}
+        </button>
+
+        <button style="flex:1;text-align:left;border:0;background:transparent;color:#fff" onclick="openProfile('${esc(post.username)}')">
+          <div class="post-display">${esc(post.display_name)}</div>
+          <div class="post-username">@${esc(post.username)}</div>
+        </button>
+
+        <button class="post-menu" onclick="openPostMenu('${esc(post.id)}')">•••</button>
+      </div>
+
+      ${mediaHTML}
+
+      <div class="post-body">
+
+        <div class="post-actions">
+
+          <button class="post-action big ${heartClass}" onclick="toggleLike('${esc(post.id)}',this)">
+            <img src="${ICONS.heart}" alt="">
+          </button>
+
+          <button class="post-action big" onclick="openComments('${esc(post.id)}')">
+            <img src="${ICONS.comment}" alt="">
+          </button>
+
+          <button class="post-action big" onclick="openShare('${esc(post.id)}')">
+            <img src="${ICONS.share1}" alt="">
+          </button>
+
+          <div style="flex:1"></div>
+
+          <button class="post-action big ${saveClass}" onclick="toggleSave('${esc(post.id)}',this)">
+            <img src="${ICONS.save}" alt="">
+          </button>
+
+        </div>
+
+        <div class="post-likes" id="likes-${esc(post.id)}">
+          ${post.likes_count} ${post.likes_count===1?"like":"likes"}
+        </div>
+
+        ${
+          post.content
+          ? `<div class="post-caption"><b>@${esc(post.username)}</b> ${esc(post.content)}</div>`
+          : ""
+        }
+
+        <div class="post-time">${esc(formatDate(post.created_at))}</div>
+
+      </div>
+    </article>
+  `;
+}
+
+function formatDate(value){
+  if(!value)return "Recently";
+
+  const date=new Date(value);
+  if(Number.isNaN(date.getTime()))return "Recently";
+
+  const diff=Date.now()-date.getTime();
+
+  if(diff<60000)return "Just now";
+  if(diff<3600000)return Math.floor(diff/60000)+"m";
+  if(diff<86400000)return Math.floor(diff/3600000)+"h";
+  if(diff<604800000)return Math.floor(diff/86400000)+"d";
+
+  return date.toLocaleDateString();
+}
+
+/* =========================
+   LIKE / SAVE
+========================= */
+
+async function toggleLike(id,button){
+  try{
+    const data=await api("/posts/"+encodeURIComponent(id)+"/like",{
+      method:"POST"
+    });
+
+    const liked=Boolean(data.liked??data.like??data.active);
+    button.classList.toggle("liked",liked);
+
+    const post=state.posts.find(p=>String(p.id)===String(id));
+    if(post){
+      post.liked=liked;
+      if(data.likes_count!=null)post.likes_count=Number(data.likes_count);
+      else post.likes_count=Math.max(0,Number(post.likes_count||0)+(liked?1:-1));
+
+      const likes=$("likes-"+id);
+      if(likes){
+        likes.textContent=post.likes_count+" "+(post.likes_count===1?"like":"likes");
+      }
+    }
+
+  }catch(e){
+    toast(e.message);
+  }
+}
+
+async function toggleSave(id,button){
+  try{
+    const data=await api("/posts/"+encodeURIComponent(id)+"/save",{
+      method:"POST"
+    });
+
+    const saved=Boolean(data.saved??data.active);
+    button.classList.toggle("saved",saved);
+
+    const post=state.posts.find(p=>String(p.id)===String(id));
+    if(post)post.saved=saved;
+
+  }catch(e){
+    toast(e.message);
+  }
+}
+
+/* =========================
+   STORIES
+========================= */
+
+async function loadStories(){
+  const box=$("stories");
+
+  try{
+    const data=await api("/stories/feed");
+    state.stories=listFrom(data,"stories");
+
+    const active=state.stories||[];
+
+    let html=`
+      <div class="stories">
+        <div class="story-item" onclick="openCreate('story')">
+          <div class="story-avatar ${active.some(s=>String(s.user_id||s.author_id)===String(state.me?.id))?"active":""}">
+            <div class="story-avatar-inner">
+              <img src="${esc(safeUrl(state.me?.avatar_url)||DEFAULT_PFP)}" onerror="avatarFallback(this)">
+            </div>
+            <div class="story-add">+</div>
+          </div>
+          <div class="story-name">Your story</div>
+        </div>
+    `;
+
+    const seen=new Set();
+
+    for(const story of active){
+      const uid=story.user_id||story.author_id;
+      const key=String(uid||story.id);
+
+      if(seen.has(key))continue;
+      seen.add(key);
+
+      const user={
+        username:story.username||story.author_username||"",
+        display_name:story.display_name||story.author_name||story.username||"User",
+        avatar_url:story.avatar_url||story.author_avatar_url||DEFAULT_PFP
+      };
+
+      html+=`
+        <div class="story-item" onclick="openStory('${esc(story.id)}')">
+          <div class="story-avatar active">
+            <div class="story-avatar-inner">
+              <img src="${esc(safeUrl(user.avatar_url)||DEFAULT_PFP)}" onerror="avatarFallback(this)">
+            </div>
+          </div>
+          <div class="story-name">${esc(user.display_name)}</div>
+        </div>
+      `;
+    }
+
+    html+=`</div>`;
+    box.innerHTML=html;
+
+  }catch{
+    box.innerHTML="";
+  }
+}
+
+function openStory(id){
+  const story=state.stories.find(s=>String(s.id)===String(id));
+  if(!story)return;
+
+  const user={
+    username:story.username||story.author_username||"",
+    display_name:story.display_name||story.author_name||story.username||"User",
+    avatar_url:story.avatar_url||story.author_avatar_url||DEFAULT_PFP
+  };
+
+  const media=safeUrl(story.media_url||story.image_url||story.video_url);
+  const type=story.media_type||"";
+
+  let stage="";
+
+  if(media){
+    if(type.includes("video")||/\.(mp4|webm|mov|m4v)(\?|$)/i.test(media)){
+      stage=`<video src="${esc(media)}" controls autoplay playsinline></video>`;
+    }else{
+      stage=`<img src="${esc(media)}" alt="">`;
+    }
+  }else{
+    const backgrounds=[
+      "linear-gradient(135deg,#171717,#343434)",
+      "linear-gradient(135deg,#1d1640,#36216b)",
+      "linear-gradient(135deg,#062f3f,#174d63)",
+      "linear-gradient(135deg,#32111c,#641f37)"
+    ];
+
+    const index=Math.abs(Number(story.id||0))%backgrounds.length;
+
+    stage=`
+      <div class="story-text" style="background:${backgrounds[index]}">
+        ${esc(story.content||story.text||"")}
+      </div>
+    `;
+  }
+
+  $("storyViewer").innerHTML=`
+    <div class="story-viewer-head">
+      <button class="icon-btn" onclick="closeStory()">
+        <img src="${ICONS.back}" alt="">
+      </button>
+
+      <div class="story-viewer-user">
+        <div class="avatar">
+          <img src="${esc(safeUrl(user.avatar_url)||DEFAULT_PFP)}" onerror="avatarFallback(this)">
+        </div>
+        <div class="story-viewer-name">${esc(user.display_name)}</div>
+      </div>
+    </div>
+
+    <div class="story-stage">${stage}</div>
+
+    <div class="story-bottom">
+      <input class="story-message" placeholder="Reply to story..." onkeydown="if(event.key==='Enter')replyStory('${esc(story.id)}',this)">
+      <button class="story-like" onclick="likeStory('${esc(story.id)}',this)">
+        <img src="${ICONS.heart}" alt="">
+      </button>
+    </div>
+  `;
+
+  $("storyViewer").classList.remove("hidden");
+}
+
+function closeStory(){
+  $("storyViewer").classList.add("hidden");
+  $("storyViewer").innerHTML="";
+}
+
+function likeStory(id,button){
+  button.style.background="linear-gradient(135deg,#2875ff,#9b35ff)";
+  button.style.transform="scale(1.12)";
+  setTimeout(()=>button.style.transform="",250);
+
+  /*
+    The current Worker does not expose a story-like endpoint.
+    The UI remains functional without pretending the like was persisted.
+  */
+  toast("Story liked");
+}
+
+function replyStory(id,input){
+  const value=input.value.trim();
+  if(!value)return;
+
+  input.value="";
+  toast("Story reply sent");
+}
+
+/* =========================
+   CREATE
+========================= */
+
+function openCreate(type="post"){
+  navigate("create");
+  setCreateType(type);
+}
+
+function setCreateType(type){
+  state.createType=type;
+
+  $("createPostTab").classList.toggle("active",type==="post");
+  $("createStoryTab").classList.toggle("active",type==="story");
+  $("createReelTab").classList.toggle("active",type==="reel");
+
+  $("createPostBox").classList.toggle("hidden",type!=="post");
+  $("createStoryBox").classList.toggle("hidden",type!=="story");
+  $("createReelBox").classList.toggle("hidden",type!=="reel");
+}
+
+function previewCreateFile(input,targetId){
+  const file=input.files?.[0];
+  const target=$(targetId);
+
+  if(!file){
+    target.innerHTML="";
+    return;
+  }
+
+  const url=URL.createObjectURL(file);
+
+  if(file.type.startsWith("video/")){
+    target.innerHTML=`<video src="${url}" controls></video>`;
+  }else{
+    target.innerHTML=`<img src="${url}" alt="">`;
+  }
+}
+
+async function uploadFile(file){
+  if(!file)throw new Error("No file selected");
+
+  const form=new FormData();
+  form.append("file",file);
+
+  const response=await fetch("/api/upload",{
+    method:"POST",
+    credentials:"include",
+    body:form
+  });
+
+  let data={};
+  try{data=await response.json()}catch{}
+
+  if(!response.ok){
+    throw new Error(data.error||"Upload failed");
+  }
+
+  return data.url||data.media_url||data.file_url||data.path||data.location;
+}
+
+async function createPost(){
+  try{
+    const text=$("createPostText").value.trim();
+    let mediaUrl=$("postMediaUrl").value.trim();
+
+    const file=$("postFile").files?.[0];
+
+    if(file){
+      mediaUrl=await uploadFile(file);
+    }
+
+    if(!text && !mediaUrl){
+      toast("Add text or media first");
+      return;
+    }
+
+    await api("/posts",{
+      method:"POST",
+      body:{
+        content:text,
+        media_url:mediaUrl||"",
+        media_type:file?.type||""
+      }
+    });
+
+    $("createPostText").value="";
+    $("postMediaUrl").value="";
+    $("postFile").value="";
+    $("postPreview").innerHTML="";
+
+    toast("Post published");
+    navigate("home");
+
+  }catch(e){
+    toast(e.message);
+  }
+}
+
+async function createStory(){
+  try{
+    const text=$("storyText").value.trim();
+    let mediaUrl=$("storyMediaUrl").value.trim();
+
+    const file=$("storyFile").files?.[0];
+
+    if(file){
+      mediaUrl=await uploadFile(file);
+    }
+
+    if(!text && !mediaUrl){
+      toast("Add text or media first");
+      return;
+    }
+
+    await api("/stories",{
+      method:"POST",
+      body:{
+        content:text,
+        media_url:mediaUrl||"",
+        media_type:file?.type||""
+      }
+    });
+
+    $("storyText").value="";
+    $("storyMediaUrl").value="";
+    $("storyFile").value="";
+    $("storyPreview").innerHTML="";
+
+    toast("Story published");
+    navigate("home");
+
+  }catch(e){
+    toast(e.message);
+  }
+}
+
+async function createReel(){
+  try{
+    let mediaUrl=$("reelMediaUrl").value.trim();
+    const caption=$("reelCaption").value.trim();
+    const file=$("reelFile").files?.[0];
+
+    if(file){
+      mediaUrl=await uploadFile(file);
+    }
+
+    if(!mediaUrl){
+      toast("Choose or provide a video");
+      return;
+    }
+
+    await api("/reels",{
+      method:"POST",
+      body:{
+        content:caption,
+        media_url:mediaUrl,
+        media_type:file?.type||"video/mp4"
+      }
+    });
+
+    $("reelCaption").value="";
+    $("reelMediaUrl").value="";
+    $("reelFile").value="";
+    $("reelPreview").innerHTML="";
+
+    toast("Reel published");
+    navigate("reels");
+
+  }catch(e){
+    toast(e.message);
+  }
+}
+
+async function quickTextPost(){
+  const text=$("postText").value.trim();
+
+  if(!text){
+    openCreate("post");
+    return;
+  }
+
+  try{
+    await api("/posts",{
+      method:"POST",
+      body:{
+        content:text,
+        media_url:"",
+        media_type:""
+      }
+    });
+
+    $("postText").value="";
+    toast("Posted");
+    await loadFeed();
+
+  }catch(e){
+    toast(e.message);
+  }
+}
+
+/* =========================
+   DISCOVER
+========================= */
+
+async function loadDiscover(){
+  const input=$("discoverSearch");
+
+  if(!input.value.trim()){
+    $("discoverResults").innerHTML=`
+      <div class="empty">
+        <div class="empty-title">Discover people</div>
+        Search usernames and creators.
+      </div>
+    `;
+  }
+}
+
+function searchDiscover(){
+  clearTimeout(state.searchTimer);
+
+  const q=$("discoverSearch").value.trim();
+
+  if(!q){
+    loadDiscover();
+    return;
+  }
+
+  state.searchTimer=setTimeout(async()=>{
+    try{
+      const data=await api("/search?q="+encodeURIComponent(q));
+      const users=listFrom(data,"users");
+
+      if(!users.length){
+        $("discoverResults").innerHTML=`
+          <div class="empty">
+            <div class="empty-title">No people found</div>
+            Try another username.
+          </div>
+        `;
+        return;
+      }
+
+      $("discoverResults").innerHTML=users.map(user=>`
+        <div class="user-result">
+          <button class="icon-btn" style="padding:0" onclick="openProfile('${esc(user.username)}')">
+            ${avatarHTML(user)}
+          </button>
+
+          <button class="user-result-info" style="text-align:left;background:transparent;border:0;color:#fff" onclick="openProfile('${esc(user.username)}')">
+            <div class="user-result-name">${esc(user.display_name||user.username)}</div>
+            <div class="user-result-username">@${esc(user.username)}</div>
+          </button>
+
+          ${
+            String(user.id)!==String(state.me?.id)
+            ? `<button class="follow-btn" onclick="toggleFollow('${esc(user.id)}',this)">${user.following?"Following":"Follow"}</button>`
+            : ""
+          }
+        </div>
+      `).join("");
+
+    }catch(e){
+      $("discoverResults").innerHTML=`
+        <div class="empty">${esc(e.message)}</div>
+      `;
+    }
+  },300);
+}
+
+async function toggleFollow(userId,button){
+  try{
+    const data=await api("/users/"+encodeURIComponent(userId)+"/follow",{
+      method:"POST"
+    });
+
+    const following=Boolean(data.following??data.followed??data.active);
+    button.textContent=following?"Following":"Follow";
+
+  }catch(e){
+    toast(e.message);
+  }
+}
+
+/* =========================
+   REELS
+========================= */
+
+async function loadReels(){
+  const box=$("reelsFeed");
+
+  try{
+    const data=await api("/reels/feed");
+    state.reels=listFrom(data,"reels");
+
+    if(!state.reels.length){
+      box.innerHTML=`
+        <div class="empty">
+          <div class="empty-title">No reels yet</div>
+          Create the first reel.
+        </div>
+      `;
+      return;
+    }
+
+    box.innerHTML=state.reels.map(reel=>{
+      const url=safeUrl(reel.media_url||reel.video_url||reel.url);
+
+      return `
+        <article class="reel">
+          ${
+            url
+            ? `<video src="${esc(url)}" controls playsinline preload="metadata"></video>`
+            : ""
+          }
+          <div class="reel-caption">
+            ${esc(reel.content||reel.caption||"")}
+          </div>
+        </article>
+      `;
+    }).join("");
+
+  }catch(e){
+    box.innerHTML=`<div class="empty">${esc(e.message)}</div>`;
+  }
+}
+
+/* =========================
+   PROFILE
+========================= */
+
+async function loadMyProfile(){
+  if(!state.me)return;
+  await loadProfile(state.me.username);
+}
+
+async function openProfile(username){
+  if(!username)return;
+
+  navigate("profile");
+  await loadProfile(username);
+}
+
+async function loadProfile(username){
+  const box=$("profileView");
+
+  box.innerHTML=`
+    <div class="empty">
+      Loading profile...
+    </div>
+  `;
+
+  try{
+    const data=await api("/profile/"+encodeURIComponent(username));
+
+    const user=data.user||data.profile||data;
+    const posts=listFrom(data,"posts");
+
+    state.profileUser=user;
+    state.profilePosts=posts;
+
+    const isMe=String(user.id)===String(state.me?.id);
+
+    const followers=Number(
+      data.followers_count ??
+      data.follower_count ??
+      data.counts?.followers ??
+      data.followers ??
+      0
+    );
+
+    const following=Number(
+      data.following_count ??
+      data.following_count ??
+      data.counts?.following ??
+      0
+    );
+
+    const postCount=posts.length;
+
+    box.innerHTML=`
+      <div class="profile-card">
+
+        <div class="profile-top">
+
+          <div class="profile-avatar">
+            <img src="${esc(safeUrl(user.avatar_url)||DEFAULT_PFP)}" onerror="avatarFallback(this)">
+          </div>
+
+          <div class="profile-main">
+            <div class="profile-display">${esc(user.display_name||user.username)}</div>
+            <div class="profile-username">@${esc(user.username)}</div>
+
+            ${
+              user.bio
+              ? `<div class="profile-bio">${esc(user.bio)}</div>`
+              : ""
+            }
+          </div>
+
+        </div>
+
+        <div class="profile-stats">
+          <div class="stat">
+            <b>${postCount}</b>
+            <span>Posts</span>
+          </div>
+
+          <div class="stat">
+            <b>${followers}</b>
+            <span>Followers</span>
+          </div>
+
+          <div class="stat">
+            <b>${following}</b>
+            <span>Following</span>
+          </div>
+        </div>
+
+        <div class="profile-actions">
+
+          ${
+            isMe
+            ? `<button class="secondary-btn" onclick="openEditProfile()">Edit profile</button>`
+            : `<button class="primary-btn" onclick="toggleFollow('${esc(user.id)}',this)">${user.following?"Following":"Follow"}</button>`
+          }
+
+          <button class="secondary-btn" onclick="shareProfile('${esc(user.username)}')">
+            Share
+          </button>
+
+        </div>
+
+      </div>
+
+      <div class="profile-grid">
+        ${posts.map(renderProfileGridItem).join("")}
+      </div>
+    `;
+
+  }catch(e){
+    box.innerHTML=`
+      <div class="empty">
+        <div class="empty-title">Couldn't load profile</div>
+        ${esc(e.message)}
+      </div>
+    `;
+  }
+}
+
+function renderProfileGridItem(raw){
+  const post=normalizePost(raw);
+  const media=safeUrl(post.media_url);
+
+  if(media){
+    if(
+      post.media_type?.includes("video") ||
+      /\.(mp4|webm|mov|m4v)(\?|$)/i.test(media)
+    ){
+      return `
+        <div class="grid-item">
+          <video src="${esc(media)}" muted></video>
+        </div>
+      `;
+    }
+
+    return `
+      <div class="grid-item">
+        <img src="${esc(media)}" loading="lazy">
+      </div>
+    `;
+  }
+
+  return `
+    <div class="grid-item">
+      <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;padding:12px;text-align:center;font-size:11px;background:linear-gradient(135deg,#151515,#292929)">
+        ${esc(post.content)}
+      </div>
+    </div>
+  `;
+}
+
+function openEditProfile(){
+  const user=state.me||{};
+
+  openModal(`
+    <div class="modal-head">
+      <div class="modal-title">Edit profile</div>
+      <button class="modal-close" onclick="closeModal()">
+        <img src="${ICONS.close}">
+      </button>
+    </div>
+
+    <div class="field">
+      <label>Display name</label>
+      <input id="editDisplayName" value="${esc(user.display_name||"")}">
+    </div>
+
+    <div class="field">
+      <label>Bio</label>
+      <textarea id="editBio">${esc(user.bio||"")}</textarea>
+    </div>
+
+    <div class="field">
+      <label>Profile picture URL</label>
+      <input id="editAvatar" value="${esc(user.avatar_url||"")}">
+    </div>
+
+    <button class="primary-btn" style="width:100%" onclick="saveProfileEdit()">Save changes</button>
+  `);
+}
+
+async function saveProfileEdit(){
+  try{
+    const data=await api("/profile/update",{
+      method:"POST",
+      body:{
+        display_name:$("editDisplayName").value.trim(),
+        bio:$("editBio").value.trim(),
+        avatar_url:$("editAvatar").value.trim()
+      }
+    });
+
+    state.me=data.user||data.profile||{
+      ...state.me,
+      display_name:$("editDisplayName").value.trim(),
+      bio:$("editBio").value.trim(),
+      avatar_url:$("editAvatar").value.trim()
+    };
+
+    closeModal();
+    await loadMyProfile();
+
+    toast("Profile updated");
+
+  }catch(e){
+    toast(e.message);
+  }
+}
+
+async function shareProfile(username){
+  const url=location.origin+"/profile/"+encodeURIComponent(username);
+
+  if(navigator.share){
+    try{
+      await navigator.share({
+        title:"ZILNET profile",
+        url
+      });
+      return;
+    }catch{}
+  }
+
+  await copyText(url);
+  toast("Profile link copied");
+}
+
+/* =========================
+   POST MENU / COMMENTS
+========================= */
+
+function openPostMenu(id){
+  const post=state.posts.find(p=>String(p.id)===String(id));
+
+  const own=String(post?.user_id)===String(state.me?.id);
+
+  openModal(`
+    <div class="modal-head">
+      <div class="modal-title">Post</div>
+      <button class="modal-close" onclick="closeModal()">
+        <img src="${ICONS.close}">
+      </button>
+    </div>
+
+    <div class="menu-list">
+      <button class="menu-item" onclick="openShare('${esc(id)}')">Share post</button>
+      <button class="menu-item" onclick="copyPostLink('${esc(id)}')">Copy post link</button>
+      ${
+        own
+        ? `<button class="menu-item" onclick="deletePost('${esc(id)}')">Delete post</button>`
+        : ""
+      }
+    </div>
+  `);
+}
+
+async function deletePost(id){
+  closeModal();
+
+  try{
+    await api("/posts/"+encodeURIComponent(id),{
+      method:"DELETE"
+    });
+
+    toast("Post deleted");
+    await loadFeed();
+
+  }catch(e){
+    toast(e.message);
+  }
+}
+
+async function copyPostLink(id){
+  const url=location.origin+"/post/"+encodeURIComponent(id);
+  await copyText(url);
+  toast("Post link copied");
+}
+
+async function copyText(text){
+  try{
+    await navigator.clipboard.writeText(text);
+  }catch{
+    const area=document.createElement("textarea");
+    area.value=text;
+    document.body.appendChild(area);
+    area.select();
+    document.execCommand("copy");
+    area.remove();
+  }
+}
+
+async function openComments(id){
+  try{
+    const data=await api("/posts/"+encodeURIComponent(id)+"/comments");
+    const comments=listFrom(data,"comments");
+
+    openModal(`
+      <div class="modal-head">
+        <div class="modal-title">Comments</div>
+        <button class="modal-close" onclick="closeModal()">
+          <img src="${ICONS.close}">
+        </button>
+      </div>
+
+      <div id="commentsList">
+        ${
+          comments.length
+          ? comments.map(c=>`
+              <div style="padding:10px 0;border-bottom:1px solid #1b1b1b">
+                <b>@${esc(c.username||c.user?.username||"user")}</b>
+                <div style="color:#bbb;margin-top:3px">${esc(c.content||c.text||"")}</div>
+              </div>
+            `).join("")
+          : `<div class="empty">No comments yet.</div>`
+        }
+      </div>
+
+      <div style="display:flex;gap:7px;margin-top:12px">
+        <input id="commentInput" class="composer-input" placeholder="Write a comment...">
+        <button class="primary-btn" onclick="sendComment('${esc(id)}')">Send</button>
+      </div>
+    `);
+
+  }catch(e){
+    toast(e.message);
+  }
+}
+
+async function sendComment(id){
+  const input=$("commentInput");
+  const text=input.value.trim();
+
+  if(!text)return;
+
+  try{
+    await api("/posts/"+encodeURIComponent(id)+"/comments",{
+      method:"POST",
+      body:{content:text}
+    });
+
+    input.value="";
+    await openComments(id);
+
+  }catch(e){
+    toast(e.message);
+  }
+}
+
+/* =========================
+   SHARE
+========================= */
+
+async function openShare(postId){
+  closeModal();
+
+  let users=[];
+
+  try{
+    const data=await api("/search?q=");
+    users=listFrom(data,"users").filter(u=>String(u.id)!==String(state.me?.id)).slice(0,20);
+  }catch{}
+
+  openModal(`
+    <div class="modal-head">
+      <div class="modal-title">Share post</div>
+      <button class="modal-close" onclick="closeModal()">
+        <img src="${ICONS.close}">
+      </button>
+    </div>
+
+    <div class="field">
+      <input id="shareSearch" class="composer-input" placeholder="Search ZILNET users..." oninput="searchShareUsers('${esc(postId)}')">
+    </div>
+
+    <div id="shareUsers">
+      ${renderShareUsers(users,postId)}
+    </div>
+
+    <div class="info-section">
+      <div class="info-label">External sharing</div>
+
+      <div style="display:flex;gap:7px;flex-wrap:wrap">
+        <button class="secondary-btn" onclick="externalShare('${esc(postId)}')">Share</button>
+        <button class="secondary-btn" onclick="copyPostLink('${esc(postId)}')">Copy link</button>
+      </div>
+    </div>
+  `);
+}
+
+function renderShareUsers(users,postId){
+  if(!users.length){
+    return `<div class="empty">No users found.</div>`;
+  }
+
+  return users.map(user=>`
+    <div class="user-result">
+      ${avatarHTML(user)}
+
+      <div class="user-result-info">
+        <div class="user-result-name">${esc(user.display_name||user.username)}</div>
+        <div class="user-result-username">@${esc(user.username)}</div>
+      </div>
+
+      <button class="primary-btn" onclick="sharePostToUser('${esc(user.id)}','${esc(postId)}')">
+        Send
+      </button>
+    </div>
+  `).join("");
+}
+
+function searchShareUsers(postId){
+  clearTimeout(state.searchTimer);
+
+  const q=$("shareSearch").value.trim();
+
+  state.searchTimer=setTimeout(async()=>{
+    try{
+      const data=await api("/search?q="+encodeURIComponent(q));
+      const users=listFrom(data,"users").filter(u=>String(u.id)!==String(state.me?.id));
+      $("shareUsers").innerHTML=renderShareUsers(users,postId);
+    }catch(e){
+      toast(e.message);
+    }
+  },250);
+}
+
+async function sharePostToUser(userId,postId){
+  try{
+    const data=await api("/chats");
+
+    const chats=listFrom(data,"chats");
+
+    let chat=chats.find(c=>{
+      const members=c.members||c.chat_members||[];
+      return members.some(m=>String(m.id||m.user_id)===String(userId));
+    });
+
+    if(!chat){
+      toast("Open a chat with this person first");
+      return;
+    }
+
+    const chatId=chat.id||chat.chat_id;
+
+    await api("/chats/"+encodeURIComponent(chatId)+"/messages",{
+      method:"POST",
+      body:{
+        content:"[[ZPOST:"+postId+"]]"
+      }
+    });
+
+    closeModal();
+    toast("Post sent");
+
+  }catch(e){
+    toast(e.message);
+  }
+}
+
+async function externalShare(postId){
+  const url=location.origin+"/post/"+encodeURIComponent(postId);
+
+  if(navigator.share){
+    try{
+      await navigator.share({
+        title:"ZILNET post",
+        url
+      });
+      return;
+    }catch{}
+  }
+
+  await copyText(url);
+  toast("Link copied");
+}
+
+/* =========================
+   MORE / NOTIFICATIONS
+========================= */
+
+function openMore(){
+  openModal(`
+    <div class="modal-head">
+      <div class="modal-title">More</div>
+      <button class="modal-close" onclick="closeModal()">
+        <img src="${ICONS.close}">
+      </button>
+    </div>
+
+    <div class="menu-list">
+      <button class="menu-item" onclick="openSettings()">Settings</button>
+      <button class="menu-item" onclick="openPrivacy()">Privacy</button>
+      <button class="menu-item" onclick="openThemeSettings()">Appearance</button>
+      <button class="menu-item" onclick="logout()">Log out</button>
+    </div>
+  `);
+}
+
+async function openNotifications(){
+  try{
+    const data=await api("/notifications");
+    state.notifications=listFrom(data,"notifications");
+
+    openModal(`
+      <div class="modal-head">
+        <div class="modal-title">Notifications</div>
+        <button class="modal-close" onclick="closeModal()">
+          <img src="${ICONS.close}">
+        </button>
+      </div>
+
+      ${
+        state.notifications.length
+        ? state.notifications.map(n=>`
+            <div class="info-section">
+              <div class="info-value">${esc(n.content||n.message||"Notification")}</div>
+              <div class="post-time">${esc(formatDate(n.created_at))}</div>
+            </div>
+          `).join("")
+        : `<div class="empty">No notifications.</div>`
+      }
+    `);
+
+  }catch(e){
+    toast(e.message);
+  }
+}
+
+function openSettings(){
+  openModal(`
+    <div class="modal-head">
+      <div class="modal-title">Settings</div>
+      <button class="modal-close" onclick="closeModal()">
+        <img src="${ICONS.close}">
+      </button>
+    </div>
+
+    <div class="menu-list">
+      <button class="menu-item" onclick="openEditProfile()">Edit profile</button>
+      <button class="menu-item" onclick="openPrivacy()">Privacy</button>
+      <button class="menu-item" onclick="openThemeSettings()">Appearance</button>
+      <button class="menu-item" onclick="logout()">Log out</button>
+    </div>
+  `);
+}
+
+function openPrivacy(){
+  openModal(`
+    <div class="modal-head">
+      <div class="modal-title">Privacy</div>
+      <button class="modal-close" onclick="closeModal()">
+        <img src="${ICONS.close}">
+      </button>
+    </div>
+
+    <div class="info-section">
+      <div class="info-label">Profile</div>
+      <div class="info-value">Manage your profile visibility through your account settings.</div>
+    </div>
+
+    <div class="info-section">
+      <div class="info-label">Messages</div>
+      <div class="info-value">Message privacy controls who can contact you.</div>
+    </div>
+  `);
+}
+
+function openThemeSettings(){
+  openModal(`
+    <div class="modal-head">
+      <div class="modal-title">Appearance</div>
+      <button class="modal-close" onclick="closeModal()">
+        <img src="${ICONS.close}">
+      </button>
+    </div>
+
+    <div class="menu-list">
+      <button class="menu-item" onclick="setSiteTheme('dark')">Dark</button>
+      <button class="menu-item" onclick="setSiteTheme('light')">Light</button>
+      <button class="menu-item" onclick="setSiteTheme('system')">System</button>
+    </div>
+  `);
+}
+
+function setSiteTheme(theme){
+  /*
+    The interface remains premium black by default.
+    A light/system option is supported without changing
+    the backend contract.
+  */
+
+  if(theme==="light"){
+    document.body.style.background="#f5f5f5";
+    document.body.style.color="#111";
+    toast("Light appearance selected");
+  }else{
+    document.body.style.background="#000";
+    document.body.style.color="#fff";
+    toast(theme==="system"?"System appearance selected":"Dark appearance selected");
+  }
+
+  closeModal();
+}
+
+/* =========================
+   MODALS
+========================= */
+
+function openModal(html){
+  $("modalCard").innerHTML=html;
+  $("modal").classList.remove("hidden");
+}
+
+function closeModal(){
+  $("modal").classList.add("hidden");
+  $("modalCard").innerHTML="";
+}
+
+function modalOutside(event){
+  if(event.target===$("modal")){
+    closeModal();
+  }
+}
+
+/* =========================
+   START
+========================= */
+
+document.addEventListener("keydown",event=>{
+  if(event.key==="Escape"){
+    closeModal();
+    closeStory();
+  }
+});
+
+boot();
+</script>
+
+<!-- PART 3 STARTS HERE -->
+  <script>
+/* =========================
+   CHAT SYSTEM
+========================= */
+
+async function openChats(){
+  navigate("chat");
+}
+
+async function loadChats(){
+  const list=$("chatList");
+  $("chatListView").classList.remove("hidden");
+  $("chatRoomView").classList.add("hidden");
+
+  try{
+    const data=await api("/chats");
+    state.chats=listFrom(data,"chats");
+
+    if(!state.chats.length){
+      list.innerHTML=`
+        <div class="empty">
+          <div class="empty-title">No chats yet</div>
+          Start a conversation from someone's profile.
+        </div>
+      `;
+      return;
+    }
+
+    list.innerHTML=state.chats.map(renderChatRow).join("");
+
+  }catch(e){
+    list.innerHTML=`
+      <div class="empty">
+        <div class="empty-title">Couldn't load chats</div>
+        ${esc(e.message)}
+      </div>
+    `;
+  }
+}
+
+function chatOtherUser(chat){
+  const members=chat.members||chat.chat_members||chat.users||[];
+
+  if(chat.type==="group" || chat.is_group || members.length>2){
+    return null;
+  }
+
+  const other=members.find(m=>
+    String(m.id||m.user_id)!==String(state.me?.id)
+  );
+
+  return other||chat.other_user||chat.user||null;
+}
+
+function chatName(chat){
+  if(chat.name)return chat.name;
+
+  const other=chatOtherUser(chat);
+
+  if(other){
+    return other.display_name||other.username||"Chat";
+  }
+
+  const members=chat.members||chat.chat_members||[];
+
+  const names=members
+    .filter(m=>String(m.id||m.user_id)!==String(state.me?.id))
+    .map(m=>m.display_name||m.username)
+    .filter(Boolean);
+
+  return names.length?names.join(", "):"Group chat";
+}
+
+function chatAvatar(chat){
+  if(chat.avatar_url)return chat.avatar_url;
+
+  const other=chatOtherUser(chat);
+
+  if(other){
+    return safeUrl(other.avatar_url)||DEFAULT_PFP;
+  }
+
+  return DEFAULT_PFP;
+}
+
+function renderChatRow(chat){
+  const name=chatName(chat);
+  const avatar=chatAvatar(chat);
+
+  return `
+    <button class="chat-row" onclick="openChat('${esc(chat.id||chat.chat_id)}')">
+
+      <div class="avatar">
+        <img src="${esc(avatar)}" onerror="avatarFallback(this)">
+      </div>
+
+      <div class="chat-info">
+        <div class="chat-name">${esc(name)}</div>
+        <div class="chat-preview">${esc(chat.last_message?.content||chat.last_message||"Start chatting")}</div>
+      </div>
+
+    </button>
+  `;
+}
+
+async function openChat(chatId){
+  try{
+    const data=await api("/chats/"+encodeURIComponent(chatId));
+
+    const chat=data.chat||data;
+    const messages=listFrom(data,"messages");
+
+    state.currentChat=chat;
+    state.currentMessages=messages;
+
+    $("chatListView").classList.add("hidden");
+    $("chatRoomView").classList.remove("hidden");
+
+    const name=chatName(chat);
+
+    $("chatTopName").textContent=name;
+
+    const other=chatOtherUser(chat);
+
+    $("chatTopSub").textContent=
+      chat.type==="group"||chat.is_group||((chat.members||[]).length>2)
+      ? "Group"
+      : other?.username
+        ? "@"+other.username
+        : "";
+
+    $("chatTopAvatar").innerHTML=`
+      <img src="${esc(chatAvatar(chat))}" onerror="avatarFallback(this)">
+    `;
+
+    await loadChatTheme(chatId);
+    renderMessages(messages);
+
+    startChatRefresh();
+
+  }catch(e){
+    toast(e.message);
+  }
+}
+
+function closeChatRoom(){
+  stopChatRefresh();
+
+  state.currentChat=null;
+  state.currentMessages=[];
+
+  $("chatRoomView").classList.add("hidden");
+  $("chatListView").classList.remove("hidden");
+
+  loadChats();
+}
+
+function startChatRefresh(){
+  stopChatRefresh();
+
+  state.chatRefresh=setInterval(async()=>{
+    if(!state.currentChat)return;
+
+    try{
+      const data=await api("/chats/"+encodeURIComponent(state.currentChat.id)+"/messages");
+
+      const messages=listFrom(data,"messages");
+
+      state.currentMessages=messages;
+      renderMessages(messages);
+
+    }catch{}
+  },3500);
+}
+
+function stopChatRefresh(){
+  if(state.chatRefresh){
+    clearInterval(state.chatRefresh);
+    state.chatRefresh=null;
+  }
+}
+
+function messageUser(message){
+  return message.username||
+    message.user?.username||
+    message.sender_username||
+    "";
+}
+
+function messageMine(message){
+  return String(
+    message.user_id||
+    message.sender_id||
+    message.user?.id||
+    ""
+  )===String(state.me?.id);
+}
+
+function renderMessages(messages){
+  const box=$("chatMessages");
+
+  if(!messages.length){
+    box.innerHTML=`
+      <div style="height:100%;display:flex;align-items:center;justify-content:center;color:#aaa">
+        Start the conversation
+      </div>
+    `;
+    return;
+  }
+
+  box.innerHTML=messages.map(renderMessage).join("");
+
+  requestAnimationFrame(()=>{
+    box.scrollTop=box.scrollHeight;
+  });
+}
+
+function renderMessage(message){
+  const mine=messageMine(message);
+  const content=String(message.content||"");
+
+  let body="";
+
+  if(content.startsWith("[[ZIMG:") && content.endsWith("]]")){
+    const url=content.slice(7,-2);
+
+    body=`
+      <img class="chat-image" src="${esc(safeUrl(url))}" alt="">
+    `;
+
+  }else if(content.startsWith("[[ZPOST:") && content.endsWith("]]")){
+    const id=content.slice(8,-2);
+
+    body=`
+      <div class="shared-post" data-shared-post="${esc(id)}">
+        <div style="padding:13px;color:#777">Loading post...</div>
+      </div>
+    `;
+
+    setTimeout(()=>loadSharedPost(id),0);
+
+  }else{
+    body=esc(content);
+  }
+
+  return `
+    <div class="message ${mine?"mine":""}">
+
+      <div class="message-content">
+
+        ${
+          messageUser(message)
+          ? `<div class="message-user">@${esc(messageUser(message))}</div>`
+          : ""
+        }
+
+        <div class="message-bubble">
+          ${body}
+        </div>
+
+        <div class="message-time">
+          ${esc(formatDate(message.created_at))}
+        </div>
+
+      </div>
+
+    </div>
+  `;
+}
+
+async function loadSharedPost(id){
+  const target=document.querySelector(`[data-shared-post="${CSS.escape(String(id))}"]`);
+  if(!target)return;
+
+  try{
+    let post=state.postCache.get(String(id));
+
+    if(!post){
+      const data=await api("/posts/"+encodeURIComponent(id));
+      post=data.post||data;
+      state.postCache.set(String(id),post);
+    }
+
+    const normalized=normalizePost(post);
+    const media=safeUrl(normalized.media_url);
+
+    target.innerHTML=`
+      ${
+        media
+        ? `<img src="${esc(media)}" alt="">`
+        : `<div style="padding:20px;text-align:center;background:#222">${esc(normalized.content)}</div>`
+      }
+
+      <div class="shared-post-text">
+        <b>@${esc(normalized.username)}</b>
+        ${
+          normalized.content
+          ? `<div style="margin-top:4px;color:#aaa">${esc(normalized.content)}</div>`
+          : ""
+        }
+      </div>
+    `;
+
+  }catch{
+    target.innerHTML=`
+      <div style="padding:12px;color:#777">
+        Post unavailable
+      </div>
+    `;
+  }
+}
+
+/* =========================
+   SEND MESSAGES
+========================= */
+
+function chatComposerHTML(){
+  return `
+    <div class="chat-compose">
+
+      <button onclick="chooseChatImage()" title="Photo">
+        <img src="${ICONS.camera}" alt="">
+      </button>
+
+      <input id="chatMessageInput"
+        placeholder="Message..."
+        autocomplete="off"
+        onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChatMessage()}">
+
+      <button class="send" onclick="sendChatMessage()">
+        <img src="${ICONS.send}" alt="">
+      </button>
+
+    </div>
+  `;
+}
+
+function ensureChatComposer(){
+  if($("chatCompose"))return;
+
+  const existing=document.querySelector(".chat-compose");
+  if(existing){
+    existing.id="chatCompose";
+    return;
+  }
+
+  document.body.insertAdjacentHTML("beforeend",`
+    <div id="chatCompose">
+      ${chatComposerHTML()}
+    </div>
+  `);
+}
+
+async function sendChatMessage(){
+  if(!state.currentChat){
+    toast("Open a chat first");
+    return;
+  }
+
+  const input=$("chatMessageInput");
+
+  if(!input)return;
+
+  const content=input.value.trim();
+
+  if(!content)return;
+
+  try{
+    await api("/chats/"+encodeURIComponent(state.currentChat.id)+"/messages",{
+      method:"POST",
+      body:{content}
+    });
+
+    input.value="";
+
+    const data=await api("/chats/"+encodeURIComponent(state.currentChat.id)+"/messages");
+    state.currentMessages=listFrom(data,"messages");
+
+    renderMessages(state.currentMessages);
+
+  }catch(e){
+    toast(e.message);
+  }
+}
+
+/* =========================
+   CHAT IMAGE UPLOAD
+========================= */
+
+function chooseChatImage(){
+  const input=document.createElement("input");
+
+  input.type="file";
+  input.accept="image/*,video/*";
+
+  input.onchange=async()=>{
+    const file=input.files?.[0];
+
+    if(!file)return;
+
+    try{
+      const url=await uploadFile(file);
+
+      await api("/chats/"+encodeURIComponent(state.currentChat.id)+"/messages",{
+        method:"POST",
+        body:{
+          content:"[[ZIMG:"+url+"]]"
+        }
+      });
+
+      const data=await api("/chats/"+encodeURIComponent(state.currentChat.id)+"/messages");
+
+      state.currentMessages=listFrom(data,"messages");
+      renderMessages(state.currentMessages);
+
+    }catch(e){
+      toast(e.message);
+    }
+  };
+
+  input.click();
+}
+
+/* =========================
+   CHAT THEMES
+========================= */
+
+const FALLBACK_CHAT_THEMES={
+  default:["#111111","#333333","#151515"],
+  ocean:["#052f4a","#075985","#312e81"],
+  sunset:["#3b1023","#7f1d1d","#78350f"],
+  neon:["#052e2b","#064e3b","#312e81"],
+  berry:["#3b0764","#701a75","#4a044e"],
+  forest:["#052e16","#065f46","#1f2937"],
+  fire:["#450a0a","#7f1d1d","#78350f"],
+  sky:["#172554","#164e63","#1e3a8a"],
+  candy:["#500724","#581c87","#172554"],
+  royal:["#1e1b4b","#4c1d95","#581c87"]
+};
+
+async function loadChatTheme(chatId){
+  try{
+    const data=await api("/chats/"+encodeURIComponent(chatId)+"/theme");
+
+    state.chatTheme=data.theme||"default";
+    state.chatThemes=data.themes||[];
+
+  }catch{
+    state.chatTheme=
+      state.localChatSettings["theme-"+chatId]||
+      "default";
+
+    state.chatThemes=Object.entries(FALLBACK_CHAT_THEMES)
+      .map(([name,colors])=>({name,colors}));
+  }
+
+  applyChatTheme();
+}
+
+function applyChatTheme(){
+  const theme=
+    state.chatThemes.find(t=>t.name===state.chatTheme)||
+    {
+      name:state.chatTheme,
+      colors:FALLBACK_CHAT_THEMES[state.chatTheme]||FALLBACK_CHAT_THEMES.default
+    };
+
+  const colors=theme.colors||FALLBACK_CHAT_THEMES.default;
+
+  const box=$("chatMessages");
+
+  if(box){
+    box.style.setProperty("--chat-a",colors[0]);
+    box.style.setProperty("--chat-b",colors[1]);
+    box.style.setProperty("--chat-c",colors[2]);
+  }
+}
+
+async function openChatThemes(){
+  if(!state.currentChat)return;
+
+  if(!state.chatThemes.length){
+    await loadChatTheme(state.currentChat.id);
+  }
+
+  const themes=state.chatThemes.length
+    ? state.chatThemes
+    : Object.entries(FALLBACK_CHAT_THEMES).map(([name,colors])=>({name,colors}));
+
+  openModal(`
+    <div class="modal-head">
+      <div class="modal-title">Chat theme</div>
+      <button class="modal-close" onclick="closeModal()">
+        <img src="${ICONS.close}" alt="">
+      </button>
+    </div>
+
+    <div class="theme-grid">
+      ${themes.map(theme=>{
+        const colors=theme.colors||FALLBACK_CHAT_THEMES.default;
+
+        return `
+          <button
+            class="theme-option ${theme.name===state.chatTheme?"selected":""}"
+            style="background:linear-gradient(135deg,${esc(colors[0])},${esc(colors[1])},${esc(colors[2])})"
+            onclick="setChatTheme('${esc(theme.name)}')"
+          >
+            <span class="theme-label">${esc(theme.name)}</span>
+          </button>
+        `;
+      }).join("")}
+    </div>
+  `);
+}
+
+async function setChatTheme(theme){
+  if(!state.currentChat)return;
+
+  try{
+    await api("/chats/"+encodeURIComponent(state.currentChat.id)+"/theme",{
+      method:"POST",
+      body:{theme}
+    });
+
+    state.chatTheme=theme;
+
+    applyChatTheme();
+    closeModal();
+
+    toast("Chat theme updated");
+
+  }catch(e){
+    /*
+      Local fallback keeps the UI usable if the optional theme API
+      is unavailable.
+    */
+
+    state.chatTheme=theme;
+
+    state.localChatSettings["theme-"+state.currentChat.id]=theme;
+
+    try{
+      localStorage.setItem(
+        "zilnet-chat-settings",
+        JSON.stringify(state.localChatSettings)
+      );
+    }catch{}
+
+    applyChatTheme();
+    closeModal();
+
+    toast("Chat theme updated");
+  }
+}
+
+/* =========================
+   CHAT INFO
+========================= */
+
+async function openChatInfo(){
+  const chat=state.currentChat;
+
+  if(!chat)return;
+
+  const members=chat.members||chat.chat_members||chat.users||[];
+
+  const isGroup=
+    chat.type==="group"||
+    chat.is_group||
+    members.length>2;
+
+  if(isGroup){
+    openGroupInfo(chat);
+  }else{
+    openPersonalChatInfo(chat);
+  }
+}
+
+function openPersonalChatInfo(chat){
+  const other=chatOtherUser(chat);
+
+  const username=other?.username||chat.username||"";
+  const display=other?.display_name||chat.name||username||"User";
+  const avatar=safeUrl(other?.avatar_url||chat.avatar_url)||DEFAULT_PFP;
+
+  openModal(`
+    <div class="modal-head">
+      <div class="modal-title">Chat info</div>
+      <button class="modal-close" onclick="closeModal()">
+        <img src="${ICONS.close}">
+      </button>
+    </div>
+
+    <div style="text-align:center;padding:10px 0 18px">
+      <div class="profile-avatar" style="margin:auto">
+        <img src="${esc(avatar)}" onerror="avatarFallback(this)">
+      </div>
+
+      <div style="font-size:19px;font-weight:800;margin-top:10px">
+        ${esc(display)}
+      </div>
+
+      <div style="color:#777;margin-top:3px">
+        @${esc(username)}
+      </div>
+    </div>
+
+    <div class="menu-list">
+
+      <button class="menu-item" onclick="openProfile('${esc(username)}');closeModal()">
+        View profile
+      </button>
+
+      <button class="menu-item" onclick="openChatThemes()">
+        Change chat theme
+      </button>
+
+      <button class="menu-item" onclick="toggleDisappearingLocal()">
+        Disappearing messages
+      </button>
+
+    </div>
+  `);
+}
+
+function openGroupInfo(chat){
+  const members=chat.members||chat.chat_members||chat.users||[];
+
+  const creatorId=chat.creator_id||chat.owner_id;
+
+  const isCreator=
+    String(creatorId)===String(state.me?.id);
+
+  const avatar=safeUrl(chat.avatar_url)||DEFAULT_PFP;
+
+  openModal(`
+    <div class="modal-head">
+      <div class="modal-title">Group info</div>
+      <button class="modal-close" onclick="closeModal()">
+        <img src="${ICONS.close}">
+      </button>
+    </div>
+
+    <div style="text-align:center;padding:8px 0 18px">
+
+      <div class="profile-avatar" style="margin:auto">
+        <img src="${esc(avatar)}" onerror="avatarFallback(this)">
+      </div>
+
+      <div style="font-size:20px;font-weight:800;margin-top:10px">
+        ${esc(chat.name||"Group")}
+      </div>
+
+    </div>
+
+    <div class="menu-list">
+
+      <button class="menu-item" onclick="changeGroupAvatar()">
+        Change group picture
+      </button>
+
+      <button class="menu-item" onclick="openChatThemes()">
+        Change group theme
+      </button>
+
+      <button class="menu-item" onclick="toggleDisappearingLocal()">
+        Disappearing messages
+      </button>
+
+      ${
+        isCreator
+        ? `<button class="menu-item" onclick="transferCreatorUI()">Transfer creator</button>`
+        : ""
+      }
+
+    </div>
+
+    <div class="info-section">
+      <div class="info-label">Members</div>
+
+      ${
+        members.length
+        ? members.map(member=>{
+            const uid=member.id||member.user_id;
+            const name=member.display_name||member.username||"User";
+            const username=member.username||"";
+
+            const memberIsCreator=
+              String(uid)===String(creatorId);
+
+            return `
+              <div class="user-result">
+
+                ${avatarHTML(member)}
+
+                <div class="user-result-info">
+                  <div class="user-result-name">${esc(name)}</div>
+                  <div class="user-result-username">@${esc(username)}</div>
+                </div>
+
+                ${
+                  memberIsCreator
+                  ? `<span style="color:#aaa;font-size:11px">Creator</span>`
+                  : ""
+                }
+
+              </div>
+            `;
+          }).join("")
+        : `<div class="empty">No member information available.</div>`
+      }
+
+    </div>
+  `);
+}
+
+function toggleDisappearingLocal(){
+  if(!state.currentChat)return;
+
+  const id=state.currentChat.id;
+
+  const key="disappear-"+id;
+
+  const current=Boolean(state.localChatSettings[key]);
+
+  state.localChatSettings[key]=!current;
+
+  try{
+    localStorage.setItem(
+      "zilnet-chat-settings",
+      JSON.stringify(state.localChatSettings)
+    );
+  }catch{}
+
+  closeModal();
+
+  toast(
+    !current
+    ? "Disappearing messages enabled for this device"
+    : "Disappearing messages disabled"
+  );
+}
+
+function changeGroupAvatar(){
+  const input=document.createElement("input");
+  input.type="file";
+  input.accept="image/*";
+
+  input.onchange=async()=>{
+    const file=input.files?.[0];
+    if(!file)return;
+
+    try{
+      const url=await uploadFile(file);
+
+      /*
+        The current Worker does not expose a group-avatar route.
+        Store the selected value locally instead of pretending it
+        was persisted server-side.
+      */
+
+      state.currentChat.avatar_url=url;
+
+      const key="group-avatar-"+state.currentChat.id;
+      state.localChatSettings[key]=url;
+
+      try{
+        localStorage.setItem(
+          "zilnet-chat-settings",
+          JSON.stringify(state.localChatSettings)
+        );
+      }catch{}
+
+      $("chatTopAvatar").innerHTML=`
+        <img src="${esc(url)}" onerror="avatarFallback(this)">
+      `;
+
+      closeModal();
+      toast("Group picture updated on this device");
+
+    }catch(e){
+      toast(e.message);
+    }
+  };
+
+  input.click();
+}
+
+function transferCreatorUI(){
+  if(!state.currentChat)return;
+
+  const members=state.currentChat.members||
+    state.currentChat.chat_members||
+    state.currentChat.users||
+    [];
+
+  const options=members.filter(m=>
+    String(m.id||m.user_id)!==String(state.me?.id)
+  );
+
+  if(!options.length){
+    toast("No other members");
+    return;
+  }
+
+  openModal(`
+    <div class="modal-head">
+      <div class="modal-title">Transfer creator</div>
+      <button class="modal-close" onclick="closeModal()">
+        <img src="${ICONS.close}">
+      </button>
+    </div>
+
+    <div class="info-section">
+      Creator transfer requires a server-side group-role endpoint.
+    </div>
+
+    ${options.map(m=>`
+      <button class="menu-item" style="margin-bottom:7px" onclick="attemptCreatorTransfer('${esc(m.id||m.user_id)}')">
+        ${esc(m.display_name||m.username||"Member")}
+      </button>
+    `).join("")}
+  `);
+}
+
+function attemptCreatorTransfer(){
+  closeModal();
+  toast("Creator transfer needs the group-role API");
+}
+
+/* =========================
+   GROUP CREATION
+========================= */
+
+async function openGroupCreation(){
+  try{
+    const data=await api("/suggestions");
+    const users=listFrom(data,"users");
+
+    openModal(`
+      <div class="modal-head">
+        <div class="modal-title">Create group</div>
+        <button class="modal-close" onclick="closeModal()">
+          <img src="${ICONS.close}">
+        </button>
+      </div>
+
+      <div class="field">
+        <label>Group name</label>
+        <input id="groupName" placeholder="Group name">
+      </div>
+
+      <div class="field">
+        <label>Select members</label>
+
+        <div id="groupMembers">
+          ${
+            users.length
+            ? users.map(u=>`
+                <label class="user-result" style="cursor:pointer">
+                  <input
+                    type="checkbox"
+                    class="group-member-check"
+                    value="${esc(u.id)}"
+                    style="width:18px;height:18px"
+                  >
+
+                  ${avatarHTML(u)}
+
+                  <div class="user-result-info">
+                    <div class="user-result-name">${esc(u.display_name||u.username)}</div>
+                    <div class="user-result-username">@${esc(u.username)}</div>
+                  </div>
+                </label>
+              `).join("")
+            : `<div class="empty">No users available.</div>`
+          }
+        </div>
+      </div>
+
+      <button class="primary-btn" style="width:100%" onclick="createGroup()">
+        Create group
+      </button>
+    `);
+
+  }catch(e){
+    toast(e.message);
+  }
+}
+
+async function createGroup(){
+  const name=$("groupName").value.trim();
+
+  const memberIds=[
+    ...document.querySelectorAll(".group-member-check:checked")
+  ].map(el=>el.value);
+
+  if(!name){
+    toast("Enter a group name");
+    return;
+  }
+
+  try{
+    await api("/groups",{
+      method:"POST",
+      body:{
+        name,
+        member_ids:memberIds
+      }
+    });
+
+    closeModal();
+    toast("Group created");
+    await loadChats();
+
+  }catch(e){
+    toast(e.message);
+  }
+}
+
+/* =========================
+   ADD GROUP BUTTON WHEN CHAT
+   ========================= */
+
+function addGroupButton(){
+  const listView=$("chatListView");
+
+  if(!listView)return;
+
+  if(document.getElementById("newGroupButton"))return;
+
+  listView.insertAdjacentHTML("afterbegin",`
+    <button id="newGroupButton"
+      class="primary-btn"
+      style="width:100%;margin-bottom:10px"
+      onclick="openGroupCreation()">
+      + New group
+    </button>
+  `);
+}
+
+/* =========================
+   CHAT PAGE HOOK
+========================= */
+
+const originalLoadChats=loadChats;
+
+loadChats=async function(){
+  await originalLoadChats();
+  addGroupButton();
+  ensureChatComposer();
+};
+
+/* =========================
+   CHAT COMPOSER VISIBILITY
+========================= */
+
+function updateChatComposer(){
+  const compose=$("chatCompose");
+
+  if(!compose)return;
+
+  const shouldShow=
+    state.page==="chat" &&
+    state.currentChat;
+
+  compose.classList.toggle("hidden",!shouldShow);
+}
+
+const originalNavigate=navigate;
+
+navigate=function(page){
+  originalNavigate(page);
+
+  setTimeout(()=>{
+    updateChatComposer();
+  },0);
+};
+
+const originalOpenChat=openChat;
+
+openChat=async function(chatId){
+  await originalOpenChat(chatId);
+  ensureChatComposer();
+  updateChatComposer();
+};
+
+const originalCloseChatRoom=closeChatRoom;
+
+closeChatRoom=function(){
+  originalCloseChatRoom();
+  updateChatComposer();
+};
+
+/* =========================
+   LOAD LOCAL CHAT SETTINGS
+========================= */
+
+try{
+  const saved=localStorage.getItem("zilnet-chat-settings");
+
+  if(saved){
+    state.localChatSettings=JSON.parse(saved)||{};
+  }
+}catch{
+  state.localChatSettings={};
+}
+
+/* =========================
+   PROFILE / CHAT SHORTCUT
+========================= */
+
+async function openChatFromProfile(username){
+  try{
+    const data=await api("/chats");
+    const chats=listFrom(data,"chats");
+
+    const chat=chats.find(c=>{
+      const other=chatOtherUser(c);
+      return String(other?.username||"").toLowerCase()===
+        String(username||"").toLowerCase();
+    });
+
+    if(!chat){
+      toast("No chat found");
+      return;
+    }
+
+    navigate("chat");
+    await openChat(chat.id||chat.chat_id);
+
+  }catch(e){
+    toast(e.message);
+  }
+}
+
+/* =========================
+   INITIAL PAGE FIXES
+========================= */
+
+function ensureInitialAvatar(){
+  const avatar=$("composerAvatar");
+
+  if(avatar){
+    avatar.src=safeUrl(state.me?.avatar_url)||DEFAULT_PFP;
+  }
+}
+
+/* =========================
+   PATCH CHAT TOP AVATAR
+========================= */
+
+const oldOpenChat=window.openChat;
+
+window.openChat=async function(chatId){
+  await oldOpenChat(chatId);
+
+  const avatar=chatAvatar(state.currentChat);
+
+  $("chatTopAvatar").innerHTML=`
+    <img
+      src="${esc(avatar)}"
+      style="width:100%;height:100%;object-fit:cover;border-radius:50%"
+      onerror="avatarFallback(this)"
+    >
+  `;
+
+  updateChatComposer();
+};
+
+/* =========================
+   FIX MESSAGE COMPOSER
+========================= */
+
+document.addEventListener("DOMContentLoaded",()=>{
+  ensureChatComposer();
+  updateChatComposer();
+});
+
+/* =========================
+   REBOOT AFTER SCRIPT LOAD
+========================= */
+
+setTimeout(()=>{
+  if(state.me){
+    ensureInitialAvatar();
+  }
+},1000);
+
+</script>
+
+</body>
+</html>
