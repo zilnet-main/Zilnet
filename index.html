@@ -1,0 +1,4451 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#08090d">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>ZILNET</title>
+
+<style>
+:root{
+  --bg:#08090d;
+  --bg2:#0d0f15;
+  --card:#11131a;
+  --card2:#191c25;
+  --text:#f7f7fb;
+  --muted:#858997;
+  --line:#242731;
+  --accent1:#693cff;
+  --accent2:#b13cff;
+  --accent3:#267cff;
+  --max:720px;
+  --danger:#ff3b61;
+}
+
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+}
+
+html,body{
+  min-height:100%;
+  background:var(--bg);
+  color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif;
+}
+
+body{
+  overflow-x:hidden;
+}
+
+button,input,textarea,select{
+  font:inherit;
+  color:inherit;
+}
+
+button{
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+
+img,video{
+  max-width:100%;
+}
+
+.hidden{
+  display:none!important;
+}
+
+/* ---------------- ANIMATIONS ---------------- */
+
+@keyframes pop{
+  0%{transform:scale(1)}
+  45%{transform:scale(.78)}
+  75%{transform:scale(1.12)}
+  100%{transform:scale(1)}
+}
+
+@keyframes likePop{
+  0%{transform:scale(.7) rotate(-8deg)}
+  45%{transform:scale(1.3) rotate(5deg)}
+  75%{transform:scale(.94)}
+  100%{transform:scale(1) rotate(0)}
+}
+
+@keyframes storyPulse{
+  0%,100%{
+    box-shadow:0 0 0 rgba(120,60,255,0);
+  }
+  50%{
+    box-shadow:0 0 25px rgba(120,60,255,.45);
+  }
+}
+
+@keyframes fadeUp{
+  from{
+    opacity:0;
+    transform:translateY(14px);
+  }
+  to{
+    opacity:1;
+    transform:translateY(0);
+  }
+}
+
+@keyframes gradientMove{
+  0%{background-position:0% 50%}
+  50%{background-position:100% 50%}
+  100%{background-position:0% 50%}
+}
+
+.pressable:active,
+.ib:active,
+.nav:active,
+.action:active,
+.option:active,
+.story:active{
+  transform:scale(.92);
+}
+
+/* ---------------- AUTH ---------------- */
+
+.auth{
+  min-height:100vh;
+  min-height:100dvh;
+  display:grid;
+  place-items:center;
+  padding:24px;
+  background:
+    radial-gradient(circle at 20% 15%,rgba(101,53,255,.18),transparent 35%),
+    radial-gradient(circle at 85% 80%,rgba(40,116,255,.13),transparent 35%),
+    var(--bg);
+}
+
+.authbox{
+  width:min(430px,100%);
+  text-align:center;
+  animation:fadeUp .5s ease;
+}
+
+.brand{
+  font-size:44px;
+  font-weight:950;
+  letter-spacing:-3px;
+}
+
+.tag{
+  color:var(--muted);
+  margin:8px 0 30px;
+}
+
+.tabs{
+  display:flex;
+  border-bottom:1px solid var(--line);
+  margin-bottom:18px;
+}
+
+.tabs button{
+  flex:1;
+  padding:13px;
+  border:0;
+  background:none;
+  color:var(--muted);
+}
+
+.tabs .on{
+  color:#fff;
+  font-weight:850;
+  border-bottom:2px solid #fff;
+}
+
+.field{
+  width:100%;
+  padding:14px 15px;
+  margin-bottom:10px;
+  border:1px solid var(--line);
+  background:var(--card);
+  border-radius:13px;
+  outline:none;
+  transition:.2s;
+}
+
+.field:focus,
+.search:focus,
+.chatinput input:focus{
+  border-color:#755cff;
+  box-shadow:0 0 0 3px rgba(117,92,255,.12);
+}
+
+.primary{
+  width:100%;
+  padding:14px;
+  border:0;
+  border-radius:13px;
+  background:linear-gradient(135deg,var(--accent3),var(--accent1),var(--accent2));
+  background-size:200% 200%;
+  animation:gradientMove 5s ease infinite;
+  color:#fff;
+  font-weight:850;
+}
+
+.secondary{
+  padding:11px 14px;
+  border:1px solid var(--line);
+  background:var(--card);
+  border-radius:11px;
+  font-weight:800;
+}
+
+.linkbtn{
+  border:0;
+  background:none;
+  color:var(--text);
+  font-weight:700;
+  padding:12px 4px;
+}
+
+.authnote{
+  color:var(--muted);
+  font-size:12px;
+  line-height:1.5;
+  margin-top:18px;
+}
+
+/* ---------------- APP ---------------- */
+
+.app{
+  min-height:100vh;
+  min-height:100dvh;
+  padding-bottom:80px;
+}
+
+.top{
+  height:72px;
+  position:sticky;
+  top:0;
+  z-index:30;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 17px;
+  background:rgba(8,9,13,.86);
+  backdrop-filter:blur(22px);
+  -webkit-backdrop-filter:blur(22px);
+  border-bottom:1px solid var(--line);
+}
+
+.logo{
+  font-size:30px;
+  font-weight:950;
+  letter-spacing:-2.5px;
+}
+
+.topbuttons{
+  display:flex;
+  align-items:center;
+  gap:2px;
+}
+
+.ib{
+  width:48px;
+  height:48px;
+  border:0;
+  background:none;
+  display:grid;
+  place-items:center;
+  position:relative;
+  transition:transform .18s ease;
+}
+
+.ib img{
+  width:27px;
+  height:27px;
+  object-fit:contain;
+  filter:brightness(0) invert(1);
+  transition:
+    transform .2s ease,
+    filter .2s ease,
+    opacity .2s ease;
+}
+
+.ib:active img{
+  transform:scale(.72) rotate(-8deg);
+}
+
+.content{
+  width:100%;
+  max-width:var(--max);
+  margin:auto;
+}
+
+/* ---------------- STORIES ---------------- */
+
+.stories{
+  padding:18px 15px 17px;
+  border-bottom:1px solid var(--line);
+  animation:fadeUp .4s ease;
+}
+
+.storyrow{
+  display:flex;
+  gap:18px;
+  overflow-x:auto;
+  scrollbar-width:none;
+}
+
+.storyrow::-webkit-scrollbar{
+  display:none;
+}
+
+.story{
+  min-width:70px;
+  width:70px;
+  text-align:center;
+  transition:transform .2s ease;
+}
+
+.ring{
+  width:68px;
+  height:68px;
+  padding:3px;
+  border-radius:50%;
+  margin:auto;
+  background:
+    linear-gradient(135deg,#267cff,#6c3cff,#b63cff,#267cff);
+  background-size:300% 300%;
+  animation:
+    gradientMove 4s ease infinite,
+    storyPulse 2.5s ease-in-out infinite;
+}
+
+.ring .avatar{
+  border:2px solid var(--bg);
+}
+
+.avatar{
+  width:100%;
+  height:100%;
+  border-radius:50%;
+  background:var(--card2);
+  overflow:hidden;
+  display:grid;
+  place-items:center;
+  font-weight:900;
+  color:#fff;
+}
+
+.avatar img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  object-position:center;
+}
+
+.storyname{
+  margin-top:8px;
+  font-size:11px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  color:#c7c9d1;
+}
+
+/* ---------------- POSTS ---------------- */
+
+.post{
+  border-bottom:1px solid var(--line);
+  animation:fadeUp .35s ease;
+}
+
+.posthead{
+  display:flex;
+  align-items:center;
+  gap:11px;
+  padding:15px;
+}
+
+.postavatar{
+  width:44px;
+  height:44px;
+  border-radius:50%;
+  flex:none;
+  overflow:hidden;
+  background:var(--card2);
+  display:grid;
+  place-items:center;
+  font-weight:900;
+}
+
+.postavatar img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+.author{
+  flex:1;
+  min-width:0;
+}
+
+.author strong{
+  display:block;
+  font-size:14px;
+}
+
+.author span{
+  display:block;
+  color:var(--muted);
+  font-size:12px;
+  margin-top:2px;
+}
+
+.postmedia{
+  width:100%;
+  max-height:760px;
+  display:block;
+  background:#000;
+  object-fit:contain;
+}
+
+.postimage{
+  aspect-ratio:1/1;
+  object-fit:cover;
+}
+
+.posttext{
+  padding:17px 16px;
+  font-size:15px;
+  line-height:1.55;
+  white-space:pre-wrap;
+}
+
+.textpost{
+  margin:0 15px 10px;
+  min-height:330px;
+  border-radius:20px;
+  display:grid;
+  place-items:center;
+  padding:35px;
+  text-align:center;
+  font-size:27px;
+  line-height:1.2;
+  font-weight:900;
+  background:
+    linear-gradient(
+      135deg,
+      #246bff,
+      #673cff,
+      #a735ff,
+      #ff5d9e
+    );
+  background-size:250% 250%;
+  animation:gradientMove 8s ease infinite;
+}
+
+.actions{
+  display:flex;
+  align-items:center;
+  padding:7px 10px;
+}
+
+.action{
+  width:50px;
+  height:46px;
+  border:0;
+  background:none;
+  display:grid;
+  place-items:center;
+  transition:transform .18s ease;
+}
+
+.action img{
+  width:27px;
+  height:27px;
+  object-fit:contain;
+  filter:brightness(0) invert(1);
+  transition:
+    transform .2s ease,
+    filter .2s ease;
+}
+
+.action.liked img{
+  filter:
+    brightness(1.15)
+    saturate(2)
+    hue-rotate(180deg);
+  animation:likePop .42s ease;
+}
+
+.action.save{
+  margin-left:auto;
+}
+
+.postinfo{
+  padding:0 16px 18px;
+}
+
+.likes{
+  font-size:13px;
+  font-weight:850;
+  margin-bottom:6px;
+}
+
+.caption{
+  font-size:14px;
+  line-height:1.45;
+}
+
+.caption b{
+  margin-right:5px;
+}
+
+.meta{
+  color:var(--muted);
+  font-size:11px;
+  margin-top:8px;
+}
+
+.empty{
+  text-align:center;
+  color:var(--muted);
+  padding:70px 25px;
+}
+
+/* ---------------- BOTTOM NAV ---------------- */
+
+.bottom{
+  position:fixed;
+  z-index:40;
+  left:0;
+  right:0;
+  bottom:0;
+  height:70px;
+  display:flex;
+  align-items:center;
+  justify-content:space-around;
+  background:rgba(8,9,13,.92);
+  backdrop-filter:blur(22px);
+  -webkit-backdrop-filter:blur(22px);
+  border-top:1px solid var(--line);
+  padding-bottom:env(safe-area-inset-bottom);
+}
+
+.nav{
+  width:58px;
+  height:58px;
+  border:0;
+  background:none;
+  display:grid;
+  place-items:center;
+  transition:transform .18s ease;
+}
+
+.nav img{
+  width:29px;
+  height:29px;
+  object-fit:contain;
+  filter:brightness(0) invert(1);
+  opacity:.68;
+  transition:
+    transform .2s ease,
+    opacity .2s ease,
+    filter .2s ease;
+}
+
+.nav.active img{
+  opacity:1;
+  transform:scale(1.08);
+}
+
+.nav:active img{
+  transform:scale(.72) rotate(8deg);
+}
+
+/* ---------------- PANELS ---------------- */
+
+.panel{
+  position:fixed;
+  inset:0;
+  z-index:70;
+  background:var(--bg);
+  overflow:auto;
+  animation:fadeUp .22s ease;
+}
+
+.panelhead{
+  height:68px;
+  position:sticky;
+  top:0;
+  z-index:3;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:0 13px;
+  background:rgba(8,9,13,.92);
+  backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--line);
+}
+
+.panelhead h2{
+  font-size:19px;
+}
+
+.panelbody{
+  width:min(var(--max),100%);
+  margin:auto;
+  padding:18px 16px 100px;
+}
+
+.search{
+  width:100%;
+  padding:14px 15px;
+  border:1px solid var(--line);
+  background:var(--card);
+  border-radius:14px;
+  outline:none;
+  margin-bottom:14px;
+}
+
+.userrow,
+.chatrow{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:13px 2px;
+  border-bottom:1px solid var(--line);
+}
+
+.userrow{
+  cursor:pointer;
+}
+
+.userrow .avatar,
+.chatavatar{
+  width:50px;
+  height:50px;
+  flex:none;
+}
+
+.userinfo,
+.chatinfo{
+  flex:1;
+  min-width:0;
+}
+
+.userinfo span,
+.chatinfo span{
+  display:block;
+  color:var(--muted);
+  font-size:12px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+.follow{
+  border:1px solid transparent;
+  background:#fff;
+  color:#000;
+  border-radius:10px;
+  padding:8px 12px;
+  font-weight:850;
+}
+
+.following{
+  background:var(--card2);
+  color:#fff;
+  border-color:var(--line);
+}
+
+/* ---------------- PROFILE ---------------- */
+
+.profiletop{
+  padding:20px 0;
+}
+
+.profileline{
+  display:flex;
+  gap:18px;
+  align-items:center;
+}
+
+.profileavatar{
+  width:96px;
+  height:96px;
+  border-radius:50%;
+  background:var(--card2);
+  overflow:hidden;
+  display:grid;
+  place-items:center;
+  font-size:28px;
+  font-weight:900;
+  flex:none;
+}
+
+.profileavatar img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+.profilemain{
+  flex:1;
+  min-width:0;
+}
+
+.profilemain h2{
+  font-size:21px;
+}
+
+.profilemain p{
+  color:var(--muted);
+  font-size:13px;
+  margin-top:4px;
+  white-space:pre-wrap;
+}
+
+.stats{
+  display:flex;
+  gap:20px;
+  margin-top:13px;
+  font-size:13px;
+}
+
+.profilebuttons{
+  display:flex;
+  gap:8px;
+  margin-top:18px;
+}
+
+.profilebuttons button{
+  flex:1;
+  padding:11px;
+  border:1px solid var(--line);
+  background:var(--card);
+  border-radius:10px;
+  font-weight:800;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:2px;
+  margin:0 -16px;
+}
+
+.griditem{
+  aspect-ratio:1;
+  overflow:hidden;
+  background:var(--card);
+  cursor:pointer;
+}
+
+.griditem img,
+.griditem video{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+/* ---------------- MODALS ---------------- */
+
+.modal{
+  position:fixed;
+  inset:0;
+  z-index:100;
+  background:rgba(0,0,0,.78);
+  display:grid;
+  place-items:end;
+  animation:fadeUp .2s ease;
+}
+
+.sheet{
+  width:min(720px,100%);
+  max-height:92vh;
+  overflow:auto;
+  background:var(--bg2);
+  border:1px solid var(--line);
+  border-radius:22px 22px 0 0;
+  padding:17px 16px 32px;
+}
+
+.sheet h3{
+  margin-bottom:16px;
+}
+
+.option{
+  width:100%;
+  padding:18px;
+  margin:6px 0;
+  text-align:left;
+  border:1px solid var(--line);
+  background:var(--card);
+  border-radius:14px;
+}
+
+.option b{
+  display:block;
+}
+
+.option span{
+  color:var(--muted);
+  font-size:12px;
+  display:block;
+  margin-top:4px;
+}
+
+/* ---------------- COMMENTS ---------------- */
+
+.comment{
+  display:flex;
+  gap:9px;
+  margin:11px 0;
+  font-size:13px;
+  align-items:flex-start;
+}
+
+.comment .avatar{
+  width:35px;
+  height:35px;
+  flex:none;
+}
+
+.commentform{
+  display:flex;
+  gap:8px;
+  margin-top:15px;
+}
+
+.commentform input{
+  flex:1;
+  min-width:0;
+  padding:11px 14px;
+  border:1px solid var(--line);
+  background:var(--card);
+  border-radius:22px;
+  outline:none;
+}
+
+.commentform button{
+  border:0;
+  background:#fff;
+  color:#000;
+  border-radius:22px;
+  padding:0 16px;
+  font-weight:850;
+}
+
+/* ---------------- STORY VIEWER ---------------- */
+
+.storyviewer{
+  position:fixed;
+  inset:0;
+  z-index:120;
+  background:
+    radial-gradient(circle at 50% 25%,rgba(98,51,255,.14),transparent 35%),
+    #030407;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+
+.storytop{
+  height:74px;
+  flex:none;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:10px 12px;
+  background:linear-gradient(to bottom,rgba(0,0,0,.72),transparent);
+  z-index:3;
+}
+
+.storytop .avatar{
+  width:44px;
+  height:44px;
+  flex:none;
+}
+
+.storywho{
+  flex:1;
+  min-width:0;
+}
+
+.storywho strong{
+  display:block;
+}
+
+.storywho span{
+  display:block;
+  color:#aaa;
+  font-size:12px;
+  margin-top:2px;
+}
+
+.storycontent{
+  flex:1;
+  min-height:0;
+  display:grid;
+  place-items:center;
+  position:relative;
+}
+
+.storycontent img,
+.storycontent video{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+}
+
+.storytext{
+  width:min(90%,600px);
+  min-height:55%;
+  padding:40px 25px;
+  border-radius:24px;
+  display:grid;
+  place-items:center;
+  text-align:center;
+  font-size:30px;
+  line-height:1.18;
+  font-weight:900;
+  background:linear-gradient(135deg,#2475ff,#693cff,#a936ff);
+  background-size:250% 250%;
+  animation:gradientMove 7s ease infinite;
+}
+
+.storybottom{
+  padding:10px 12px max(16px,env(safe-area-inset-bottom));
+  display:flex;
+  gap:9px;
+  align-items:center;
+  background:linear-gradient(to top,rgba(0,0,0,.85),transparent);
+}
+
+.storymessage{
+  flex:1;
+  min-width:0;
+  height:48px;
+  border:1px solid rgba(255,255,255,.3);
+  background:rgba(15,16,21,.76);
+  backdrop-filter:blur(15px);
+  border-radius:25px;
+  padding:0 17px;
+  outline:none;
+}
+
+.storyLike{
+  width:50px;
+  height:50px;
+  border-radius:50%;
+  border:1px solid rgba(255,255,255,.2);
+  background:rgba(18,19,24,.82);
+  display:grid;
+  place-items:center;
+}
+
+.storyLike img{
+  width:29px;
+  height:29px;
+  filter:brightness(0) invert(1);
+}
+
+.storyLike.liked img{
+  filter:
+    brightness(1.2)
+    saturate(2)
+    hue-rotate(180deg);
+  animation:likePop .45s ease;
+}
+
+/* ---------------- CHAT ---------------- */
+
+.chatview{
+  position:fixed;
+  inset:0;
+  z-index:110;
+  background:var(--bg);
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+
+.chatBackground{
+  position:absolute;
+  inset:0;
+  z-index:0;
+  background-position:center;
+  background-size:cover;
+  opacity:.22;
+  pointer-events:none;
+}
+
+.chatOverlay{
+  position:absolute;
+  inset:0;
+  z-index:1;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(5,6,10,.96),
+      rgba(5,6,10,.76) 40%,
+      rgba(5,6,10,.94)
+    );
+  pointer-events:none;
+}
+
+.chathead,
+.messages,
+.chattools,
+.chatinput{
+  position:relative;
+  z-index:2;
+}
+
+.chathead{
+  min-height:68px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:0 11px;
+  border-bottom:1px solid var(--line);
+  background:rgba(7,8,12,.8);
+  backdrop-filter:blur(18px);
+  flex:none;
+}
+
+.chathead .chatavatar{
+  width:43px;
+  height:43px;
+}
+
+.chathead .who{
+  flex:1;
+  min-width:0;
+}
+
+.chathead .who strong{
+  display:block;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+.chathead .who span{
+  display:block;
+  color:var(--muted);
+  font-size:11px;
+  margin-top:2px;
+}
+
+.messages{
+  flex:1;
+  min-height:0;
+  overflow:auto;
+  padding:15px 13px 10px;
+}
+
+.messageRow{
+  display:flex;
+  margin:9px 0 14px;
+  align-items:flex-end;
+}
+
+.messageRow.mine{
+  justify-content:flex-end;
+}
+
+.messageStack{
+  max-width:min(78%,420px);
+}
+
+.messageUser{
+  color:#aeb1bd;
+  font-size:11px;
+  font-weight:750;
+  margin:0 9px 5px;
+}
+
+.mine .messageUser{
+  text-align:right;
+}
+
+.bubble{
+  width:max-content;
+  max-width:100%;
+  padding:10px 13px;
+  border-radius:17px;
+  font-size:14px;
+  line-height:1.42;
+  white-space:pre-wrap;
+  overflow-wrap:anywhere;
+  box-shadow:0 5px 20px rgba(0,0,0,.12);
+}
+
+.mineBubble{
+  margin-left:auto;
+  color:#fff;
+  background:linear-gradient(135deg,#5b61ff,#7b42ff);
+  border-bottom-right-radius:5px;
+}
+
+.theirsBubble{
+  background:rgba(29,31,41,.88);
+  border:1px solid rgba(255,255,255,.06);
+  border-bottom-left-radius:5px;
+}
+
+.chattools{
+  display:flex;
+  gap:7px;
+  padding:8px 11px;
+  border-top:1px solid var(--line);
+  background:rgba(7,8,12,.76);
+  overflow-x:auto;
+}
+
+.chattool{
+  flex:none;
+  border:1px solid var(--line);
+  background:rgba(24,26,34,.88);
+  border-radius:18px;
+  padding:7px 11px;
+  font-size:11px;
+  font-weight:800;
+}
+
+.chatinput{
+  display:flex;
+  gap:8px;
+  padding:9px 10px max(10px,env(safe-area-inset-bottom));
+  border-top:1px solid var(--line);
+  background:rgba(7,8,12,.9);
+  backdrop-filter:blur(18px);
+}
+
+.chatinput input{
+  flex:1;
+  min-width:0;
+  height:48px;
+  padding:0 15px;
+  border:1px solid #555965;
+  background:rgba(15,16,21,.92);
+  border-radius:25px;
+  outline:none;
+}
+
+.chatinput button{
+  width:48px;
+  height:48px;
+  border:0;
+  border-radius:50%;
+  background:#fff;
+  display:grid;
+  place-items:center;
+}
+
+.chatinput button img{
+  width:24px;
+  height:24px;
+  object-fit:contain;
+}
+
+/* ---------------- CHAT THEMES ---------------- */
+
+.themePreview{
+  height:90px;
+  border-radius:17px;
+  margin:7px 0;
+  padding:12px;
+  display:flex;
+  align-items:flex-end;
+  justify-content:flex-end;
+  border:1px solid rgba(255,255,255,.08);
+  cursor:pointer;
+  transition:.2s;
+}
+
+.themePreview:active{
+  transform:scale(.97);
+}
+
+.themeBubble{
+  padding:8px 12px;
+  border-radius:14px 14px 5px 14px;
+  background:rgba(255,255,255,.15);
+  font-size:11px;
+}
+
+.themeGrid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:9px;
+}
+
+/* ---------------- SETTINGS ---------------- */
+
+.sectionTitle{
+  color:var(--muted);
+  font-size:12px;
+  font-weight:900;
+  text-transform:uppercase;
+  margin:23px 0 8px;
+}
+
+.setting{
+  width:100%;
+  min-height:56px;
+  padding:15px 3px;
+  border:0;
+  border-bottom:1px solid var(--line);
+  background:none;
+  text-align:left;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+}
+
+.setting span{
+  color:var(--muted);
+}
+
+.setting select{
+  border:1px solid var(--line);
+  background:var(--card);
+  border-radius:10px;
+  padding:7px 9px;
+}
+
+.fileButton{
+  width:100%;
+  border:1px solid var(--line);
+  background:var(--card);
+  border-radius:12px;
+  padding:14px;
+  text-align:left;
+  margin-bottom:9px;
+}
+
+/* ---------------- NOTIFICATIONS ---------------- */
+
+.notif{
+  display:flex;
+  gap:12px;
+  padding:13px 2px;
+  border-bottom:1px solid var(--line);
+  align-items:center;
+}
+
+.notif.unread{
+  background:rgba(255,255,255,.035);
+}
+
+.notifDot{
+  width:9px;
+  height:9px;
+  border-radius:50%;
+  background:#fff;
+  margin-left:auto;
+  flex:none;
+}
+
+/* ---------------- TOAST ---------------- */
+
+#toast{
+  position:fixed;
+  z-index:300;
+  left:50%;
+  bottom:90px;
+  transform:translate(-50%,20px);
+  opacity:0;
+  pointer-events:none;
+  background:#fff;
+  color:#000;
+  padding:11px 16px;
+  border-radius:999px;
+  font-size:13px;
+  font-weight:850;
+  transition:.22s;
+  max-width:88%;
+  text-align:center;
+}
+
+#toast.show{
+  opacity:1;
+  transform:translate(-50%,0);
+}
+
+/* ---------------- PERFORMANCE ---------------- */
+
+body.performance *{
+  animation-duration:.01ms!important;
+  animation-iteration-count:1!important;
+  transition-duration:.01ms!important;
+}
+
+/* ---------------- RESPONSIVE ---------------- */
+
+@media(min-width:800px){
+  .bottom{
+    width:550px;
+    left:50%;
+    right:auto;
+    transform:translateX(-50%);
+    bottom:14px;
+    border:1px solid var(--line);
+    border-radius:22px;
+  }
+
+  .app{
+    padding-bottom:100px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div id="toast"></div>
+
+<section id="auth" class="auth">
+  <div class="authbox">
+    <div class="brand">ZILNET</div>
+    <div class="tag">Create. Connect. Discover.</div>
+
+    <div class="tabs">
+      <button id="loginTab" class="on" onclick="authMode('login')">Log in</button>
+      <button id="signupTab" onclick="authMode('signup')">Create account</button>
+    </div>
+
+    <form id="loginForm">
+      <input id="identity" class="field" placeholder="Username or email" required>
+      <input id="password" class="field" type="password" placeholder="Password" required>
+      <button class="primary">Log in</button>
+      <button type="button" class="linkbtn" onclick="forgotPassword()">Forgot password?</button>
+    </form>
+
+    <form id="signupForm" class="hidden">
+      <input id="username" class="field" placeholder="Username" required>
+      <input id="email" class="field" type="email" placeholder="Email" required>
+      <input id="newPassword" class="field" type="password" placeholder="Password" minlength="8" required>
+      <button class="primary">Create account</button>
+    </form>
+
+    <div class="authnote">
+      Log in to the community where you can find opportunities.
+    </div>
+  </div>
+</section>
+
+<div id="app" class="app hidden">
+
+  <header class="top">
+    <div class="logo">ZILNET</div>
+
+    <div class="topbuttons">
+      <button class="ib" onclick="notifications()">
+        <img src="/icons/IMG_1895.png" alt="Notifications">
+        <i id="topDot" class="notifDot hidden" style="position:absolute;margin:0 0 27px 27px"></i>
+      </button>
+
+      <button class="ib" onclick="chats()">
+        <img src="/icons/IMG_1883.png" alt="Messages">
+      </button>
+
+      <button class="ib" onclick="moreMenu()">
+        <img src="/Icon2/IMG_1957.png" alt="More">
+      </button>
+    </div>
+  </header>
+
+  <main id="home" class="content"></main>
+
+  <nav class="bottom">
+
+    <button id="homeNav" class="nav active" onclick="home()">
+      <img src="/icons/IMG_1881.png" alt="Home">
+    </button>
+
+    <button id="searchNav" class="nav" onclick="searchPanel()">
+      <img src="/Icon2/IMG_1946.png" alt="Search">
+    </button>
+
+    <button id="createNav" class="nav" onclick="createMenu()">
+      <img src="/icons/IMG_1899.png" alt="Create">
+    </button>
+
+    <button id="reelsNav" class="nav" onclick="reels()">
+      <img src="/icons/IMG_1893.png" alt="Reels">
+    </button>
+
+    <button id="profileNav" class="nav" onclick="myProfile()">
+      <img src="/icons/IMG_1885.png" alt="Profile">
+    </button>
+
+  </nav>
+</div>
+
+<div id="panel"></div>
+<div id="modal"></div>
+
+<div class="hidden">
+  <input id="storyPicker" type="file" accept="image/*,video/*">
+  <input id="postPicker" type="file" accept="image/*,video/*">
+  <input id="reelPicker" type="file" accept="video/*">
+  <input id="avatarPicker" type="file" accept="image/*">
+  <input id="chatBgPicker" type="file" accept="image/*">
+</div>
+
+<script>
+  const API='/api';
+
+let me=null;
+let feed=[];
+let chatId=null;
+let poll=null;
+let settingsCache=null;
+let currentStory=null;
+let currentStoryIndex=0;
+let currentChatTheme='default';
+
+const CHAT_THEMES={
+  default:['#08090d','#171326','#24163b'],
+  ocean:['#06111c','#062d42','#123d63'],
+  sunset:['#170807','#3b1114','#451c0d'],
+  neon:['#03130f','#092c29','#241348'],
+  berry:['#100516','#24102f','#3a123e'],
+  forest:['#03110b','#09251a','#123a29'],
+  fire:['#160605','#34100b','#411d08'],
+  sky:['#050c18','#092447','#112e49'],
+  candy:['#140610','#2a1027','#28104b'],
+  royal:['#070713','#15133a','#24124a']
+};
+
+const ICONS={
+  home:'/icons/IMG_1881.png',
+  search:'/Icon2/IMG_1946.png',
+  create:'/icons/IMG_1899.png',
+  reels:'/icons/IMG_1893.png',
+  messages:'/icons/IMG_1883.png',
+  profile:'/icons/IMG_1885.png',
+  notification:'/icons/IMG_1895.png',
+  settings:'/icons/IMG_1891.png',
+  more:'/Icon2/IMG_1957.png',
+  heart:'/icons/IMG_1886.png',
+  comment:'/icons/IMG_1897.png',
+  share1:'/icons/IMG_1884.png',
+  share2:'/icons/IMG_1887.png',
+  save:'/Icon2/IMG_1948.png',
+  send:'/icons/IMG_1898.png',
+  back:'/icons/IMG_1890.png',
+  close:'/icons/IMG_1889.png',
+  edit:'/icons/IMG_1879.png',
+  camera:'/icons/IMG_1880.png'
+};
+
+const $=id=>document.getElementById(id);
+
+const esc=x=>String(x??'').replace(
+  /[&<>"']/g,
+  m=>({
+    '&':'&amp;',
+    '<':'&lt;',
+    '>':'&gt;',
+    '"':'&quot;',
+    "'":'&#039;'
+  }[m])
+);
+
+const initial=u=>
+  (u?.display_name||u?.username||'?')
+  .slice(0,1)
+  .toUpperCase();
+
+function toast(x){
+  const t=$('toast');
+  t.textContent=x;
+  t.classList.add('show');
+  clearTimeout(toast.t);
+  toast.t=setTimeout(()=>t.classList.remove('show'),2300);
+}
+
+async function api(path,opt={}){
+  const o={
+    credentials:'include',
+    ...opt
+  };
+
+  if(
+    o.body &&
+    typeof o.body==='object' &&
+    !(o.body instanceof FormData) &&
+    !(o.body instanceof Blob)
+  ){
+    o.headers={
+      'Content-Type':'application/json',
+      ...(o.headers||{})
+    };
+    o.body=JSON.stringify(o.body);
+  }
+
+  const r=await fetch(API+path,o);
+
+  let d=null;
+  try{
+    d=await r.json();
+  }catch{}
+
+  if(!r.ok){
+    throw Error(
+      d?.error ||
+      d?.message ||
+      `Request failed (${r.status})`
+    );
+  }
+
+  return d;
+}
+
+function avatar(u,c='avatar'){
+  u=u||{};
+
+  if(u.avatar_url){
+    return `
+      <div class="${c}">
+        <img src="${esc(u.avatar_url)}" alt="">
+      </div>
+    `;
+  }
+
+  return `
+    <div class="${c}">
+      ${esc(initial(u))}
+    </div>
+  `;
+}
+
+function nav(id){
+  document.querySelectorAll('.nav')
+    .forEach(x=>x.classList.remove('active'));
+
+  if(id){
+    $(id+'Nav')?.classList.add('active');
+  }
+}
+
+function closeUI(){
+  clearInterval(poll);
+  poll=null;
+  chatId=null;
+  $('panel').innerHTML='';
+  $('modal').innerHTML='';
+}
+
+function closeModal(){
+  $('modal').innerHTML='';
+}
+
+function openPanel(title,html){
+  $('panel').innerHTML=`
+    <section class="panel">
+      <header class="panelhead">
+        <button class="ib" onclick="closePanel()">
+          <img src="${ICONS.back}" alt="Back">
+        </button>
+
+        <h2>${esc(title)}</h2>
+      </header>
+
+      <div class="panelbody">
+        ${html}
+      </div>
+    </section>
+  `;
+}
+
+function closePanel(){
+  $('panel').innerHTML='';
+  clearInterval(poll);
+  poll=null;
+  chatId=null;
+}
+
+function authMode(m){
+  $('loginForm').classList.toggle('hidden',m!=='login');
+  $('signupForm').classList.toggle('hidden',m!=='signup');
+  $('loginTab').classList.toggle('on',m==='login');
+  $('signupTab').classList.toggle('on',m==='signup');
+}
+
+$('loginForm').onsubmit=async e=>{
+  e.preventDefault();
+
+  try{
+    await api('/login',{
+      method:'POST',
+      body:{
+        username:$('identity').value.trim(),
+        password:$('password').value
+      }
+    });
+
+    await boot();
+  }catch(x){
+    toast(x.message);
+  }
+};
+
+$('signupForm').onsubmit=async e=>{
+  e.preventDefault();
+
+  try{
+    await api('/signup',{
+      method:'POST',
+      body:{
+        username:$('username').value.trim(),
+        email:$('email').value.trim(),
+        password:$('newPassword').value
+      }
+    });
+
+    await boot();
+  }catch(x){
+    toast(x.message);
+  }
+};
+
+async function boot(){
+  applyLocalTheme();
+
+  try{
+    const r=await api('/me');
+
+    me=r.user;
+
+    $('auth').classList.add('hidden');
+    $('app').classList.remove('hidden');
+
+    await home();
+    loadNotifDot();
+
+  }catch{
+    $('auth').classList.remove('hidden');
+    $('app').classList.add('hidden');
+  }
+}
+
+async function logout(){
+  try{
+    await api('/logout',{method:'POST'});
+  }catch{}
+
+  me=null;
+
+  closeUI();
+
+  $('app').classList.add('hidden');
+  $('auth').classList.remove('hidden');
+}
+
+function mediaURL(x){
+  return x||'';
+}
+
+function detectVideo(url,type=''){
+  return (
+    type.startsWith('video') ||
+    /\.(mp4|webm|mov|m4v)(\?|$)/i.test(url||'')
+  );
+}
+
+function randomTextGradient(){
+  const gradients=[
+    'linear-gradient(135deg,#236dff,#703cff,#b13cff)',
+    'linear-gradient(135deg,#00a6ff,#3855ff,#913cff)',
+    'linear-gradient(135deg,#ff5d9e,#8d3cff,#315dff)',
+    'linear-gradient(135deg,#11b97b,#1478ff,#703cff)',
+    'linear-gradient(135deg,#ff7a18,#af002d,#319197)'
+  ];
+
+  return gradients[
+    Math.floor(Math.random()*gradients.length)
+  ];
+}
+
+function postHTML(p){
+  const u=p.user||p.author||p||{};
+  const m=p.media_url||p.video_url||'';
+  const type=p.media_type||'';
+
+  let media='';
+
+  if(m){
+    if(detectVideo(m,type)){
+      media=`
+        <video
+          class="postmedia"
+          src="${esc(mediaURL(m))}"
+          controls
+          playsinline
+          preload="metadata">
+        </video>
+      `;
+    }else{
+      media=`
+        <img
+          class="postmedia postimage"
+          src="${esc(mediaURL(m))}"
+          loading="lazy"
+          alt="">
+      `;
+    }
+  }else if(p.content){
+    media=`
+      <div
+        class="textpost"
+        style="background:${randomTextGradient()}">
+        ${esc(p.content)}
+      </div>
+    `;
+  }
+
+  return `
+    <article class="post" id="post-${p.id}">
+
+      <div
+        class="posthead"
+        onclick="openProfile('${encodeURIComponent(u.username||p.username||'')}')">
+
+        ${avatar(u,'postavatar')}
+
+        <div class="author">
+          <strong>${esc(u.display_name||u.username||'User')}</strong>
+          <span>@${esc(u.username||p.username||'')}</span>
+        </div>
+
+        <button
+          class="ib"
+          onclick="event.stopPropagation();postMenu(${p.id},${p.user_id||u.id})">
+
+          <img
+            src="${ICONS.more}"
+            alt="More">
+
+        </button>
+      </div>
+
+      ${media}
+
+      ${
+        m && p.content
+        ? `<div class="posttext">${esc(p.content)}</div>`
+        : ''
+      }
+
+      <div class="actions">
+
+        <button
+          class="action ${p.liked?'liked':''}"
+          onclick="like(${p.id},this)">
+
+          <img src="${ICONS.heart}" alt="Like">
+
+        </button>
+
+        <button
+          class="action"
+          onclick="comments(${p.id})">
+
+          <img src="${ICONS.comment}" alt="Comment">
+
+        </button>
+
+        <button
+          class="action"
+          onclick="share(${p.id})">
+
+          <img src="${ICONS.share1}" alt="Share">
+
+        </button>
+
+        <button
+          class="action save ${p.saved?'liked':''}"
+          onclick="save(${p.id},this)">
+
+          <img src="${ICONS.save}" alt="Save">
+
+        </button>
+
+      </div>
+
+      <div class="postinfo">
+
+        <div class="likes">
+          ${Number(p.likes_count??p.likes??0)} likes
+        </div>
+
+        ${
+          m && p.content
+          ? `<div class="caption">
+              <b>@${esc(u.username||p.username||'user')}</b>
+              ${esc(p.content)}
+            </div>`
+          : ''
+        }
+
+        <div class="meta">
+          ${esc(p.created_at||'')}
+        </div>
+
+      </div>
+
+    </article>
+  `;
+}
+
+async function home(){
+  nav('home');
+
+  closeUI();
+
+  $('home').innerHTML=
+    '<div class="empty">Loading…</div>';
+
+  try{
+    const r=await api('/feed');
+
+    feed=r.posts||[];
+
+    renderStories(r.stories||[]);
+
+    $('home').insertAdjacentHTML(
+      'beforeend',
+      feed.length
+      ? feed.map(postHTML).join('')
+      : `
+        <div class="empty">
+          <h3>Your feed is empty</h3>
+          <p>Follow people or create the first post.</p>
+        </div>
+      `
+    );
+
+  }catch(x){
+    $('home').innerHTML=`
+      <div class="empty">
+        ${esc(x.message)}
+      </div>
+    `;
+  }
+}
+
+function renderStories(stories){
+  const groups={};
+
+  stories.forEach(x=>{
+    const u=x.user||x;
+    const key=u.username||x.username;
+
+    if(!groups[key]) groups[key]=[];
+
+    groups[key].push({
+      ...x,
+      user:u
+    });
+  });
+
+  let html=`
+    <section class="stories">
+
+      <div
+        style="
+          font-size:12px;
+          font-weight:900;
+          color:var(--muted);
+          margin-bottom:13px
+        ">
+        STORIES
+      </div>
+
+      <div class="storyrow">
+
+        <div
+          class="story"
+          onclick="pick('story')">
+
+          <div class="ring">
+            <div class="avatar">
+              ＋
+            </div>
+          </div>
+
+          <div class="storyname">
+            Add story
+          </div>
+
+        </div>
+  `;
+
+  Object.values(groups).forEach(a=>{
+    const u=a[0].user||a[0];
+
+    html+=`
+      <div
+        class="story"
+        onclick='viewStory(${JSON.stringify(a).replace(/'/g,"&#39;")})'>
+
+        <div class="ring">
+          ${avatar(u)}
+        </div>
+
+        <div class="storyname">
+          @${esc(u.username)}
+        </div>
+
+      </div>
+    `;
+  });
+
+  html+=`
+      </div>
+    </section>
+  `;
+
+  $('home').insertAdjacentHTML(
+    'afterbegin',
+    html
+  );
+}
+
+async function viewStory(stories){
+  currentStory=stories;
+  currentStoryIndex=0;
+
+  renderStoryViewer();
+}
+
+function renderStoryViewer(){
+  if(!currentStory?.length) return;
+
+  const s=currentStory[currentStoryIndex];
+  const u=s.user||s;
+
+  const media=s.media_url||'';
+  const video=detectVideo(media,s.media_type||'');
+
+  let content='';
+
+  if(media){
+    content=video
+      ? `<video src="${esc(media)}" autoplay controls playsinline></video>`
+      : `<img src="${esc(media)}" alt="">`;
+  }else{
+    content=`
+      <div
+        class="storytext"
+        style="background:${randomTextGradient()}">
+        ${esc(s.content||'')}
+      </div>
+    `;
+  }
+
+  $('modal').innerHTML=`
+    <div class="storyviewer">
+
+      <div class="storytop">
+
+        <button
+          class="ib"
+          onclick="closeModal()">
+          <img src="${ICONS.back}" alt="Back">
+        </button>
+
+        ${avatar(u)}
+
+        <div class="storywho">
+          <strong>@${esc(u.username||'user')}</strong>
+          <span>${esc(s.created_at||'')}</span>
+        </div>
+
+        <button
+          class="ib"
+          onclick="closeModal()">
+          <img src="${ICONS.close}" alt="Close">
+        </button>
+
+      </div>
+
+      <div class="storycontent">
+        ${content}
+      </div>
+
+      <div class="storybottom">
+
+        <input
+          id="storyMessage"
+          class="storymessage"
+          placeholder="Send message…">
+
+        <button
+          class="storyLike"
+          id="storyLikeBtn"
+          onclick="likeStory()">
+
+          <img
+            src="${ICONS.heart}"
+            alt="Like">
+
+        </button>
+
+      </div>
+
+    </div>
+  `;
+
+  $('storyMessage').onkeydown=e=>{
+    if(e.key==='Enter'){
+      e.preventDefault();
+      sendStoryMessage();
+    }
+  };
+}
+
+function likeStory(){
+  const b=$('storyLikeBtn');
+
+  if(!b)return;
+
+  b.classList.toggle('liked');
+
+  /*
+    The current Worker exposes post likes, but does not currently
+    expose a story-like route. This keeps the UI state animated
+    without breaking the existing backend.
+  */
+
+  toast(
+    b.classList.contains('liked')
+    ? 'Story liked'
+    : 'Like removed'
+  );
+}
+
+async function sendStoryMessage(){
+  const input=$('storyMessage');
+
+  if(!input)return;
+
+  const text=input.value.trim();
+
+  if(!text)return;
+
+  const s=currentStory?.[currentStoryIndex];
+  const u=s?.user||s;
+
+  if(!u?.id){
+    toast('Unable to message this user');
+    return;
+  }
+
+  try{
+    const r=await api('/chats',{
+      method:'POST',
+      body:{
+        user_id:Number(u.id)
+      }
+    });
+
+    const id=r.chat?.id||r.id;
+
+    if(!id){
+      throw Error('Unable to open chat');
+    }
+
+    await api(`/chats/${id}/messages`,{
+      method:'POST',
+      body:{
+        content:text
+      }
+    });
+
+    input.value='';
+
+    toast('Message sent');
+
+  }catch(x){
+    toast(x.message);
+  }
+}
+
+async function like(id,b){
+  try{
+    const r=await api(
+      `/posts/${id}/like`,
+      {method:'POST'}
+    );
+
+    b.classList.toggle(
+      'liked',
+      !!r.liked
+    );
+
+    b.closest('.post')
+      .querySelector('.likes')
+      .textContent=
+      `${r.likes_count} likes`;
+
+  }catch(x){
+    toast(x.message);
+  }
+}
+
+async function save(id,b){
+  try{
+    const r=await api(
+      `/posts/${id}/save`,
+      {method:'POST'}
+    );
+
+    b.classList.toggle(
+      'liked',
+      !!r.saved
+    );
+
+    toast(
+      r.saved
+      ? 'Saved'
+      : 'Removed from saved'
+    );
+
+  }catch(x){
+    toast(x.message);
+  }
+}
+
+async function share(id){
+  const u=new URL(location.href);
+
+  u.hash='post-'+id;
+
+  try{
+    if(navigator.share){
+      await navigator.share({
+        title:'ZILNET post',
+        url:u.href
+      });
+    }else{
+      await navigator.clipboard.writeText(u.href);
+      toast('Link copied');
+    }
+  }catch{}
+}
+
+async function comments(id){
+  try{
+    const r=await api(`/posts/${id}/comments`);
+    const cs=r.comments||[];
+
+    $('modal').innerHTML=`
+      <div
+        class="modal"
+        onclick="if(event.target===this)closeModal()">
+
+        <div class="sheet">
+
+          <h3>Comments</h3>
+
+          <div id="commentList">
+
+            ${
+              cs.map(c=>`
+                <div class="comment">
+
+                  ${avatar(c,'avatar')}
+
+                  <div>
+                    <b>
+                      @${esc(c.username||c.user?.username||'user')}
+                    </b>
+
+                    ${esc(c.content||'')}
+
+                  </div>
+
+                </div>
+              `).join('')
+            }
+
+          </div>
+
+          <form
+            class="commentform"
+            onsubmit="sendComment(event,${id})">
+
+            <input
+              id="commentInput"
+              placeholder="Write a comment…"
+              required>
+
+            <button>
+              Send
+            </button>
+
+          </form>
+
+        </div>
+      </div>
+    `;
+
+    $('commentInput').focus();
+
+  }catch(x){
+    toast(x.message);
+  }
+}
+
+async function sendComment(e,id){
+  e.preventDefault();
+
+  const i=$('commentInput');
+
+  try{
+    const r=await api(
+      `/posts/${id}/comments`,
+      {
+        method:'POST',
+        body:{
+          content:i.value.trim()
+        }
+      }
+    );
+
+    const c=r.comment||{};
+
+    $('commentList').insertAdjacentHTML(
+      'beforeend',
+      `
+        <div class="comment">
+
+          ${avatar(me,'avatar')}
+
+          <div>
+            <b>@${esc(me.username)}</b>
+            ${esc(c.content||i.value)}
+          </div>
+
+        </div>
+      `
+    );
+
+    i.value='';
+
+  }catch(x){
+    toast(x.message);
+  }
+}
+  function createMenu(){
+  $('modal').innerHTML=`
+    <div
+      class="modal"
+      onclick="if(event.target===this)closeModal()">
+
+      <div class="sheet">
+
+        <h3>Create</h3>
+
+        <button
+          class="option"
+          onclick="newPost()">
+
+          <b>Create post</b>
+          <span>Photo, video or text</span>
+
+        </button>
+
+        <button
+          class="option"
+          onclick="pick('story')">
+
+          <b>Create story</b>
+          <span>Photo, video or text</span>
+
+        </button>
+
+        <button
+          class="option"
+          onclick="pick('reel')">
+
+          <b>Create reel</b>
+          <span>Video</span>
+
+        </button>
+
+      </div>
+    </div>
+  `;
+}
+
+function newPost(){
+  $('modal').innerHTML=`
+    <div
+      class="modal"
+      onclick="if(event.target===this)closeModal()">
+
+      <div class="sheet">
+
+        <h3>New post</h3>
+
+        <textarea
+          id="postText"
+          class="field"
+          placeholder="Write something…"></textarea>
+
+        <button
+          class="fileButton"
+          onclick="pick('post')">
+
+          📷 Choose photo or video
+
+        </button>
+
+        <input
+          id="postURL"
+          class="field"
+          placeholder="Or paste image/video URL">
+
+        <div
+          id="postPreview"
+          style="margin-bottom:12px"></div>
+
+        <button
+          class="primary"
+          onclick="sendPost()">
+
+          Post
+
+        </button>
+
+      </div>
+    </div>
+  `;
+}
+
+function pick(k){
+  closeModal();
+
+  let input;
+
+  if(k==='story')input=$('storyPicker');
+  else if(k==='post')input=$('postPicker');
+  else input=$('reelPicker');
+
+  input.value='';
+
+  input.onchange=()=>{
+
+    if(k==='story'){
+      sendStory(input.files[0]);
+    }
+
+    if(k==='post'){
+      selectedPostFile=input.files[0];
+
+      if(selectedPostFile){
+        toast(
+          `${selectedPostFile.name} selected`
+        );
+      }
+    }
+
+    if(k==='reel'){
+      sendReel(input.files[0]);
+    }
+  };
+
+  input.click();
+}
+
+let selectedPostFile=null;
+
+async function upload(f){
+  const fd=new FormData();
+
+  fd.append(
+    'file',
+    f,
+    f.name
+  );
+
+  const r=await api(
+    '/upload',
+    {
+      method:'POST',
+      body:fd
+    }
+  );
+
+  return r.url||r.media_url||r.key;
+}
+
+async function sendPost(){
+  try{
+
+    const text=
+      $('postText')?.value.trim()||'';
+
+    const url=
+      $('postURL')?.value.trim()||'';
+
+    let media='';
+    let mediaType='';
+
+    if(selectedPostFile){
+      media=await upload(selectedPostFile);
+      mediaType=selectedPostFile.type||'';
+    }else if(url){
+      media=url;
+      mediaType=
+        /\.(mp4|webm|mov|m4v)(\?|$)/i.test(url)
+        ? 'video/url'
+        : 'image/url';
+    }
+
+    if(!text && !media){
+      toast('Add text, an image, or a video');
+      return;
+    }
+
+    await api(
+      '/posts',
+      {
+        method:'POST',
+        body:{
+          content:text,
+          media_url:media,
+          media_type:mediaType
+        }
+      }
+    );
+
+    selectedPostFile=null;
+
+    closeModal();
+
+    toast('Posted');
+
+    home();
+
+  }catch(x){
+    toast(x.message);
+  }
+}
+
+async function sendStory(f){
+  if(!f)return;
+
+  try{
+
+    const m=await upload(f);
+
+    await api(
+      '/stories',
+      {
+        method:'POST',
+        body:{
+          content:'',
+          media_url:m,
+          media_type:f.type
+        }
+      }
+    );
+
+    toast('Story added');
+
+    home();
+
+  }catch(x){
+    toast(x.message);
+  }
+}
+
+async function sendReel(f){
+  if(!f)return;
+
+  try{
+
+    const m=await upload(f);
+
+    await api(
+      '/reels',
+      {
+        method:'POST',
+        body:{
+          caption:'',
+          media_url:m
+        }
+      }
+    );
+
+    toast('Reel added');
+
+    reels();
+
+  }catch(x){
+    toast(x.message);
+  }
+}
+
+function searchPanel(){
+  nav('search');
+
+  openPanel(
+    'Search',
+    `
+      <input
+        id="q"
+        class="search"
+        placeholder="Search people, skills or work">
+
+      <div id="results"></div>
+    `
+  );
+
+  $('q').oninput=()=>doSearch();
+
+  $('q').focus();
+}
+
+let st;
+
+async function doSearch(){
+
+  clearTimeout(st);
+
+  st=setTimeout(async()=>{
+
+    const q=$('q').value.trim();
+
+    if(!q){
+      $('results').innerHTML='';
+      return;
+    }
+
+    try{
+
+      const r=await api(
+        '/search?q='+encodeURIComponent(q)
+      );
+
+      const us=r.users||[];
+
+      $('results').innerHTML=
+        us.map(u=>`
+
+          <div
+            class="userrow"
+            onclick="openProfile('${encodeURIComponent(u.username)}')">
+
+            ${avatar(u)}
+
+            <div class="userinfo">
+
+              <strong>
+                ${esc(u.display_name||u.username)}
+              </strong>
+
+              <span>
+                @${esc(u.username)}
+                ${u.skills?' · '+esc(u.skills):''}
+              </span>
+
+            </div>
+
+            ${
+              Number(u.id)!==Number(me.id)
+              ? `
+                <button
+                  class="follow ${u.following?'following':''}"
+                  onclick="event.stopPropagation();follow(${u.id},this)">
+
+                  ${u.following?'Following':'Follow'}
+
+                </button>
+              `
+              :''
+            }
+
+          </div>
+
+        `).join('')
+        ||
+        '<div class="empty">No results.</div>';
+
+    }catch(x){
+      toast(x.message);
+    }
+
+  },220);
+}
+
+async function follow(id,b){
+  try{
+
+    const r=await api(
+      `/users/${id}/follow`,
+      {method:'POST'}
+    );
+
+    b.textContent=
+      r.following
+      ? 'Following'
+      : 'Follow';
+
+    b.classList.toggle(
+      'following',
+      !!r.following
+    );
+
+  }catch(x){
+    toast(x.message);
+  }
+}
+
+async function myProfile(){
+  nav('profile');
+
+  openProfile(
+    encodeURIComponent(me.username),
+    true
+  );
+}
+
+async function openProfile(un,own=false){
+  try{
+
+    const r=await api(
+      '/profile/'+decodeURIComponent(un)
+    );
+
+    const u=r.user;
+    const ps=r.posts||[];
+
+    openPanel(
+      '@'+u.username,
+      profileHTML(
+        u,
+        ps,
+        own||u.username===me.username,
+        r.private
+      )
+    );
+
+  }catch(x){
+    toast(x.message);
+  }
+}
+
+function profileHTML(
+  u,
+  ps,
+  own,
+  privateProfile
+){
+
+  return `
+    <div class="profiletop">
+
+      <div class="profileline">
+
+        ${avatar(u,'profileavatar')}
+
+        <div class="profilemain">
+
+          <h2>
+            ${esc(u.display_name||u.username)}
+          </h2>
+
+          <p>
+            @${esc(u.username)}
+            ${u.bio?'\n'+esc(u.bio):''}
+          </p>
+
+          <div class="stats">
+
+            <span>
+              <b>${ps.length}</b>
+              posts
+            </span>
+
+            <span>
+              <b>${Number(u.followers_count||0)}</b>
+              followers
+            </span>
+
+            <span>
+              <b>${Number(u.following_count||0)}</b>
+              following
+            </span>
+
+          </div>
+
+        </div>
+
+      </div>
+
+      <div class="profilebuttons">
+
+        ${
+          own
+          ? `
+            <button onclick="editProfile()">
+              <img
+                src="${ICONS.edit}"
+                style="width:18px;height:18px;filter:brightness(0) invert(1);vertical-align:middle">
+              Edit
+            </button>
+
+            <button onclick="settings()">
+              <img
+                src="${ICONS.settings}"
+                style="width:18px;height:18px;filter:brightness(0) invert(1);vertical-align:middle">
+              Settings
+            </button>
+          `
+          : `
+            <button
+              onclick="follow(${u.id},this)"
+              class="${u.following?'following':''}">
+
+              ${u.following?'Following':'Follow'}
+
+            </button>
+
+            <button onclick="startChat(${u.id})">
+              Message
+            </button>
+          `
+        }
+
+      </div>
+
+    </div>
+
+    ${
+      privateProfile
+      ? `
+        <div class="empty">
+          This account is private.
+        </div>
+      `
+      : `
+        <div class="grid">
+
+          ${
+            ps.map(p=>{
+
+              const m=p.media_url||'';
+
+              if(!m){
+                return `
+                  <div
+                    class="griditem"
+                    onclick="single(${p.id})"
+                    style="
+                      display:grid;
+                      place-items:center;
+                      padding:15px;
+                      text-align:center;
+                      background:${randomTextGradient()}
+                    ">
+
+                    <b>
+                      ${esc(p.content||'')}
+                    </b>
+
+                  </div>
+                `;
+              }
+
+              return `
+                <div
+                  class="griditem"
+                  onclick="single(${p.id})">
+
+                  ${
+                    detectVideo(m,p.media_type||'')
+                    ? `
+                      <video
+                        src="${esc(m)}"
+                        muted
+                        playsinline>
+                      </video>
+                    `
+                    : `
+                      <img
+                        src="${esc(m)}"
+                        loading="lazy">
+                    `
+                  }
+
+                </div>
+              `;
+
+            }).join('')
+          }
+
+        </div>
+      `
+    }
+  `;
+}
+
+async function single(id){
+  try{
+
+    const r=await api(
+      '/posts/'+id
+    );
+
+    const p=r.post||r;
+
+    openPanel(
+      'Post',
+      postHTML(p)
+    );
+
+  }catch(x){
+    toast(x.message);
+  }
+}
+
+function postMenu(id,owner){
+
+  if(Number(owner)!==Number(me.id)){
+    return;
+  }
+
+  $('modal').innerHTML=`
+    <div
+      class="modal"
+      onclick="if(event.target===this)closeModal()">
+
+      <div class="sheet">
+
+        <h3>Post</h3>
+
+        <button
+          class="option"
+          onclick="
+            closeModal();
+            deletePost(${id})
+          ">
+
+          <b>Delete post</b>
+          <span>This cannot be undone.</span>
+
+        </button>
+
+      </div>
+
+    </div>
+  `;
+}
+
+async function deletePost(id){
+
+  try{
+
+    await api(
+      `/posts/${id}`,
+      {method:'DELETE'}
+    );
+
+    toast('Post deleted');
+
+    home();
+
+  }catch(x){
+    toast(x.message);
+  }
+}
+
+function editProfile(){
+
+  $('modal').innerHTML=`
+    <div class="modal">
+
+      <div class="sheet">
+
+        <h3>Edit profile</h3>
+
+        <input
+          id="ename"
+          class="field"
+          placeholder="Display name"
+          value="${esc(me.display_name||'')}">
+
+        <textarea
+          id="ebio"
+          class="field"
+          placeholder="Bio">${esc(me.bio||'')}</textarea>
+
+        <input
+          id="eskills"
+          class="field"
+          placeholder="Skills"
+          value="${esc(me.skills||'')}">
+
+        <input
+          id="eavatar"
+          class="field"
+          placeholder="Profile image URL"
+          value="${esc(me.avatar_url||'')}">
+
+        <button
+          class="primary"
+          onclick="saveProfile()">
+
+          Save
+
+        </button>
+
+      </div>
+
+    </div>
+  `;
+}
+
+async function saveProfile(){
+
+  try{
+
+    const r=await api(
+      '/profile/update',
+      {
+        method:'POST',
+        body:{
+          display_name:$('ename').value,
+          bio:$('ebio').value,
+          skills:$('eskills').value,
+          avatar_url:$('eavatar').value
+        }
+      }
+    );
+
+    me=r.user;
+
+    closeModal();
+
+    toast('Profile updated');
+
+    myProfile();
+
+  }catch(x){
+    toast(x.message);
+  }
+}
+
+/* ---------------- MORE ---------------- */
+
+function moreMenu(){
+
+  $('modal').innerHTML=`
+    <div
+      class="modal"
+      onclick="if(event.target===this)closeModal()">
+
+      <div class="sheet">
+
+        <h3>More</h3>
+
+        <button
+          class="option"
+          onclick="settings()">
+
+          <b>
+            <img
+              src="${ICONS.settings}"
+              style="width:20px;height:20px;filter:brightness(0) invert(1);vertical-align:middle">
+            Settings
+          </b>
+
+          <span>
+            Theme, privacy, notifications and account
+          </span>
+
+        </button>
+
+        <button
+          class="option"
+          onclick="notifications();closeModal()">
+
+          <b>Notifications</b>
+          <span>See your latest activity.</span>
+
+        </button>
+
+        <button
+          class="option"
+          onclick="logout()">
+
+          <b>Log out</b>
+          <span>Sign out of ZILNET.</span>
+
+        </button>
+
+      </div>
+    </div>
+  `;
+}
+
+/* ---------------- CHATS ---------------- */
+
+async function chats(){
+
+  nav('chat');
+
+  openPanel(
+    'Messages',
+    `
+      <div style="display:flex;gap:8px;margin-bottom:14px">
+
+        <button
+          class="secondary"
+          onclick="newChat()"
+          style="flex:1">
+
+          New chat
+
+        </button>
+
+        <button
+          class="secondary"
+          onclick="newGroup()"
+          style="flex:1">
+
+          Group
+
+        </button>
+
+      </div>
+
+      <div id="chatList">
+        Loading…
+      </div>
+    `
+  );
+
+  try{
+
+    const r=await api('/chats');
+    const cs=r.chats||[];
+
+    $('chatList').innerHTML=
+      cs.map(c=>{
+
+        let title=
+          c.name ||
+          c.username ||
+          (
+            c.members?.length
+            ? c.members
+              .map(x=>'@'+x.username)
+              .join(', ')
+            : 'Chat'
+          );
+
+        return `
+          <div
+            class="chatrow"
+            onclick="chat(${c.id})">
+
+            ${avatar(c.user||c,'chatavatar')}
+
+            <div class="chatinfo">
+
+              <strong>
+                ${esc(title)}
+              </strong>
+
+              <span>
+                ${esc(c.last_message||'No messages yet')}
+              </span>
+
+            </div>
+
+          </div>
+        `;
+
+      }).join('')
+      ||
+      '<div class="empty">No chats yet.</div>';
+
+  }catch(x){
+    toast(x.message);
+  }
+}
+
+async function newChat(){
+
+  openPanel(
+    'New chat',
+    `
+      <input
+        id="newq"
+        class="search"
+        placeholder="Search a person">
+
+      <div id="newr"></div>
+    `
+  );
+
+  $('newq').oninput=async()=>{
+
+    const q=$('newq').value.trim();
+
+    if(!q){
+      $('newr').innerHTML='';
+      return;
+    }
+
+    try{
+
+      const r=await api(
+        '/search?q='+encodeURIComponent(q)
+      );
+
+      $('newr').innerHTML=
+        (r.users||[])
+        .filter(
+          x=>Number(x.id)!==Number(me.id)
+        )
+        .map(u=>`
+
+          <div
+            class="userrow"
+            onclick="startChat(${u.id})">
+
+            ${avatar(u)}
+
+            <div class="userinfo">
+
+              <strong>
+                ${esc(u.display_name||u.username)}
+              </strong>
+
+              <span>
+                @${esc(u.username)}
+              </span>
+
+            </div>
+
+          </div>
+
+        `).join('');
+
+    }catch{}
+  };
+
+  $('newq').focus();
+}
+
+async function startChat(id){
+
+  try{
+
+    const r=await api(
+      '/chats',
+      {
+        method:'POST',
+        body:{
+          user_id:Number(id)
+        }
+      }
+    );
+
+    const id2=r.chat?.id||r.id;
+
+    if(!id2){
+      throw Error('Chat could not be created');
+    }
+
+    chat(id2);
+
+  }catch(x){
+    toast(x.message);
+  }
+}
+
+async function newGroup(){
+
+  openPanel(
+    'Create group',
+    `
+      <input
+        id="groupSearch"
+        class="search"
+        placeholder="Search people">
+
+      <div id="groupResults"></div>
+
+      <div
+        id="selectedPeople"
+        style="margin:12px 0">
+      </div>
+
+      <input
+        id="groupName"
+        class="field"
+        placeholder="Group name">
+
+      <button
+        class="primary"
+        onclick="createGroup()">
+
+        Create group
+
+      </button>
+    `
+  );
+
+  window.groupUsers=[];
+
+  $('groupSearch').oninput=async()=>{
+
+    const q=$('groupSearch').value.trim();
+
+    if(!q){
+      $('groupResults').innerHTML='';
+      return;
+    }
+
+    try{
+
+      const r=await api(
+        '/search?q='+encodeURIComponent(q)
+      );
+
+      $('groupResults').innerHTML=
+        (r.users||[])
+        .filter(
+          x=>Number(x.id)!==Number(me.id)
+        )
+        .map(u=>`
+
+          <div
+            class="userrow"
+            onclick="selectGroupUser(${u.id},'${esc(u.username)}')">
+
+            ${avatar(u)}
+
+            <div class="userinfo">
+
+              <strong>
+                ${esc(u.display_name||u.username)}
+              </strong>
+
+              <span>
+                @${esc(u.username)}
+              </span>
+
+            </div>
+
+          </div>
+
+        `).join('');
+
+    }catch{}
+  };
+}
+
+function selectGroupUser(id,username){
+
+  if(window.groupUsers.some(x=>x.id===Number(id))){
+    return;
+  }
+
+  window.groupUsers.push({
+    id:Number(id),
+    username
+  });
+
+  renderSelectedPeople();
+}
+
+function renderSelectedPeople(){
+
+  $('selectedPeople').innerHTML=
+    window.groupUsers.map(x=>`
+
+      <button
+        class="chattool"
+        onclick="
+          window.groupUsers=window.groupUsers.filter(
+            y=>y.id!==${x.id}
+          );
+          renderSelectedPeople();
+        ">
+
+        @${esc(x.username)} ×
+
+      </button>
+
+    `).join(' ');
+}
+
+async function createGroup(){
+
+  const name=$('groupName').value.trim();
+
+  if(!name){
+    toast('Enter a group name');
+    return;
+  }
+
+  if(!window.groupUsers?.length){
+    toast('Select at least one person');
+    return;
+  }
+
+  try{
+
+    const r=await api(
+      '/groups',
+      {
+        method:'POST',
+        body:{
+          name,
+          user_ids:window.groupUsers.map(x=>x.id)
+        }
+      }
+    );
+
+    const id=r.chat?.id||r.id;
+
+    if(!id){
+      throw Error('Group could not be created');
+    }
+
+    chat(id);
+
+  }catch(x){
+    toast(x.message);
+  }
+}
+
+function chatThemeGradient(theme='default'){
+
+  const colors=
+    CHAT_THEMES[theme]||
+    CHAT_THEMES.default;
+
+  return `
+    linear-gradient(
+      135deg,
+      ${colors[0]},
+      ${colors[1]},
+      ${colors[2]}
+    )
+  `;
+}
+
+async function chat(id){
+
+  chatId=id;
+
+  try{
+
+    const info=await api(`/chats/${id}`);
+    const r=await api(`/chats/${id}/messages`);
+
+    const c=info.chat||{};
+    const ms=r.messages||[];
+
+    let theme='default';
+
+    try{
+      const tr=await api(`/chats/${id}/theme`);
+      theme=tr.theme||'default';
+    }catch{}
+
+    currentChatTheme=theme;
+
+    const bg=
+      localStorage.getItem(
+        `zilnet-chat-bg-${id}`
+      )||'';
+
+    $('modal').innerHTML=`
+
+      <div class="chatview">
+
+        ${
+          bg
+          ? `
+            <div
+              class="chatBackground"
+              style="
+                background-image:url('${esc(bg)}')
+              ">
+            </div>
+          `
+          : ''
+        }
+
+        <div class="chatOverlay"></div>
+
+        <div
+          class="chathead"
+          style="
+            background:${chatThemeGradient(theme)};
+            background-size:250% 250%;
+            animation:gradientMove 9s ease infinite;
+          ">
+
+          <button
+            class="ib"
+            onclick="closeModal()">
+
+            <img
+              src="${ICONS.back}"
+              alt="Back">
+
+          </button>
+
+          ${avatar(c.user||c,'chatavatar')}
+
+          <div class="who">
+
+            <strong>
+              ${esc(chatTitle(c))}
+            </strong>
+
+            <span>
+              ${chatSubtitle(c)}
+            </span>
+
+          </div>
+
+          ${
+            c.username
+            ? `
+              <button
+                class="ib"
+                onclick="openProfile('${encodeURIComponent(c.username)}')">
+
+                <img
+                  src="${ICONS.profile}"
+                  alt="Profile">
+
+              </button>
+            `
+            : ''
+          }
+
+        </div>
+
+        <div
+          id="messages"
+          class="messages">
+
+          ${ms.map(msg).join('')}
+
+        </div>
+
+        <div class="chattools">
+
+          <button
+            class="chattool"
+            onclick="showChatThemes()">
+
+            Theme
+
+          </button>
+
+          <button
+            class="chattool"
+            onclick="pickChatBackground()">
+
+            Background
+
+          </button>
+
+          <button
+            class="chattool"
+            onclick="removeChatBackground()">
+
+            Remove background
+
+          </button>
+
+        </div>
+
+        <form
+          class="chatinput"
+          onsubmit="sendMsg(event)">
+
+          <input
+            id="msg"
+            placeholder="Message…"
+            autocomplete="off">
+
+          <button>
+
+            <img
+              src="${ICONS.send}"
+              alt="Send">
+
+          </button>
+
+        </form>
+
+      </div>
+    `;
+
+    $('messages').scrollTop=
+      $('messages').scrollHeight;
+
+    clearInterval(poll);
+
+    poll=setInterval(
+      refreshChat,
+      3000
+    );
+
+  }catch(x){
+    toast(x.message);
+  }
+}
+
+function chatTitle(c){
+
+  if(c.type==='group'){
+    if(c.name)return c.name;
+
+    if(c.members?.length){
+      return c.members
+        .map(x=>'@'+x.username)
+        .join(', ');
+    }
+
+    return 'Group';
+  }
+
+  return c.name||
+    c.username||
+    c.user?.username||
+    'Chat';
+}
+
+function chatSubtitle(c){
+
+  if(c.type==='group'){
+    return 'Group chat';
+  }
+
+  return c.username
+    ? '@'+c.username
+    : c.user?.username
+      ? '@'+c.user.username
+      : '';
+}
+
+function msg(m){
+
+  const mine=
+    Number(m.user_id)===Number(me.id);
+
+  const username=
+    m.username||
+    m.user?.username||
+    'user';
+
+  return `
+    <div
+      class="messageRow ${mine?'mine':''}">
+
+      <div class="messageStack">
+
+        <div class="messageUser">
+          @${esc(username)}
+        </div>
+
+        <div
+          class="bubble ${
+            mine
+            ? 'mineBubble'
+            : 'theirsBubble'
+          }">
+
+          ${esc(m.content||'')}
+
+        </div>
+
+      </div>
+
+    </div>
+  `;
+}
+
+async function refreshChat(){
+
+  if(!chatId||!$('messages'))return;
+
+  try{
+
+    const r=await api(
+      `/chats/${chatId}/messages`
+    );
+
+    $('messages').innerHTML=
+      (r.messages||[])
+      .map(msg)
+      .join('');
+
+    $('messages').scrollTop=
+      $('messages').scrollHeight;
+
+  }catch{}
+}
+
+async function sendMsg(e){
+
+  e.preventDefault();
+
+  const i=$('msg');
+
+  const t=i.value.trim();
+
+  if(!t)return;
+
+  try{
+
+    await api(
+      `/chats/${chatId}/messages`,
+      {
+        method:'POST',
+        body:{
+          content:t
+        }
+      }
+    );
+
+    i.value='';
+
+    refreshChat();
+
+  }catch(x){
+    toast(x.message);
+  }
+}
+
+/* ---------------- CHAT THEMES ---------------- */
+
+async function showChatThemes(){
+
+  let themes=Object.keys(CHAT_THEMES);
+
+  try{
+
+    const r=await api(
+      `/chats/${chatId}/theme`
+    );
+
+    if(r.themes?.length){
+      themes=r.themes.map(x=>x.name);
+    }
+
+  }catch{}
+
+  $('modal').innerHTML=`
+
+    <div
+      class="modal"
+      onclick="if(event.target===this)chat(${chatId})">
+
+      <div class="sheet">
+
+        <h3>Chat theme</h3>
+
+        <div class="themeGrid">
+
+          ${
+            themes.map(name=>{
+
+              const colors=
+                CHAT_THEMES[name]||
+                ['#111','#222','#333'];
+
+              return `
+                <div
+                  class="themePreview"
+                  style="
+                    background:linear-gradient(
+                      135deg,
+                      ${colors[0]},
+                      ${colors[1]},
+                      ${colors[2]}
+                    )
+                  "
+                  onclick="setChatTheme('${name}')">
+
+                  <div class="themeBubble">
+                    ${esc(name)}
+                  </div>
+
+                </div>
+              `;
+
+            }).join('')
+          }
+
+        </div>
+
+      </div>
+    </div>
+  `;
+}
+
+async function setChatTheme(name){
+
+  try{
+
+    await api(
+      `/chats/${chatId}/theme`,
+      {
+        method:'POST',
+        body:{
+          theme:name
+        }
+      }
+    );
+
+    currentChatTheme=name;
+
+    toast('Theme changed');
+
+    chat(chatId);
+
+  }catch(x){
+    toast(x.message);
+  }
+}
+
+function pickChatBackground(){
+
+  const input=$('chatBgPicker');
+
+  input.value='';
+
+  input.onchange=async()=>{
+
+    const f=input.files[0];
+
+    if(!f)return;
+
+    try{
+
+      const url=await upload(f);
+
+      localStorage.setItem(
+        `zilnet-chat-bg-${chatId}`,
+        url
+      );
+
+      toast('Chat background updated');
+
+      chat(chatId);
+
+    }catch(x){
+      toast(x.message);
+    }
+  };
+
+  input.click();
+}
+
+function removeChatBackground(){
+
+  localStorage.removeItem(
+    `zilnet-chat-bg-${chatId}`
+  );
+
+  toast('Background removed');
+
+  chat(chatId);
+}
+
+/* ---------------- REELS ---------------- */
+
+async function reels(){
+
+  nav('reels');
+
+  openPanel(
+    'Reels',
+    `
+      <button
+        class="primary"
+        onclick="createMenu()"
+        style="margin-bottom:15px">
+
+        Create reel
+
+      </button>
+
+      <div id="reels">
+        Loading…
+      </div>
+    `
+  );
+
+  try{
+
+    const r=await api('/reels/feed');
+    const rs=r.reels||[];
+
+    $('reels').innerHTML=
+      rs.map(x=>`
+
+        <article class="post">
+
+          <div class="posthead">
+
+            ${avatar(x,'postavatar')}
+
+            <div class="author">
+
+              <strong>
+                ${esc(x.display_name||x.username)}
+              </strong>
+
+              <span>
+                @${esc(x.username)}
+              </span>
+
+            </div>
+
+          </div>
+
+          <video
+            class="postmedia"
+            src="${esc(x.media_url||x.video_url||'')}"
+            controls
+            playsinline
+            loop>
+          </video>
+
+          ${
+            x.caption
+            ? `
+              <div class="postinfo">
+
+                <div class="caption">
+                  <b>@${esc(x.username)}</b>
+                  ${esc(x.caption)}
+                </div>
+
+              </div>
+            `
+            : ''
+          }
+
+        </article>
+
+      `).join('')
+      ||
+      '<div class="empty">No reels yet.</div>';
+
+  }catch(x){
+    toast(x.message);
+  }
+}
+
+/* ---------------- NOTIFICATIONS ---------------- */
+
+async function notifications(){
+
+  openPanel(
+    'Notifications',
+    '<div id="notes">Loading…</div>'
+  );
+
+  try{
+
+    const r=await api('/notifications');
+    const ns=r.notifications||[];
+
+    $('notes').innerHTML=
+      ns.map(n=>{
+
+        const text=
+          n.type==='follow'
+          ? 'started following you'
+          : n.type==='like'
+            ? 'liked your post'
+            : n.type==='comment'
+              ? 'commented on your post'
+              : n.type==='message'
+                ? 'sent you a message'
+                : 'sent you a notification';
+
+        return `
+          <div
+            class="notif ${n.read?'':'unread'}"
+            onclick="
+              ${
+                n.actor?.username
+                ? `openProfile('${encodeURIComponent(n.actor.username)}')`
+                : ''
+              }
+            ">
+
+            ${avatar(n.actor,'avatar')}
+
+            <div>
+
+              <b>
+                ${esc(
+                  n.actor?.display_name||
+                  n.actor?.username||
+                  'Someone'
+                )}
+              </b>
+
+              ${text}
+
+              <div class="meta">
+                ${esc(n.created_at||'')}
+              </div>
+
+            </div>
+
+            ${
+              n.read
+              ? ''
+              : '<i class="notifDot"></i>'
+            }
+
+          </div>
+        `;
+
+      }).join('')
+      ||
+      '<div class="empty">No notifications.</div>';
+
+    api(
+      '/notifications/read',
+      {method:'POST'}
+    );
+
+    $('topDot').classList.add('hidden');
+
+  }catch(x){
+    toast(x.message);
+  }
+}
+
+async function loadNotifDot(){
+
+  try{
+
+    const r=await api('/notifications');
+
+    const has=
+      (r.notifications||[])
+      .some(n=>!n.read);
+
+    $('topDot').classList.toggle(
+      'hidden',
+      !has
+    );
+
+  }catch{}
+}
+
+/* ---------------- SETTINGS ---------------- */
+
+async function settings(){
+
+  closeModal();
+
+  try{
+
+    const r=await api('/settings');
+
+    settingsCache=r.settings;
+
+    renderSettings();
+
+  }catch(x){
+    toast(x.message);
+  }
+}
+
+function renderSettings(){
+
+  const s=settingsCache||{};
+
+  $('modal').innerHTML=`
+
+    <div
+      class="modal"
+      onclick="if(event.target===this)closeModal()">
+
+      <div class="sheet">
+
+        <h3>Settings</h3>
+
+        <div class="sectionTitle">
+          Appearance
+        </div>
+
+        <div class="setting">
+
+          <span>
+            Theme
+          </span>
+
+          <select id="themeSel">
+
+            <option value="system">
+              System
+            </option>
+
+            <option value="dark">
+              Dark
+            </option>
+
+            <option value="light">
+              Light
+            </option>
+
+          </select>
+
+        </div>
+
+        <div class="setting">
+
+          <span>
+            Performance mode<br>
+            <small>
+              Reduce heavy animations
+            </small>
+          </span>
+
+          <button
+            id="perf"
+            class="switch ${
+              localStorage.getItem('zilnet-performance')==='on'
+              ? 'on'
+              : ''
+            }"
+            onclick="togglePerformance()">
+
+            <i></i>
+
+          </button>
+
+        </div>
+
+        <div class="sectionTitle">
+          Privacy
+        </div>
+
+        <div class="setting">
+
+          <span>
+            Private account
+          </span>
+
+          <button
+            id="priv"
+            class="switch ${
+              s.profile_visibility==='private'
+              ? 'on'
+              : ''
+            }"
+            onclick="togglePrivacy()">
+
+            <i></i>
+
+          </button>
+
+        </div>
+
+        <div class="setting">
+
+          <span>
+            Who can message you
+          </span>
+
+          <select id="msgPrivacy">
+
+            <option value="everyone">
+              Everyone
+            </option>
+
+            <option value="followers">
+              Followers only
+            </option>
+
+            <option value="nobody">
+              No one
+            </option>
+
+          </select>
+
+        </div>
+
+        <div class="sectionTitle">
+          Notifications
+        </div>
+
+        ${
+          ['likes','comments','follows','messages']
+          .map(k=>`
+
+            <div class="setting">
+
+              <span>
+                ${k[0].toUpperCase()+k.slice(1)}
+              </span>
+
+              <input
+                id="n-${k}"
+                type="checkbox"
+                ${
+                  s.notification_settings?.[k]!==false
+                  ? 'checked'
+                  : ''
+                }
+                onchange="saveSettings()">
+
+            </div>
+
+          `).join('')
+        }
+
+        <div class="sectionTitle">
+          Account
+        </div>
+
+        <button
+          class="setting"
+          onclick="editProfile()">
+
+          <span>
+            Edit profile
+          </span>
+
+          <span>›</span>
+
+        </button>
+
+        <button
+          class="setting"
+          onclick="changePassword()">
+
+          <span>
+            Change password
+          </span>
+
+          <span>›</span>
+
+        </button>
+
+        <button
+          class="setting"
+          onclick="logout()">
+
+          <span>
+            Log out
+          </span>
+
+          <span>›</span>
+
+        </button>
+
+      </div>
+    </div>
+  `;
+
+  $('themeSel').value=
+    s.theme||'system';
+
+  $('msgPrivacy').value=
+    s.message_privacy||'everyone';
+
+  $('themeSel').onchange=
+    saveSettings;
+
+  $('msgPrivacy').onchange=
+    saveSettings;
+}
+
+function togglePerformance(){
+
+  const on=
+    localStorage.getItem(
+      'zilnet-performance'
+    )==='on';
+
+  localStorage.setItem(
+    'zilnet-performance',
+    on?'off':'on'
+  );
+
+  document.body.classList.toggle(
+    'performance',
+    !on
+  );
+
+  $('perf').classList.toggle(
+    'on',
+    !on
+  );
+
+  toast(
+    !on
+    ? 'Performance mode enabled'
+    : 'Performance mode disabled'
+  );
+}
+
+function applyLocalTheme(){
+
+  const t=
+    localStorage.getItem(
+      'zilnet-theme'
+    )||'dark';
+
+  document.body.classList.toggle(
+    'light',
+    t==='light'
+  );
+
+  document.body.classList.toggle(
+    'performance',
+    localStorage.getItem(
+      'zilnet-performance'
+    )==='on'
+  );
+}
+
+async function saveSettings(){
+
+  try{
+
+    const s=settingsCache||{};
+
+    const payload={
+      theme:
+        $('themeSel')?.value||
+        s.theme||
+        'dark',
+
+      profile_visibility:
+        $('priv')?.classList.contains('on')
+        ? 'private'
+        : 'public',
+
+      message_privacy:
+        $('msgPrivacy')?.value||
+        s.message_privacy||
+        'everyone',
+
+      notification_settings:{
+        likes:
+          $('n-likes')?.checked!==false,
+
+        comments:
+          $('n-comments')?.checked!==false,
+
+        follows:
+          $('n-follows')?.checked!==false,
+
+        messages:
+          $('n-messages')?.checked!==false
+      }
+    };
+
+    const r=await api(
+      '/settings',
+      {
+        method:'PATCH',
+        body:payload
+      }
+    );
+
+    settingsCache=r.settings;
+
+    localStorage.setItem(
+      'zilnet-theme',
+      payload.theme
+    );
+
+    applyLocalTheme();
+
+    toast('Settings saved');
+
+  }catch(x){
+    toast(x.message);
+  }
+}
+
+function togglePrivacy(){
+
+  const b=$('priv');
+
+  b.classList.toggle('on');
+
+  saveSettings();
+}
+
+function changePassword(){
+
+  closeModal();
+
+  $('modal').innerHTML=`
+
+    <div class="modal">
+
+      <div class="sheet">
+
+        <h3>Change password</h3>
+
+        <input
+          id="cp1"
+          class="field"
+          type="password"
+          placeholder="Current password">
+
+        <input
+          id="cp2"
+          class="field"
+          type="password"
+          placeholder="New password"
+          minlength="8">
+
+        <button
+          class="primary"
+          onclick="savePassword()">
+
+          Save password
+
+        </button>
+
+      </div>
+
+    </div>
+  `;
+}
+
+async function savePassword(){
+
+  try{
+
+    await api(
+      '/profile/password',
+      {
+        method:'POST',
+        body:{
+          current_password:$('cp1').value,
+          new_password:$('cp2').value
+        }
+      }
+    );
+
+    closeModal();
+
+    toast('Password updated');
+
+  }catch(x){
+    toast(x.message);
+  }
+}
+
+async function forgotPassword(){
+
+  const email=
+    prompt(
+      'Enter the email connected to your ZILNET account'
+    );
+
+  if(!email)return;
+
+  try{
+
+    const r=await api(
+      '/forgot-password',
+      {
+        method:'POST',
+        body:{email}
+      }
+    );
+
+    const id=
+      r.reset_id||
+      prompt('Enter reset ID from the recovery flow');
+
+    if(!id){
+      toast(r.message||'Recovery started');
+      return;
+    }
+
+    const code=
+      prompt(
+        'Enter the 6-digit code sent to your email'
+      );
+
+    if(!code)return;
+
+    const pw=
+      prompt(
+        'Enter your new password (8+ characters)'
+      );
+
+    if(!pw)return;
+
+    await api(
+      '/reset-password',
+      {
+        method:'POST',
+        body:{
+          reset_id:id,
+          code,
+          new_password:pw
+        }
+      }
+    );
+
+    toast(
+      'Password changed. You are logged in.'
+    );
+
+    await boot();
+
+  }catch(x){
+    toast(x.message);
+  }
+}
+
+window.onhashchange=()=>{
+
+  const m=
+    location.hash.match(
+      /^#post-(\d+)$/
+    );
+
+  if(m&&me){
+    single(Number(m[1]));
+  }
+};
+
+boot();
+</script>
+</body>
+</html>
