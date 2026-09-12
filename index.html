@@ -1,0 +1,5537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width,initial-scale=1,maximum-scale=1">
+<meta name="theme-color" content="#050507">
+<title>ZILNET</title>
+
+<style>
+/* Part 1 CSS */
+
+/* ...all the existing CSS... */
+
+
+/* AUTH SWITCH ANIMATIONS */
+@keyframes authSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes authSlideOut {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-18px);
+  }
+}
+
+  
+*{
+  box-sizing:border-box;
+  -webkit-tap-highlight-color:transparent;
+}
+
+html,body{
+  margin:0;
+  min-height:100%;
+  background:#050507;
+  color:#fff;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+}
+
+body{
+  overflow-x:hidden;
+}
+
+button,input,textarea,select{
+  font:inherit;
+}
+
+button{
+  cursor:pointer;
+}
+
+.hidden{
+  display:none!important;
+}
+
+/* =========================
+   ICON NORMALIZATION
+   ========================= */
+
+.zicon{
+  width:26px!important;
+  height:26px!important;
+  min-width:26px!important;
+  min-height:26px!important;
+  max-width:26px!important;
+  max-height:26px!important;
+  object-fit:contain!important;
+  object-position:center!important;
+  display:block;
+  flex:none;
+}
+
+.nav .zicon{
+  width:27px!important;
+  height:27px!important;
+  min-width:27px!important;
+  min-height:27px!important;
+  max-width:27px!important;
+  max-height:27px!important;
+}
+
+.icon-btn{
+  width:42px;
+  height:42px;
+  padding:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border:0;
+  background:transparent;
+  color:#fff;
+  border-radius:12px;
+  transition:
+    transform .18s ease,
+    background .18s ease;
+}
+
+.icon-btn:active{
+  transform:scale(.88);
+}
+
+.icon-btn:hover{
+  background:#18181d;
+}
+
+/* =========================
+   AUTH
+   ========================= */
+
+#auth{
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+}
+
+.auth-card{
+  width:min(430px,100%);
+  background:#0d0d11;
+  border:1px solid #24242b;
+  border-radius:24px;
+  padding:28px;
+  box-shadow:0 25px 80px rgba(0,0,0,.5);
+}
+
+.auth-logo{
+  text-align:center;
+  font-size:30px;
+  font-weight:900;
+  letter-spacing:6px;
+  margin-bottom:25px;
+}
+
+.auth-tabs{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:5px;
+  background:#18181d;
+  padding:4px;
+  border-radius:13px;
+  margin-bottom:22px;
+}
+
+.auth-tab{
+  border:0;
+  padding:11px 7px;
+  border-radius:10px;
+  background:transparent;
+  color:#777;
+  font-size:12px;
+  transition:.25s ease;
+}
+
+.auth-tab.active{
+  background:#fff;
+  color:#000;
+}
+
+.auth-message{
+  min-height:20px;
+  color:#ff6b81;
+  text-align:center;
+  font-size:13px;
+  margin-bottom:7px;
+}
+
+.auth-panel{
+  display:none;
+}
+
+.auth-panel.active{
+  display:block;
+  animation:authIn .32s cubic-bezier(.2,.8,.2,1);
+}
+
+@keyframes authIn{
+  from{
+    opacity:0;
+    transform:translateX(28px) scale(.98);
+  }
+  to{
+    opacity:1;
+    transform:translateX(0) scale(1);
+  }
+}
+
+.auth-panel h2{
+  margin:0;
+  font-size:23px;
+}
+
+.auth-subtitle{
+  color:#777;
+  font-size:13px;
+  margin:6px 0 20px;
+}
+
+.auth-panel form{
+  display:flex;
+  flex-direction:column;
+  gap:11px;
+}
+
+.field{
+  width:100%;
+  border:1px solid #292930;
+  background:#17171c;
+  color:#fff;
+  border-radius:11px;
+  padding:13px 14px;
+  outline:none;
+}
+
+.field:focus{
+  border-color:#666;
+}
+
+.auth-submit,
+.primary{
+  border:0;
+  background:#fff;
+  color:#000;
+  border-radius:11px;
+  padding:13px;
+  font-weight:700;
+  transition:.15s ease;
+}
+
+.auth-submit:active,
+.primary:active{
+  transform:scale(.98);
+}
+
+.forgot{
+  display:block;
+  margin:15px auto 0;
+  border:0;
+  background:none;
+  color:#777;
+  font-size:12px;
+}
+
+.loading{
+  opacity:.55;
+  pointer-events:none;
+}
+
+/* =========================
+   APP
+   ========================= */
+
+#app{
+  min-height:100vh;
+  padding-bottom:78px;
+}
+
+.topbar{
+  position:sticky;
+  top:0;
+  z-index:50;
+  height:60px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 16px;
+  background:rgba(5,5,7,.92);
+  backdrop-filter:blur(18px);
+  border-bottom:1px solid #17171c;
+}
+
+.brand{
+  font-weight:900;
+  letter-spacing:4px;
+  font-size:18px;
+}
+
+.top-actions{
+  display:flex;
+  align-items:center;
+  gap:3px;
+}
+
+.content{
+  width:min(680px,100%);
+  margin:auto;
+  padding:14px;
+}
+
+.page-title{
+  font-size:22px;
+  font-weight:800;
+  margin:8px 0 16px;
+}
+
+/* =========================
+   CARDS
+   ========================= */
+
+.card{
+  background:#0e0e12;
+  border:1px solid #222229;
+  border-radius:18px;
+  padding:15px;
+  margin-bottom:14px;
+}
+
+.empty{
+  padding:45px 15px;
+  text-align:center;
+  color:#777;
+}
+
+.empty h3{
+  color:#fff;
+  margin:0;
+}
+
+/* =========================
+   STORIES
+   ========================= */
+
+.story-row{
+  display:flex;
+  gap:14px;
+  overflow-x:auto;
+  scrollbar-width:none;
+  padding:4px 1px 12px;
+}
+
+.story-row::-webkit-scrollbar{
+  display:none;
+}
+
+.story{
+  min-width:66px;
+  text-align:center;
+  font-size:11px;
+  color:#999;
+}
+
+.story-avatar{
+  width:58px;
+  height:58px;
+  padding:2px;
+  border-radius:50%;
+  background:linear-gradient(135deg,#ff2d55,#8a2be2,#ff9500);
+  margin:auto auto 5px;
+}
+
+.story-avatar img,
+.story-avatar .fallback{
+  width:100%;
+  height:100%;
+  border-radius:50%;
+  object-fit:cover;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:#19191d;
+}
+
+/* =========================
+   POSTS
+   ========================= */
+
+.post-head{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.avatar{
+  width:42px;
+  height:42px;
+  min-width:42px;
+  border-radius:50%;
+  object-fit:cover;
+  background:#1d1d23;
+}
+
+.fallback{
+  color:#fff;
+  font-weight:800;
+}
+
+.post-user{
+  flex:1;
+  min-width:0;
+}
+
+.post-user strong{
+  display:block;
+  font-size:14px;
+}
+
+.post-time{
+  color:#666;
+  font-size:11px;
+}
+
+.post-menu{
+  color:#888;
+}
+
+.post-text{
+  white-space:pre-wrap;
+  word-break:break-word;
+  line-height:1.45;
+  margin:12px 0;
+}
+
+.post-media{
+  display:block;
+  width:100%;
+  max-height:650px;
+  object-fit:contain;
+  background:#030303;
+  border-radius:14px;
+}
+
+.post-actions{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin-top:12px;
+}
+
+.action{
+  border:0;
+  background:none;
+  color:#888;
+  display:flex;
+  align-items:center;
+  gap:5px;
+  padding:5px;
+  border-radius:9px;
+}
+
+.action.active{
+  color:#ff375f;
+}
+
+.action:active{
+  transform:scale(.9);
+}
+
+.action .zicon{
+  width:23px!important;
+  height:23px!important;
+  min-width:23px!important;
+  min-height:23px!important;
+  max-width:23px!important;
+  max-height:23px!important;
+}
+
+/* =========================
+   NAV
+   ========================= */
+
+.bottom-nav{
+  position:fixed;
+  z-index:100;
+  left:0;
+  right:0;
+  bottom:0;
+  height:68px;
+  display:flex;
+  align-items:center;
+  justify-content:space-around;
+  background:rgba(8,8,10,.96);
+  backdrop-filter:blur(20px);
+  border-top:1px solid #202027;
+}
+
+.nav{
+  width:54px;
+  height:54px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border:0;
+  background:none;
+  border-radius:15px;
+  opacity:.55;
+  transition:.2s ease;
+}
+
+.nav.active{
+  opacity:1;
+  background:#18181d;
+  transform:translateY(-2px);
+}
+
+.nav:active{
+  transform:scale(.9);
+}
+
+/* =========================
+   SEARCH
+   ========================= */
+
+.search-box{
+  display:flex;
+  gap:8px;
+  margin-bottom:14px;
+}
+
+.search-box input{
+  flex:1;
+}
+
+.user-row{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:11px 0;
+  border-bottom:1px solid #202027;
+}
+
+.user-row:last-child{
+  border-bottom:0;
+}
+
+.user-info{
+  flex:1;
+  min-width:0;
+}
+
+.user-info strong{
+  display:block;
+}
+
+.user-info span{
+  color:#777;
+  font-size:12px;
+}
+
+.follow-btn{
+  border:1px solid #303038;
+  background:#18181d;
+  color:#fff;
+  border-radius:9px;
+  padding:7px 12px;
+}
+
+.follow-btn.following{
+  background:#fff;
+  color:#000;
+}
+
+/* =========================
+   MODAL
+   ========================= */
+
+#modal{
+  position:fixed;
+  inset:0;
+  z-index:500;
+  display:none;
+  align-items:flex-end;
+  justify-content:center;
+  background:rgba(0,0,0,.7);
+  backdrop-filter:blur(5px);
+}
+
+#modal.open{
+  display:flex;
+}
+
+.sheet{
+  width:min(680px,100%);
+  max-height:92vh;
+  overflow:auto;
+  background:#101014;
+  border:1px solid #292930;
+  border-radius:22px 22px 0 0;
+  padding:18px;
+  animation:sheetIn .25s ease;
+}
+
+@keyframes sheetIn{
+  from{
+    transform:translateY(40px);
+    opacity:0;
+  }
+  to{
+    transform:translateY(0);
+    opacity:1;
+  }
+}
+
+.sheet-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:15px;
+}
+
+.sheet-head h3{
+  margin:0;
+}
+
+/* =========================
+   COMMENTS
+   ========================= */
+
+.comment-row{
+  display:flex;
+  gap:10px;
+  padding:10px 0;
+  border-bottom:1px solid #202027;
+}
+
+.comment-body{
+  line-height:1.4;
+}
+
+.comment-body b{
+  margin-right:7px;
+}
+
+.comment-time{
+  color:#666;
+  font-size:10px;
+  margin-top:3px;
+}
+
+.comment-form{
+  display:flex;
+  gap:8px;
+  margin-top:12px;
+}
+
+/* =========================
+   CHAT
+   ========================= */
+
+.chat-list{
+  display:flex;
+  flex-direction:column;
+}
+
+.chat-item{
+  width:100%;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:12px 2px;
+  border:0;
+  border-bottom:1px solid #202027;
+  background:none;
+  color:#fff;
+  text-align:left;
+}
+
+.chat-info{
+  flex:1;
+  min-width:0;
+}
+
+.chat-preview{
+  color:#666;
+  font-size:12px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.chat-view{
+  display:flex;
+  flex-direction:column;
+  height:78vh;
+}
+
+.chat-head{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding-bottom:12px;
+  border-bottom:1px solid #222229;
+}
+
+.messages{
+  flex:1;
+  overflow-y:auto;
+  padding:12px 0;
+}
+
+.bubble-wrap{
+  display:flex;
+  gap:7px;
+  margin:7px 0;
+}
+
+.bubble-wrap.mine{
+  justify-content:flex-end;
+}
+
+.bubble{
+  max-width:76%;
+  padding:9px 12px;
+  border-radius:15px;
+  background:#202027;
+  word-break:break-word;
+}
+
+.mine-bubble{
+  background:#fff;
+  color:#000;
+}
+
+.chat-input{
+  display:flex;
+  gap:8px;
+  padding-top:10px;
+  border-top:1px solid #222229;
+}
+
+.chat-input input{
+  flex:1;
+}
+
+/* =========================
+   SETTINGS
+   ========================= */
+
+.setting{
+  width:100%;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  padding:15px 2px;
+  border:0;
+  border-bottom:1px solid #222229;
+  background:none;
+  color:#fff;
+  text-align:left;
+}
+
+.setting:last-child{
+  border-bottom:0;
+}
+
+.setting small{
+  display:block;
+  color:#666;
+}
+
+/* =========================
+   TOAST
+   ========================= */
+
+#toast{
+  position:fixed;
+  left:50%;
+  bottom:84px;
+  z-index:1000;
+  transform:translateX(-50%) translateY(20px);
+  opacity:0;
+  pointer-events:none;
+  background:#fff;
+  color:#000;
+  padding:10px 15px;
+  border-radius:12px;
+  font-size:13px;
+  transition:.25s ease;
+  white-space:nowrap;
+  max-width:90%;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+#toast.show{
+  opacity:1;
+  transform:translateX(-50%) translateY(0);
+}
+
+/* =========================
+   LIGHT THEME
+   ========================= */
+
+body.light{
+  background:#f5f5f7;
+  color:#111;
+}
+
+body.light .topbar,
+body.light .bottom-nav{
+  background:rgba(255,255,255,.94);
+  border-color:#ddd;
+}
+
+body.light .card,
+body.light .sheet{
+  background:#fff;
+  border-color:#ddd;
+}
+
+body.light .field{
+  background:#f3f3f5;
+  color:#111;
+  border-color:#ddd;
+}
+
+body.light .auth-card{
+  background:#fff;
+  border-color:#ddd;
+}
+
+body.light .auth-tabs{
+  background:#eee;
+}
+
+body.light .auth-tab.active{
+  background:#111;
+  color:#fff;
+}
+
+body.light .bubble{
+  background:#e9e9ed;
+  color:#111;
+}
+
+body.light .mine-bubble{
+  background:#111;
+  color:#fff;
+}
+
+@media(max-width:500px){
+  .auth-card{
+    padding:22px;
+  }
+
+  .content{
+    padding:10px;
+  }
+
+  .card{
+    border-radius:15px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<!-- =========================
+     AUTH
+     ========================= -->
+
+<section id="auth">
+
+  <div class="auth-card">
+
+    <div class="auth-logo">ZILNET</div>
+
+    <div class="auth-tabs">
+
+      <button
+        type="button"
+        id="loginTab"
+        class="auth-tab active">
+        Login
+      </button>
+
+      <button
+        type="button"
+        id="signupTab"
+        class="auth-tab">
+        Create Account
+      </button>
+
+    </div>
+
+    <div id="authMessage"
+         class="auth-message"></div>
+
+    <!-- LOGIN -->
+
+    <div id="loginPanel"
+         class="auth-panel active">
+
+      <h2>Welcome back</h2>
+
+      <p class="auth-subtitle">
+        Login to your Zilnet account
+      </p>
+
+      <form id="loginForm">
+
+        <input
+          id="identity"
+          class="field"
+          type="text"
+          placeholder="Username or email"
+          autocomplete="username"
+          required>
+
+        <input
+          id="password"
+          class="field"
+          type="password"
+          placeholder="Password"
+          autocomplete="current-password"
+          required>
+
+        <button
+          id="loginButton"
+          class="auth-submit"
+          type="submit">
+          Login
+        </button>
+
+      </form>
+
+      <button
+        id="forgotButton"
+        type="button"
+        class="forgot">
+        Forgot Password?
+      </button>
+
+    </div>
+
+
+    <!-- SIGNUP -->
+
+    <div id="signupPanel"
+         class="auth-panel">
+
+      <h2>Create your account</h2>
+
+      <p class="auth-subtitle">
+        Start building your Zilnet profile
+      </p>
+
+      <form id="signupForm">
+
+        <input
+          id="signupUsername"
+          class="field"
+          type="text"
+          placeholder="Username"
+          autocomplete="username"
+          required>
+
+        <input
+          id="signupDisplay"
+          class="field"
+          type="text"
+          placeholder="Display name"
+          required>
+
+        <input
+          id="signupEmail"
+          class="field"
+          type="email"
+          placeholder="Email"
+          autocomplete="email"
+          required>
+
+        <input
+          id="signupPassword"
+          class="field"
+          type="password"
+          placeholder="Password"
+          autocomplete="new-password"
+          minlength="8"
+          required>
+
+        <button
+          id="signupButton"
+          class="auth-submit"
+          type="submit">
+          Create Account
+        </button>
+
+      </form>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- =========================
+     APP
+     ========================= -->
+
+<section id="app" class="hidden">
+
+  <header class="topbar">
+
+    <div class="brand">ZILNET</div>
+
+    <div class="top-actions">
+
+      <button
+        type="button"
+        class="icon-btn"
+        onclick="openNotifications()">
+
+        <img
+          class="zicon"
+          src="icons/IMG_1895.png"
+          alt="Notifications">
+
+      </button>
+
+      <button
+        type="button"
+        class="icon-btn"
+        onclick="openSettings()">
+
+        <img
+          class="zicon"
+          src="icons/IMG_1891.png"
+          alt="Settings">
+
+      </button>
+
+    </div>
+
+  </header>
+
+
+  <main id="content"
+        class="content">
+  </main>
+
+
+  <nav class="bottom-nav">
+
+    <button
+      id="homeNav"
+      class="nav active"
+      type="button"
+      onclick="home()">
+
+      <img
+        class="zicon"
+        src="icons/IMG_1881.png"
+        alt="Home">
+
+    </button>
+
+    <button
+      id="searchNav"
+      class="nav"
+      type="button"
+      onclick="discover()">
+
+      <img
+        class="zicon"
+        src="icons/IMG_1882.png"
+        alt="Search">
+
+    </button>
+
+    <button
+      id="createNav"
+      class="nav"
+      type="button"
+      onclick="openCreate()">
+
+      <img
+        class="zicon"
+        src="icons/IMG_1899.png"
+        alt="Create">
+
+    </button>
+
+    <button
+      id="reelsNav"
+      class="nav"
+      type="button"
+      onclick="openReels()">
+
+      <img
+        class="zicon"
+        src="icons/IMG_1893.png"
+        alt="Reels">
+
+    </button>
+
+    <button
+      id="messagesNav"
+      class="nav"
+      type="button"
+      onclick="openChats()">
+
+      <img
+        class="zicon"
+        src="icons/IMG_1883.png"
+        alt="Messages">
+
+    </button>
+
+    <button
+      id="profileNav"
+      class="nav"
+      type="button"
+      onclick="myProfile()">
+
+      <img
+        class="zicon"
+        src="icons/IMG_1885.png"
+        alt="Profile">
+
+    </button>
+
+  </nav>
+
+</section>
+
+
+<!-- MODAL -->
+
+<div id="modal"></div>
+
+<!-- TOAST -->
+
+<div id="toast"></div>
+
+
+<script>
+
+/* =========================================================
+   ZILNET FRONTEND
+   PART 1
+   ========================================================= */
+
+const ICONS = {
+  home:"icons/IMG_1881.png",
+  search:"icons/IMG_1882.png",
+  create:"icons/IMG_1899.png",
+  reels:"icons/IMG_1893.png",
+  messages:"icons/IMG_1883.png",
+  profile:"icons/IMG_1885.png",
+  notification:"icons/IMG_1895.png",
+  settings:"icons/IMG_1891.png",
+  more:"icons/IMG_1888.png",
+  heart:"icons/IMG_1886.png",
+  comment:"icons/IMG_1897.png",
+  share1:"icons/IMG_1884.png",
+  share2:"icons/IMG_1887.png",
+  save:"icons/IMG_1892.png",
+  send:"icons/IMG_1898.png",
+  back:"icons/IMG_1890.png",
+  close:"icons/IMG_1889.png",
+  edit:"icons/IMG_1879.png",
+  camera:"icons/IMG_1880.png"
+};
+
+let me = null;
+let feed = [];
+let currentChatId = null;
+let chatPoll = null;
+let settingsCache = null;
+
+
+/* =========================================================
+   HELPERS
+   ========================================================= */
+
+const $ = id =>
+  document.getElementById(id);
+
+
+function esc(value){
+
+  return String(value ?? "")
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+}
+
+
+function initial(user){
+
+  const text =
+    user?.display_name ||
+    user?.username ||
+    "?";
+
+  return esc(
+    text.charAt(0).toUpperCase()
+  );
+}
+
+
+function avatarHTML(user,className="avatar"){
+
+  if(user?.avatar_url){
+
+    return `
+      <img
+        class="${className}"
+        src="${esc(user.avatar_url)}"
+        alt="">
+    `;
+
+  }
+
+  return `
+    <div class="${className} fallback">
+      ${initial(user)}
+    </div>
+  `;
+}
+
+
+function toast(message){
+
+  const t = $("toast");
+
+  if(!t) return;
+
+  t.textContent = message;
+  t.classList.add("show");
+
+  clearTimeout(window.__toastTimer);
+
+  window.__toastTimer =
+    setTimeout(() => {
+      t.classList.remove("show");
+    },3000);
+}
+
+
+async function api(path,options={}){
+
+  const opts = {
+    credentials:"include",
+    ...options
+  };
+
+  if(
+    opts.body &&
+    typeof opts.body === "object" &&
+    !(opts.body instanceof FormData)
+  ){
+
+    opts.headers = {
+      "Content-Type":"application/json",
+      ...(opts.headers || {})
+    };
+
+    opts.body = JSON.stringify(opts.body);
+  }
+
+  const response =
+    await fetch("/api" + path,opts);
+
+  let data = null;
+
+  try{
+    data = await response.json();
+  }catch{}
+
+  if(!response.ok){
+
+    throw new Error(
+      data?.error ||
+      data?.message ||
+      `Request failed (${response.status})`
+    );
+  }
+
+  return data;
+}
+
+
+function setAuthMessage(message){
+
+  $("authMessage").textContent =
+    message || "";
+}
+
+
+function switchAuth(mode){
+
+  setAuthMessage("");
+
+  const login =
+    mode === "login";
+
+  $("loginTab")
+    .classList.toggle("active",login);
+
+  $("signupTab")
+    .classList.toggle("active",!login);
+
+  $("loginPanel")
+    .classList.toggle("active",login);
+
+  $("signupPanel")
+    .classList.toggle("active",!login);
+}
+
+
+function setLoggedIn(value){
+
+  $("auth")
+    .classList.toggle("hidden",value);
+
+  $("app")
+    .classList.toggle("hidden",!value);
+}
+
+
+function nav(name){
+
+  document
+    .querySelectorAll(".nav")
+    .forEach(x =>
+      x.classList.remove("active")
+    );
+
+  const el =
+    $(name + "Nav");
+
+  if(el)
+    el.classList.add("active");
+}
+
+
+function closeModal(){
+
+  $("modal")
+    .classList.remove("open");
+
+  $("modal").innerHTML = "";
+
+  if(chatPoll){
+    clearInterval(chatPoll);
+    chatPoll = null;
+  }
+}
+
+
+/* =========================================================
+   AUTH SWITCHING
+   ========================================================= */
+
+$("loginTab").onclick = () =>
+  switchAuth("login");
+
+$("signupTab").onclick = () =>
+  switchAuth("signup");
+
+
+/* =========================================================
+   LOGIN
+   ========================================================= */
+
+$("loginForm").onsubmit =
+async event => {
+
+  event.preventDefault();
+
+  setAuthMessage("");
+
+  const identity =
+    $("identity").value.trim();
+
+  const password =
+    $("password").value;
+
+  if(!identity){
+
+    setAuthMessage(
+      "Enter your username or email."
+    );
+
+    return;
+  }
+
+  if(!password){
+
+    setAuthMessage(
+      "Enter your password."
+    );
+
+    return;
+  }
+
+  const button =
+    $("loginButton");
+
+  button.disabled = true;
+  button.textContent = "Logging in...";
+
+  try{
+
+    const result =
+      await api("/login",{
+        method:"POST",
+        body:{
+          username:identity,
+          email:identity,
+          password
+        }
+      });
+
+    me =
+      result.user || null;
+
+    if(!me)
+      throw new Error("Login failed.");
+
+    setLoggedIn(true);
+
+    await home();
+
+  }catch(error){
+
+    console.error(error);
+
+    setAuthMessage(
+      error.message ||
+      "Unable to login."
+    );
+
+  }finally{
+
+    button.disabled = false;
+    button.textContent = "Login";
+  }
+};
+
+
+/* =========================================================
+   SIGNUP
+   ========================================================= */
+
+$("signupForm").onsubmit =
+async event => {
+
+  event.preventDefault();
+
+  setAuthMessage("");
+
+  const username =
+    $("signupUsername")
+      .value.trim();
+
+  const displayName =
+    $("signupDisplay")
+      .value.trim();
+
+  const email =
+    $("signupEmail")
+      .value.trim();
+
+  const password =
+    $("signupPassword")
+      .value;
+
+  if(username.length < 3){
+
+    setAuthMessage(
+      "Username must be at least 3 characters."
+    );
+
+    return;
+  }
+
+  if(displayName.length < 2){
+
+    setAuthMessage(
+      "Enter your display name."
+    );
+
+    return;
+  }
+
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
+
+    setAuthMessage(
+      "Enter a valid email."
+    );
+
+    return;
+  }
+
+  if(password.length < 8){
+
+    setAuthMessage(
+      "Password must be at least 8 characters."
+    );
+
+    return;
+  }
+
+  const button =
+    $("signupButton");
+
+  button.disabled = true;
+  button.textContent = "Creating...";
+
+  try{
+
+    const result =
+      await api("/signup",{
+        method:"POST",
+        body:{
+          username,
+          email,
+          password
+        }
+      });
+
+    me =
+      result.user || null;
+
+    if(!me)
+      throw new Error(
+        "Account creation failed."
+      );
+
+    /*
+      The current Worker creates the account
+      but does not store display_name during
+      signup. We immediately update it using
+      the real profile endpoint.
+    */
+
+    if(displayName){
+
+      try{
+
+        const updated =
+          await api("/profile/update",{
+            method:"POST",
+            body:{
+              display_name:displayName,
+              bio:"",
+              skills:"",
+              avatar_url:""
+            }
+          });
+
+        me =
+          updated.user ||
+          me;
+
+      }catch(profileError){
+
+        console.warn(
+          "Display name update failed:",
+          profileError
+        );
+      }
+    }
+
+    setLoggedIn(true);
+
+    await home();
+
+    toast("Welcome to Zilnet!");
+
+  }catch(error){
+
+    console.error(error);
+
+    setAuthMessage(
+      error.message ||
+      "Could not create account."
+    );
+
+  }finally{
+
+    button.disabled = false;
+    button.textContent =
+      "Create Account";
+  }
+};
+
+
+/* =========================================================
+   FORGOT PASSWORD
+   ========================================================= */
+
+$("forgotButton").onclick =
+async () => {
+
+  const email =
+    prompt(
+      "Enter the email connected to your Zilnet account:"
+    );
+
+  if(!email) return;
+
+  try{
+
+    const result =
+      await api("/forgot-password",{
+        method:"POST",
+        body:{
+          email:email.trim()
+        }
+      });
+
+    /*
+      Worker returns reset_id.
+      The actual verification code is sent
+      through the configured email provider.
+    */
+
+    if(!result?.reset_id){
+
+      toast(
+        result?.message ||
+        "Recovery request created."
+      );
+
+      return;
+    }
+
+    const code =
+      prompt(
+        "Enter the 6-digit verification code from your email:"
+      );
+
+    if(!code) return;
+
+    const newPassword =
+      prompt(
+        "Enter your new password (8+ characters):"
+      );
+
+    if(!newPassword) return;
+
+    const changed =
+      await api("/reset-password",{
+        method:"POST",
+        body:{
+          reset_id:result.reset_id,
+          code,
+          new_password:newPassword
+        }
+      });
+
+    if(changed.user){
+
+      me =
+        changed.user;
+
+      setLoggedIn(true);
+
+      await home();
+
+      toast(
+        "Password changed successfully."
+      );
+
+    }
+
+  }catch(error){
+
+    toast(
+      error.message ||
+      "Password recovery failed."
+    );
+  }
+};
+
+
+/* =========================================================
+   SESSION BOOT
+   ========================================================= */
+
+async function boot(){
+
+  try{
+
+    const result =
+      await api("/me");
+
+    me =
+      result.user || null;
+
+    if(!me)
+      throw new Error("No user");
+
+    setLoggedIn(true);
+
+    await home();
+
+  }catch(error){
+
+    me = null;
+
+    setLoggedIn(false);
+
+    switchAuth("login");
+  }
+}
+
+
+boot();
+
+</script>
+<script>
+
+/* =========================================================
+   ZILNET — PART 2
+   FEED / STORIES / POSTS / SEARCH
+   ========================================================= */
+
+
+/* =========================================================
+   HOME
+   ========================================================= */
+
+async function home(){
+
+  nav("home");
+
+  const content = $("content");
+
+  content.innerHTML = `
+    <div class="page-title">Home</div>
+
+    <div id="stories"></div>
+
+    <div id="feed">
+      <div class="empty">
+        Loading...
+      </div>
+    </div>
+  `;
+
+  try{
+
+    await Promise.all([
+      loadStories(),
+      loadFeed()
+    ]);
+
+  }catch(error){
+
+    console.error(error);
+
+    $("feed").innerHTML = `
+      <div class="card empty">
+        <h3>Couldn't load your feed</h3>
+        <p>${esc(error.message)}</p>
+        <button
+          class="primary"
+          onclick="home()">
+          Try again
+        </button>
+      </div>
+    `;
+  }
+}
+
+
+/* =========================================================
+   FEED
+   ========================================================= */
+
+async function loadFeed(){
+
+  const result =
+    await api("/feed");
+
+  /*
+    Worker returns:
+    { posts: [...] }
+  */
+
+  feed =
+    Array.isArray(result.posts)
+      ? result.posts
+      : [];
+
+  renderFeed();
+}
+
+
+function renderFeed(){
+
+  const box = $("feed");
+
+  if(!box) return;
+
+  if(!feed.length){
+
+    box.innerHTML = `
+      <div class="card empty">
+        <h3>Your feed is empty</h3>
+        <p>Follow people or create your first post.</p>
+
+        <button
+          class="primary"
+          onclick="openCreate()">
+          Create Post
+        </button>
+      </div>
+    `;
+
+    return;
+  }
+
+  box.innerHTML =
+    feed.map(postHTML).join("");
+}
+
+
+/* =========================================================
+   POST HTML
+   ========================================================= */
+
+function postHTML(post){
+
+  const author = {
+    id:post.user_id,
+    username:post.username,
+    display_name:
+      post.display_name ||
+      post.username,
+    avatar_url:
+      post.avatar_url || ""
+  };
+
+  const liked =
+    Boolean(
+      post.liked ||
+      post.is_liked ||
+      post.viewer_liked
+    );
+
+  const saved =
+    Boolean(
+      post.saved ||
+      post.is_saved ||
+      post.viewer_saved
+    );
+
+  let media = "";
+
+  if(post.media_url){
+
+    const type =
+      String(post.media_type || "")
+        .toLowerCase();
+
+    if(type.startsWith("video")){
+
+      media = `
+        <video
+          class="post-media"
+          controls
+          playsinline
+          preload="metadata"
+          src="${esc(post.media_url)}">
+        </video>
+      `;
+
+    }else{
+
+      media = `
+        <img
+          class="post-media"
+          loading="lazy"
+          src="${esc(post.media_url)}"
+          alt="">
+      `;
+    }
+  }
+
+  const content =
+    post.content ||
+    post.text ||
+    "";
+
+  const likes =
+    Number(post.like_count || post.likes || 0);
+
+  const comments =
+    Number(
+      post.comment_count ||
+      post.comments_count ||
+      0
+    );
+
+  return `
+    <article
+      class="card post"
+      data-post-id="${esc(post.id)}">
+
+      <div class="post-head">
+
+        ${avatarHTML(author)}
+
+        <button
+          type="button"
+          class="post-user"
+          style="
+            border:0;
+            background:none;
+            color:#fff;
+            text-align:left;
+            padding:0;
+          "
+          onclick="viewProfile('${esc(post.user_id)}')">
+
+          <strong>
+            ${esc(
+              post.display_name ||
+              post.username ||
+              "User"
+            )}
+          </strong>
+
+          <span class="post-time">
+            @${esc(post.username || "")}
+          </span>
+
+        </button>
+
+        <button
+          type="button"
+          class="icon-btn"
+          onclick="postMenu('${esc(post.id)}')">
+
+          <img
+            class="zicon"
+            src="${ICONS.more}"
+            alt="More">
+
+        </button>
+
+      </div>
+
+
+      <div class="post-body">
+
+        ${
+          content
+          ? `
+            <div class="post-text">
+              ${esc(content)}
+            </div>
+          `
+          : ""
+        }
+
+        ${media}
+
+      </div>
+
+
+      <div class="post-actions">
+
+        <button
+          type="button"
+          class="action ${liked ? "active" : ""}"
+          onclick="toggleLike('${esc(post.id)}',this)">
+
+          <img
+            class="zicon"
+            src="${ICONS.heart}"
+            alt="Like">
+
+          <span class="like-count">
+            ${likes}
+          </span>
+
+        </button>
+
+
+        <button
+          type="button"
+          class="action"
+          onclick="openComments('${esc(post.id)}')">
+
+          <img
+            class="zicon"
+            src="${ICONS.comment}"
+            alt="Comments">
+
+          <span>
+            ${comments}
+          </span>
+
+        </button>
+
+
+        <button
+          type="button"
+          class="action"
+          onclick="sharePost('${esc(post.id)}')">
+
+          <img
+            class="zicon"
+            src="${ICONS.share1}"
+            alt="Share">
+
+        </button>
+
+
+        <button
+          type="button"
+          class="action ${saved ? "active" : ""}"
+          onclick="toggleSave('${esc(post.id)}',this)">
+
+          <img
+            class="zicon"
+            src="${ICONS.save}"
+            alt="Save">
+
+        </button>
+
+      </div>
+
+    </article>
+  `;
+}
+
+
+/* =========================================================
+   LIKE / UNLIKE
+   ========================================================= */
+
+async function toggleLike(postId,button){
+
+  if(button.dataset.busy === "1")
+    return;
+
+  button.dataset.busy = "1";
+
+  try{
+
+    const result =
+      await api(
+        `/posts/${encodeURIComponent(postId)}/like`,
+        {
+          method:"POST"
+        }
+      );
+
+    const liked =
+      Boolean(
+        result.liked ??
+        result.is_liked
+      );
+
+    button.classList.toggle(
+      "active",
+      liked
+    );
+
+    const count =
+      button.querySelector(".like-count");
+
+    if(count){
+
+      let value =
+        Number(
+          result.like_count ??
+          result.likes ??
+          count.textContent
+        );
+
+      count.textContent =
+        Math.max(0,value);
+    }
+
+  }catch(error){
+
+    toast(
+      error.message ||
+      "Couldn't update like."
+    );
+
+  }finally{
+
+    button.dataset.busy = "0";
+  }
+}
+
+
+/* =========================================================
+   SAVE / UNSAVE
+   ========================================================= */
+
+async function toggleSave(postId,button){
+
+  if(button.dataset.busy === "1")
+    return;
+
+  button.dataset.busy = "1";
+
+  try{
+
+    const result =
+      await api(
+        `/posts/${encodeURIComponent(postId)}/save`,
+        {
+          method:"POST"
+        }
+      );
+
+    const saved =
+      Boolean(
+        result.saved ??
+        result.is_saved
+      );
+
+    button.classList.toggle(
+      "active",
+      saved
+    );
+
+    toast(
+      saved
+        ? "Post saved."
+        : "Post removed from saved."
+    );
+
+  }catch(error){
+
+    toast(
+      error.message ||
+      "Couldn't update saved posts."
+    );
+
+  }finally{
+
+    button.dataset.busy = "0";
+  }
+}
+
+
+/* =========================================================
+   COMMENTS
+   ========================================================= */
+
+async function openComments(postId){
+
+  $("modal").classList.add("open");
+
+  $("modal").innerHTML = `
+    <div class="sheet">
+
+      <div class="sheet-head">
+
+        <h3>Comments</h3>
+
+        <button
+          class="icon-btn"
+          type="button"
+          onclick="closeModal()">
+
+          <img
+            class="zicon"
+            src="${ICONS.close}"
+            alt="Close">
+
+        </button>
+
+      </div>
+
+      <div id="commentsList">
+        <div class="empty">
+          Loading...
+        </div>
+      </div>
+
+      <form
+        id="commentForm"
+        class="comment-form">
+
+        <input
+          id="commentInput"
+          class="field"
+          placeholder="Write a comment..."
+          maxlength="2000"
+          required>
+
+        <button
+          class="primary"
+          type="submit">
+          Send
+        </button>
+
+      </form>
+
+    </div>
+  `;
+
+  $("commentForm").onsubmit =
+    async event => {
+
+      event.preventDefault();
+
+      const input =
+        $("commentInput");
+
+      const content =
+        input.value.trim();
+
+      if(!content)
+        return;
+
+      try{
+
+        await api(
+          `/posts/${encodeURIComponent(postId)}/comments`,
+          {
+            method:"POST",
+            body:{
+              content
+            }
+          }
+        );
+
+        input.value = "";
+
+        await loadComments(postId);
+
+      }catch(error){
+
+        toast(
+          error.message ||
+          "Couldn't post comment."
+        );
+      }
+    };
+
+  await loadComments(postId);
+}
+
+
+async function loadComments(postId){
+
+  const box =
+    $("commentsList");
+
+  if(!box) return;
+
+  try{
+
+    const result =
+      await api(
+        `/posts/${encodeURIComponent(postId)}/comments`
+      );
+
+    const comments =
+      Array.isArray(result.comments)
+        ? result.comments
+        : [];
+
+    if(!comments.length){
+
+      box.innerHTML = `
+        <div class="empty">
+          No comments yet.
+        </div>
+      `;
+
+      return;
+    }
+
+    box.innerHTML =
+      comments.map(comment => `
+
+        <div class="comment-row">
+
+          ${avatarHTML({
+            avatar_url:comment.avatar_url,
+            display_name:
+              comment.display_name ||
+              comment.username
+          })}
+
+          <div class="comment-body">
+
+            <b>
+              ${esc(
+                comment.display_name ||
+                comment.username ||
+                "User"
+              )}
+            </b>
+
+            ${esc(
+              comment.content ||
+              ""
+            )}
+
+            <div class="comment-time">
+              ${esc(
+                comment.created_at ||
+                ""
+              )}
+            </div>
+
+          </div>
+
+        </div>
+
+      `).join("");
+
+  }catch(error){
+
+    box.innerHTML = `
+      <div class="empty">
+        ${esc(error.message)}
+      </div>
+    `;
+  }
+}
+
+
+/* =========================================================
+   SHARE
+   ========================================================= */
+
+async function sharePost(postId){
+
+  const url =
+    `${location.origin}/?post=${encodeURIComponent(postId)}`;
+
+  try{
+
+    if(navigator.share){
+
+      await navigator.share({
+        title:"Zilnet",
+        url
+      });
+
+    }else if(
+      navigator.clipboard
+    ){
+
+      await navigator.clipboard.writeText(url);
+
+      toast("Post link copied.");
+
+    }else{
+
+      prompt(
+        "Copy this link:",
+        url
+      );
+    }
+
+  }catch(error){
+
+    /*
+      User cancelling the native share sheet
+      is not an error.
+    */
+
+    if(error?.name !== "AbortError"){
+
+      toast(
+        "Couldn't share this post."
+      );
+    }
+  }
+}
+
+
+/* =========================================================
+   POST MENU
+   ========================================================= */
+
+function postMenu(postId){
+
+  $("modal").classList.add("open");
+
+  $("modal").innerHTML = `
+    <div class="sheet">
+
+      <div class="sheet-head">
+
+        <h3>Post</h3>
+
+        <button
+          class="icon-btn"
+          onclick="closeModal()">
+
+          <img
+            class="zicon"
+            src="${ICONS.close}"
+            alt="Close">
+
+        </button>
+
+      </div>
+
+      <button
+        class="setting"
+        onclick="sharePost('${esc(postId)}');closeModal()">
+
+        <span>
+          Share post
+          <small>Share this post with others</small>
+        </span>
+
+      </button>
+
+      ${
+        String(
+          feed.find(
+            p => String(p.id) === String(postId)
+          )?.user_id
+        ) === String(me?.id)
+        ? `
+          <button
+            class="setting"
+            onclick="deletePost('${esc(postId)}')">
+
+            <span>
+              Delete post
+              <small>Remove this post permanently</small>
+            </span>
+
+          </button>
+        `
+        : ""
+      }
+
+    </div>
+  `;
+}
+
+
+/* =========================================================
+   DELETE POST
+   ========================================================= */
+
+async function deletePost(postId){
+
+  closeModal();
+
+  const okay =
+    confirm(
+      "Delete this post?"
+    );
+
+  if(!okay)
+    return;
+
+  try{
+
+    await api(
+      `/posts/${encodeURIComponent(postId)}`,
+      {
+        method:"DELETE"
+      }
+    );
+
+    feed =
+      feed.filter(
+        p =>
+          String(p.id) !==
+          String(postId)
+      );
+
+    renderFeed();
+
+    toast("Post deleted.");
+
+  }catch(error){
+
+    toast(
+      error.message ||
+      "Couldn't delete post."
+    );
+  }
+}
+
+
+/* =========================================================
+   STORIES
+   ========================================================= */
+
+async function loadStories(){
+
+  const box =
+    $("stories");
+
+  if(!box) return;
+
+  try{
+
+    const result =
+      await api("/stories");
+
+    const stories =
+      Array.isArray(result.stories)
+        ? result.stories
+        : [];
+
+    renderStories(stories);
+
+  }catch(error){
+
+    console.error(
+      "Stories:",
+      error
+    );
+
+    box.innerHTML = "";
+  }
+}
+
+
+function renderStories(stories){
+
+  const box =
+    $("stories");
+
+  if(!box) return;
+
+  const myStory =
+    `
+      <button
+        type="button"
+        class="story"
+        style="
+          border:0;
+          background:none;
+          color:#fff;
+        "
+        onclick="createStory()">
+
+        <div
+          class="story-avatar"
+          style="
+            background:#333;
+            padding:2px;
+          ">
+
+          ${avatarHTML(me,"avatar")}
+
+        </div>
+
+        <div>
+          Your story
+        </div>
+
+      </button>
+    `;
+
+  const others =
+    stories.map(story => {
+
+      const user = {
+        id:story.user_id,
+        username:story.username,
+        display_name:
+          story.display_name ||
+          story.username,
+        avatar_url:
+          story.avatar_url || ""
+      };
+
+      return `
+        <button
+          type="button"
+          class="story"
+          style="
+            border:0;
+            background:none;
+            color:#aaa;
+          "
+          onclick="viewStory('${esc(story.id)}')">
+
+          <div class="story-avatar">
+
+            ${
+              story.media_url
+              ? `
+                <img
+                  src="${esc(story.media_url)}"
+                  alt="">
+              `
+              : avatarHTML(user)
+            }
+
+          </div>
+
+          <div>
+            ${esc(
+              user.username ||
+              "User"
+            )}
+          </div>
+
+        </button>
+      `;
+    }).join("");
+
+  box.innerHTML = `
+    <div class="card">
+
+      <div class="story-row">
+
+        ${myStory}
+
+        ${others}
+
+      </div>
+
+    </div>
+  `;
+}
+
+
+/* =========================================================
+   CREATE STORY
+   ========================================================= */
+
+function createStory(){
+
+  $("modal").classList.add("open");
+
+  $("modal").innerHTML = `
+    <div class="sheet">
+
+      <div class="sheet-head">
+
+        <h3>New Story</h3>
+
+        <button
+          class="icon-btn"
+          onclick="closeModal()">
+
+          <img
+            class="zicon"
+            src="${ICONS.close}"
+            alt="Close">
+
+        </button>
+
+      </div>
+
+      <input
+        id="storyFile"
+        class="field"
+        type="file"
+        accept="image/*,video/*">
+
+      <button
+        class="primary"
+        style="width:100%;margin-top:12px"
+        onclick="uploadStory()">
+
+        Add Story
+
+      </button>
+
+    </div>
+  `;
+}
+
+
+async function uploadStory(){
+
+  const input =
+    $("storyFile");
+
+  const file =
+    input?.files?.[0];
+
+  if(!file){
+
+    toast(
+      "Choose a photo or video first."
+    );
+
+    return;
+  }
+
+  try{
+
+    const uploaded =
+      await uploadFile(file);
+
+    await api("/stories",{
+      method:"POST",
+      body:{
+        media_url:
+          uploaded.url ||
+          uploaded.media_url,
+        media_type:
+          file.type
+      }
+    });
+
+    closeModal();
+
+    await loadStories();
+
+    toast("Story added.");
+
+  }catch(error){
+
+    toast(
+      error.message ||
+      "Couldn't create story."
+    );
+  }
+}
+
+
+/* =========================================================
+   STORY VIEW
+   ========================================================= */
+
+async function viewStory(storyId){
+
+  try{
+
+    const result =
+      await api(
+        `/stories/${encodeURIComponent(storyId)}`
+      );
+
+    const story =
+      result.story ||
+      result;
+
+    $("modal").classList.add("open");
+
+    $("modal").innerHTML = `
+      <div
+        class="sheet"
+        style="background:#000">
+
+        <div class="sheet-head">
+
+          <h3>
+            ${esc(
+              story.username ||
+              story.display_name ||
+              "Story"
+            )}
+          </h3>
+
+          <button
+            class="icon-btn"
+            onclick="closeModal()">
+
+            <img
+              class="zicon"
+              src="${ICONS.close}"
+              alt="Close">
+
+          </button>
+
+        </div>
+
+        ${
+          story.media_type?.startsWith("video")
+          ? `
+            <video
+              class="post-media"
+              controls
+              autoplay
+              playsinline
+              src="${esc(story.media_url)}">
+            </video>
+          `
+          : `
+            <img
+              class="post-media"
+              src="${esc(story.media_url)}"
+              alt="">
+          `
+        }
+
+      </div>
+    `;
+
+  }catch(error){
+
+    toast(
+      error.message ||
+      "Couldn't open story."
+    );
+  }
+}
+
+
+/* =========================================================
+   UPLOAD
+   ========================================================= */
+
+async function uploadFile(file){
+
+  const form =
+    new FormData();
+
+  /*
+    Worker upload endpoint expects
+    the actual multipart file.
+  */
+
+  form.append(
+    "file",
+    file,
+    file.name
+  );
+
+  const response =
+    await fetch(
+      "/api/upload",
+      {
+        method:"POST",
+        credentials:"include",
+        body:form
+      }
+    );
+
+  let data = {};
+
+  try{
+    data = await response.json();
+  }catch{}
+
+  if(!response.ok){
+
+    throw new Error(
+      data.error ||
+      data.message ||
+      "Upload failed."
+    );
+  }
+
+  return data;
+}
+
+
+/* =========================================================
+   CREATE POST
+   ========================================================= */
+
+function openCreate(){
+
+  nav("create");
+
+  $("content").innerHTML = `
+
+    <div class="page-title">
+      Create
+    </div>
+
+    <div class="card">
+
+      <form id="createPostForm">
+
+        <textarea
+          id="postContent"
+          class="field"
+          rows="5"
+          maxlength="10000"
+          placeholder="What's happening?"
+          style="
+            resize:vertical;
+            width:100%;
+          "></textarea>
+
+        <div style="height:10px"></div>
+
+        <input
+          id="postFile"
+          class="field"
+          type="file"
+          accept="image/*,video/*">
+
+        <div
+          id="postPreview"
+          style="margin-top:10px">
+        </div>
+
+        <button
+          class="primary"
+          style="
+            width:100%;
+            margin-top:12px;
+          "
+          type="submit">
+
+          Publish
+
+        </button>
+
+      </form>
+
+    </div>
+  `;
+
+  $("postFile").onchange =
+    previewPostFile;
+
+  $("createPostForm").onsubmit =
+    publishPost;
+}
+
+
+function previewPostFile(){
+
+  const file =
+    $("postFile")
+      ?.files?.[0];
+
+  const preview =
+    $("postPreview");
+
+  if(!file || !preview){
+
+    if(preview)
+      preview.innerHTML = "";
+
+    return;
+  }
+
+  const url =
+    URL.createObjectURL(file);
+
+  if(file.type.startsWith("video")){
+
+    preview.innerHTML = `
+      <video
+        class="media-preview"
+        controls
+        src="${url}">
+      </video>
+    `;
+
+  }else{
+
+    preview.innerHTML = `
+      <img
+        class="media-preview"
+        src="${url}"
+        alt="">
+    `;
+  }
+}
+
+
+async function publishPost(event){
+
+  event.preventDefault();
+
+  const content =
+    $("postContent")
+      .value
+      .trim();
+
+  const file =
+    $("postFile")
+      ?.files?.[0];
+
+  if(!content && !file){
+
+    toast(
+      "Write something or choose media."
+    );
+
+    return;
+  }
+
+  const button =
+    event.target.querySelector(
+      "button[type=submit]"
+    );
+
+  button.disabled = true;
+  button.textContent = "Publishing...";
+
+  try{
+
+    let mediaUrl = "";
+    let mediaType = "";
+
+    if(file){
+
+      const uploaded =
+        await uploadFile(file);
+
+      mediaUrl =
+        uploaded.url ||
+        uploaded.media_url ||
+        "";
+
+      mediaType =
+        uploaded.media_type ||
+        file.type;
+    }
+
+    await api("/posts",{
+      method:"POST",
+      body:{
+        content,
+        media_url:mediaUrl,
+        media_type:mediaType
+      }
+    });
+
+    toast("Post published.");
+
+    await home();
+
+  }catch(error){
+
+    toast(
+      error.message ||
+      "Couldn't publish post."
+    );
+
+  }finally{
+
+    button.disabled = false;
+    button.textContent = "Publish";
+  }
+}
+
+
+/* =========================================================
+   DISCOVER / SEARCH
+   ========================================================= */
+
+async function discover(){
+
+  nav("search");
+
+  $("content").innerHTML = `
+
+    <div class="page-title">
+      Discover
+    </div>
+
+    <div class="search-box">
+
+      <input
+        id="searchInput"
+        class="field"
+        type="search"
+        placeholder="Search people..."
+        autocomplete="off">
+
+      <button
+        id="searchButton"
+        class="primary"
+        type="button">
+
+        Search
+
+      </button>
+
+    </div>
+
+    <div
+      id="searchResults"
+      class="card">
+
+      <div class="empty">
+        Search for people on Zilnet.
+      </div>
+
+    </div>
+  `;
+
+  $("searchButton").onclick =
+    searchUsers;
+
+  $("searchInput").onkeydown =
+    event => {
+
+      if(event.key === "Enter"){
+
+        event.preventDefault();
+
+        searchUsers();
+      }
+    };
+}
+
+
+async function searchUsers(){
+
+  const input =
+    $("searchInput");
+
+  if(!input) return;
+
+  const q =
+    input.value.trim();
+
+  if(!q){
+
+    toast(
+      "Type a username or name."
+    );
+
+    return;
+  }
+
+  const box =
+    $("searchResults");
+
+  box.innerHTML = `
+    <div class="empty">
+      Searching...
+    </div>
+  `;
+
+  try{
+
+    const result =
+      await api(
+        `/search?q=${encodeURIComponent(q)}`
+      );
+
+    const users =
+      Array.isArray(result.users)
+        ? result.users
+        : [];
+
+    if(!users.length){
+
+      box.innerHTML = `
+        <div class="empty">
+          <h3>No users found</h3>
+        </div>
+      `;
+
+      return;
+    }
+
+    box.innerHTML =
+      users.map(user => `
+
+        <div class="user-row">
+
+          ${avatarHTML(user)}
+
+          <button
+            type="button"
+            class="user-info"
+            style="
+              border:0;
+              background:none;
+              color:#fff;
+              text-align:left;
+            "
+            onclick="viewProfile('${esc(user.id)}')">
+
+            <strong>
+              ${esc(
+                user.display_name ||
+                user.username ||
+                "User"
+              )}
+            </strong>
+
+            <span>
+              @${esc(user.username || "")}
+            </span>
+
+          </button>
+
+          ${
+            String(user.id) !== String(me?.id)
+            ? `
+              <button
+                type="button"
+                class="follow-btn"
+                onclick="toggleFollow(
+                  '${esc(user.id)}',
+                  this
+                )">
+
+                Follow
+
+              </button>
+            `
+            : ""
+          }
+
+        </div>
+
+      `).join("");
+
+  }catch(error){
+
+    box.innerHTML = `
+      <div class="empty">
+        ${esc(error.message)}
+      </div>
+    `;
+  }
+}
+
+
+/* =========================================================
+   FOLLOW / UNFOLLOW
+   ========================================================= */
+
+async function toggleFollow(userId,button){
+
+  if(button?.dataset.busy === "1")
+    return;
+
+  if(button)
+    button.dataset.busy = "1";
+
+  try{
+
+    const result =
+      await api(
+        `/users/${encodeURIComponent(userId)}/follow`,
+        {
+          method:"POST"
+        }
+      );
+
+    const following =
+      Boolean(
+        result.following ??
+        result.is_following
+      );
+
+    if(button){
+
+      button.textContent =
+        following
+          ? "Following"
+          : "Follow";
+
+      button.classList.toggle(
+        "following",
+        following
+      );
+    }
+
+  }catch(error){
+
+    toast(
+      error.message ||
+      "Couldn't update follow."
+    );
+
+  }finally{
+
+    if(button)
+      button.dataset.busy = "0";
+  }
+}
+
+
+/* =========================================================
+   PROFILE
+   ========================================================= */
+
+async function viewProfile(userId){
+
+  nav("profile");
+
+  $("content").innerHTML = `
+    <div class="empty">
+      Loading profile...
+    </div>
+  `;
+
+  try{
+
+    const result =
+      await api(
+        `/users/${encodeURIComponent(userId)}`
+      );
+
+    const user =
+      result.user ||
+      result;
+
+    renderProfile(user);
+
+  }catch(error){
+
+    $("content").innerHTML = `
+      <div class="card empty">
+        <h3>Couldn't load profile</h3>
+        <p>${esc(error.message)}</p>
+      </div>
+    `;
+  }
+}
+
+
+function renderProfile(user){
+
+  const following =
+    Boolean(
+      user.following ||
+      user.is_following
+    );
+
+  const mine =
+    String(user.id) ===
+    String(me?.id);
+
+  $("content").innerHTML = `
+
+    <div class="card">
+
+      <div
+        style="
+          display:flex;
+          gap:15px;
+          align-items:center;
+        ">
+
+        ${
+          user.avatar_url
+          ? `
+            <img
+              class="profile-avatar"
+              src="${esc(user.avatar_url)}"
+              alt="">
+          `
+          : `
+            <div
+              class="profile-avatar fallback"
+              style="
+                display:flex;
+                align-items:center;
+                justify-content:center;
+              ">
+
+              ${initial(user)}
+
+            </div>
+          `
+        }
+
+        <div style="flex:1">
+
+          <h2 style="margin:0">
+            ${esc(
+              user.display_name ||
+              user.username
+            )}
+          </h2>
+
+          <div style="color:#777">
+            @${esc(user.username)}
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <p style="color:#aaa;line-height:1.5">
+        ${esc(user.bio || "No bio yet.")}
+      </p>
+
+
+      ${
+        user.skills
+        ? `
+          <div
+            style="
+              color:#aaa;
+              font-size:13px;
+            ">
+
+            ${esc(
+              Array.isArray(user.skills)
+                ? user.skills.join(" • ")
+                : user.skills
+            )}
+
+          </div>
+        `
+        : ""
+      }
+
+
+      <div
+        style="
+          display:flex;
+          gap:8px;
+          margin-top:15px;
+        ">
+
+        ${
+          mine
+          ? `
+            <button
+              class="primary"
+              onclick="editProfile()">
+
+              Edit Profile
+
+            </button>
+
+            <button
+              class="z-btn"
+              onclick="openSettings()">
+
+              Settings
+
+            </button>
+          `
+          : `
+            <button
+              class="follow-btn ${
+                following
+                  ? "following"
+                  : ""
+              }"
+              onclick="
+                toggleFollow(
+                  '${esc(user.id)}',
+                  this
+                )">
+
+              ${
+                following
+                  ? "Following"
+                  : "Follow"
+              }
+
+            </button>
+
+            <button
+              class="z-btn"
+              onclick="
+                startDirectChat(
+                  '${esc(user.id)}'
+                )">
+
+              Message
+
+            </button>
+          `
+        }
+
+      </div>
+
+    </div>
+
+    <div class="page-title">
+      Posts
+    </div>
+
+    <div id="profilePosts">
+      <div class="empty">
+        Loading...
+      </div>
+    </div>
+  `;
+
+  loadUserPosts(user.id);
+}
+
+
+async function loadUserPosts(userId){
+
+  const box =
+    $("profilePosts");
+
+  if(!box) return;
+
+  try{
+
+    const result =
+      await api(
+        `/users/${encodeURIComponent(userId)}/posts`
+      );
+
+    const posts =
+      Array.isArray(result.posts)
+        ? result.posts
+        : [];
+
+    if(!posts.length){
+
+      box.innerHTML = `
+        <div class="card empty">
+          No posts yet.
+        </div>
+      `;
+
+      return;
+    }
+
+    box.innerHTML =
+      posts.map(postHTML).join("");
+
+  }catch(error){
+
+    box.innerHTML = `
+      <div class="card empty">
+        ${esc(error.message)}
+      </div>
+    `;
+  }
+}
+
+
+/* =========================================================
+   MY PROFILE
+   ========================================================= */
+
+async function myProfile(){
+
+  if(!me){
+
+    setLoggedIn(false);
+
+    return;
+  }
+
+  viewProfile(me.id);
+}
+
+
+/* =========================================================
+   EDIT PROFILE
+   ========================================================= */
+
+async function editProfile(){
+
+  const displayName =
+    prompt(
+      "Display name:",
+      me.display_name || ""
+    );
+
+  if(displayName === null)
+    return;
+
+  const bio =
+    prompt(
+      "Bio:",
+      me.bio || ""
+    );
+
+  if(bio === null)
+    return;
+
+  const skills =
+    prompt(
+      "Skills:",
+      Array.isArray(me.skills)
+        ? me.skills.join(", ")
+        : (me.skills || "")
+    );
+
+  if(skills === null)
+    return;
+
+  try{
+
+    const result =
+      await api(
+        "/profile/update",
+        {
+          method:"POST",
+          body:{
+            display_name:
+              displayName.trim(),
+            bio:bio.trim(),
+            skills:skills.trim()
+          }
+        }
+      );
+
+    me =
+      result.user ||
+      {
+        ...me,
+        display_name:
+          displayName.trim(),
+        bio:
+          bio.trim(),
+        skills:
+          skills.trim()
+      };
+
+    await myProfile();
+
+    toast("Profile updated.");
+
+  }catch(error){
+
+    toast(
+      error.message ||
+      "Couldn't update profile."
+    );
+  }
+}
+
+
+/* =========================================================
+   SETTINGS
+   ========================================================= */
+
+async function openSettings(){
+
+  nav("profile");
+
+  $("content").innerHTML = `
+    <div class="page-title">
+      Settings
+    </div>
+
+    <div class="card">
+
+      <button
+        class="setting"
+        onclick="changeTheme()">
+
+        <span>
+          Theme
+          <small>
+            Dark appearance
+          </small>
+        </span>
+
+        <span>›</span>
+
+      </button>
+
+
+      <button
+        class="setting"
+        onclick="changeVisibility()">
+
+        <span>
+          Profile visibility
+          <small>
+            Control who can view your profile
+          </small>
+        </span>
+
+        <span>›</span>
+
+      </button>
+
+
+      <button
+        class="setting"
+        onclick="changeMessagePrivacy()">
+
+        <span>
+          Messages
+          <small>
+            Control who can message you
+          </small>
+        </span>
+
+        <span>›</span>
+
+      </button>
+
+
+      <button
+        class="setting"
+        onclick="changePassword()">
+
+        <span>
+          Change password
+          <small>
+            Update your account password
+          </small>
+        </span>
+
+        <span>›</span>
+
+      </button>
+
+
+      <button
+        class="setting"
+        onclick="openNotifications()">
+
+        <span>
+          Notifications
+          <small>
+            View your notifications
+          </small>
+        </span>
+
+        <span>›</span>
+
+      </button>
+
+
+      <button
+        class="setting"
+        onclick="logout()">
+
+        <span style="color:#ff5c72">
+          Log out
+          <small>
+            End this session
+          </small>
+        </span>
+
+      </button>
+
+    </div>
+  `;
+
+  try{
+
+    const result =
+      await api("/settings");
+
+    settingsCache =
+      result.settings ||
+      result;
+
+  }catch(error){
+
+    console.warn(
+      "Settings:",
+      error
+    );
+  }
+}
+
+
+async function changeVisibility(){
+
+  const value =
+    prompt(
+      "Profile visibility: public or private",
+      settingsCache?.profile_visibility ||
+      "public"
+    );
+
+  if(!value) return;
+
+  const normalized =
+    value.toLowerCase();
+
+  if(
+    normalized !== "public" &&
+    normalized !== "private"
+  ){
+
+    toast(
+      "Use public or private."
+    );
+
+    return;
+  }
+
+  await updateSettings({
+    profile_visibility:
+      normalized
+  });
+}
+
+
+async function changeMessagePrivacy(){
+
+  const value =
+    prompt(
+      "Message privacy: everyone or following",
+      settingsCache?.message_privacy ||
+      "everyone"
+    );
+
+  if(!value) return;
+
+  const normalized =
+    value.toLowerCase();
+
+  if(
+    normalized !== "everyone" &&
+    normalized !== "following"
+  ){
+
+    toast(
+      "Use everyone or following."
+    );
+
+    return;
+  }
+
+  await updateSettings({
+    message_privacy:
+      normalized
+  });
+}
+
+
+async function changeTheme(){
+
+  /*
+    No visible theme switch is added to the UI.
+    The backend setting remains available.
+  */
+
+  await updateSettings({
+    theme:"system"
+  });
+}
+
+
+async function updateSettings(changes){
+
+  try{
+
+    const result =
+      await api(
+        "/settings",
+        {
+          method:"PATCH",
+          body:changes
+        }
+      );
+
+    settingsCache =
+      result.settings ||
+      {
+        ...(settingsCache || {}),
+        ...changes
+      };
+
+    toast("Settings saved.");
+
+  }catch(error){
+
+    toast(
+      error.message ||
+      "Couldn't save settings."
+    );
+  }
+}
+
+
+/* =========================================================
+   CHANGE PASSWORD
+   ========================================================= */
+
+async function changePassword(){
+
+  const currentPassword =
+    prompt("Current password:");
+
+  if(currentPassword === null)
+    return;
+
+  const newPassword =
+    prompt(
+      "New password (8+ characters):"
+    );
+
+  if(newPassword === null)
+    return;
+
+  if(newPassword.length < 8){
+
+    toast(
+      "Password must be at least 8 characters."
+    );
+
+    return;
+  }
+
+  try{
+
+    await api(
+      "/change-password",
+      {
+        method:"POST",
+        body:{
+          current_password:
+            currentPassword,
+          new_password:
+            newPassword
+        }
+      }
+    );
+
+    toast(
+      "Password changed successfully."
+    );
+
+  }catch(error){
+
+    toast(
+      error.message ||
+      "Couldn't change password."
+    );
+  }
+}
+
+
+/* =========================================================
+   NOTIFICATIONS
+   ========================================================= */
+
+async function openNotifications(){
+
+  $("modal").classList.add("open");
+
+  $("modal").innerHTML = `
+    <div class="sheet">
+
+      <div class="sheet-head">
+
+        <h3>Notifications</h3>
+
+        <button
+          class="icon-btn"
+          onclick="closeModal()">
+
+          <img
+            class="zicon"
+            src="${ICONS.close}"
+            alt="Close">
+
+        </button>
+
+      </div>
+
+      <div id="notificationList">
+        <div class="empty">
+          Loading...
+        </div>
+      </div>
+
+    </div>
+  `;
+
+  try{
+
+    const result =
+      await api("/notifications");
+
+    const notifications =
+      Array.isArray(result.notifications)
+        ? result.notifications
+        : [];
+
+    const box =
+      $("notificationList");
+
+    if(!notifications.length){
+
+      box.innerHTML = `
+        <div class="empty">
+          No notifications.
+        </div>
+      `;
+
+      return;
+    }
+
+    box.innerHTML =
+      notifications.map(n => `
+
+        <div class="user-row">
+
+          <div style="flex:1">
+
+            <strong>
+              ${esc(
+                n.message ||
+                n.type ||
+                "Notification"
+              )}
+            </strong>
+
+            <span style="
+              display:block;
+              color:#666;
+              font-size:11px;
+              margin-top:3px;
+            ">
+
+              ${esc(
+                n.created_at || ""
+              )}
+
+            </span>
+
+          </div>
+
+        </div>
+
+      `).join("");
+
+  }catch(error){
+
+    $("notificationList").innerHTML = `
+      <div class="empty">
+        ${esc(error.message)}
+      </div>
+    `;
+  }
+}
+
+
+/* =========================================================
+   REELS
+   ========================================================= */
+
+async function openReels(){
+
+  nav("reels");
+
+  $("content").innerHTML = `
+    <div class="page-title">
+      Reels
+    </div>
+
+    <div id="reels">
+      <div class="empty">
+        Loading...
+      </div>
+    </div>
+  `;
+
+  try{
+
+    const result =
+      await api("/reels");
+
+    const reels =
+      Array.isArray(result.reels)
+        ? result.reels
+        : [];
+
+    if(!reels.length){
+
+      $("reels").innerHTML = `
+        <div class="card empty">
+          <h3>No reels yet</h3>
+        </div>
+      `;
+
+      return;
+    }
+
+    $("reels").innerHTML =
+      reels.map(reel => `
+
+        <div class="card">
+
+          ${
+            reel.media_url
+            ? `
+              <video
+                class="post-media"
+                controls
+                playsinline
+                preload="metadata"
+                src="${esc(reel.media_url)}">
+              </video>
+            `
+            : ""
+          }
+
+          ${
+            reel.caption
+            ? `
+              <div class="post-text">
+                ${esc(reel.caption)}
+              </div>
+            `
+            : ""
+          }
+
+        </div>
+
+      `).join("");
+
+  }catch(error){
+
+    $("reels").innerHTML = `
+      <div class="card empty">
+        ${esc(error.message)}
+      </div>
+    `;
+  }
+}
+
+
+/* =========================================================
+   UPLOAD REEL
+   ========================================================= */
+
+async function createReel(){
+
+  const file =
+    await chooseFile(
+      "video/*"
+    );
+
+  if(!file)
+    return;
+
+  try{
+
+    const uploaded =
+      await uploadFile(file);
+
+    await api("/reels",{
+      method:"POST",
+      body:{
+        media_url:
+          uploaded.url ||
+          uploaded.media_url,
+        media_type:
+          file.type
+      }
+    });
+
+    toast("Reel created.");
+
+    await openReels();
+
+  }catch(error){
+
+    toast(
+      error.message ||
+      "Couldn't create reel."
+    );
+  }
+}
+
+
+/* =========================================================
+   FILE CHOOSER
+   ========================================================= */
+
+function chooseFile(accept){
+
+  return new Promise(resolve => {
+
+    const input =
+      document.createElement("input");
+
+    input.type = "file";
+    input.accept = accept;
+
+    input.onchange = () => {
+
+      resolve(
+        input.files?.[0] ||
+        null
+      );
+
+    };
+
+    input.click();
+  });
+}
+
+
+/* =========================================================
+   NAVIGATION FALLBACKS
+   ========================================================= */
+
+function startDirectChat(userId){
+
+  toast(
+    "Opening messages..."
+  );
+
+  openChats(userId);
+}
+
+
+async function openChats(userId=null){
+
+  nav("messages");
+
+  if(userId){
+
+    /*
+      Part 3 will handle the full chat UI.
+      Keep the target user available.
+    */
+
+    window.__targetChatUser =
+      userId;
+  }
+
+  $("content").innerHTML = `
+    <div class="page-title">
+      Messages
+    </div>
+
+    <div id="chatRoot">
+      <div class="empty">
+        Loading conversations...
+      </div>
+    </div>
+  `;
+
+  /*
+    Full chat rendering is continued
+    in Part 3.
+  */
+
+  if(typeof loadChatList === "function"){
+
+    await loadChatList();
+
+  }else{
+
+    $("chatRoot").innerHTML = `
+      <div class="card empty">
+        Messages are loading...
+      </div>
+    `;
+  }
+}
+
+
+/* =========================================================
+   GLOBAL ESCAPE
+   ========================================================= */
+
+document.addEventListener(
+  "keydown",
+  event => {
+
+    if(event.key === "Escape"){
+
+      closeModal();
+    }
+  }
+);
+
+</script>
+<script>
+/* =========================
+   ZILNET — PART 3/3
+   APP LOGIC + AUTH + EVENTS
+========================= */
+
+const API = "/api";
+
+const $ = (id) => document.getElementById(id);
+
+let currentUser = null;
+let currentPage = "home";
+
+/* ---------- API HELPER ---------- */
+
+async function api(path, options = {}) {
+  try {
+    const res = await fetch(API + path, {
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+        ...(options.headers || {})
+      },
+      ...options
+    });
+
+    let data = {};
+    try {
+      data = await res.json();
+    } catch (_) {}
+
+    if (!res.ok) {
+      throw new Error(data.error || data.message || `Request failed (${res.status})`);
+    }
+
+    return data;
+  } catch (err) {
+    throw err;
+  }
+}
+
+/* ---------- MESSAGE ---------- */
+
+function showAuthError(message) {
+  const box =
+    $("authError") ||
+    $("loginError") ||
+    $("signupError");
+
+  if (!box) {
+    alert(message);
+    return;
+  }
+
+  box.textContent = message;
+  box.style.display = "block";
+
+  box.animate(
+    [
+      { opacity: 0, transform: "translateY(-5px)" },
+      { opacity: 1, transform: "translateY(0)" }
+    ],
+    {
+      duration: 220,
+      easing: "ease-out"
+    }
+  );
+}
+
+function clearAuthError() {
+  document.querySelectorAll(
+    "#authError,#loginError,#signupError"
+  ).forEach(el => {
+    el.textContent = "";
+    el.style.display = "none";
+  });
+}
+
+/* ---------- AUTH SWITCH ---------- */
+
+function switchAuth(mode) {
+  clearAuthError();
+
+  const loginForm =
+    $("loginForm") ||
+    $("login-form");
+
+  const signupForm =
+    $("signupForm") ||
+    $("signup-form");
+
+  const loginPanel =
+    $("loginPanel") ||
+    $("login-panel");
+
+  const signupPanel =
+    $("signupPanel") ||
+    $("signup-panel");
+
+  const targetLogin = mode === "login";
+
+  const show = targetLogin
+    ? (loginForm || loginPanel)
+    : (signupForm || signupPanel);
+
+  const hide = targetLogin
+    ? (signupForm || signupPanel)
+    : (loginForm || loginPanel);
+
+  if (hide) {
+    hide.style.animation = "authSlideOut .18s ease forwards";
+
+    setTimeout(() => {
+      hide.style.display = "none";
+
+      if (show) {
+        show.style.display = "";
+        show.style.animation = "authSlideIn .25s ease forwards";
+      }
+    }, 170);
+  } else if (show) {
+    show.style.display = "";
+    show.style.animation = "authSlideIn .25s ease forwards";
+  }
+
+  document.querySelectorAll(
+    "[data-auth='login'],[data-auth='signup'],#loginSwitch,#signupSwitch"
+  ).forEach(btn => {
+    btn.classList.remove("active");
+  });
+
+  if (mode === "login") {
+    $("loginSwitch")?.classList.add("active");
+    document.querySelector("[data-auth='login']")?.classList.add("active");
+  } else {
+    $("signupSwitch")?.classList.add("active");
+    document.querySelector("[data-auth='signup']")?.classList.add("active");
+  }
+}
+
+/* ---------- LOGIN ---------- */
+
+async function loginUser(e) {
+  e?.preventDefault();
+  clearAuthError();
+
+  const login =
+    $("login")?.value?.trim() ||
+    $("username")?.value?.trim() ||
+    $("loginUsername")?.value?.trim();
+
+  const password =
+    $("password")?.value ||
+    $("loginPassword")?.value ||
+    "";
+
+  if (!login || !password) {
+    showAuthError("Enter your username/email and password.");
+    return;
+  }
+
+  const button =
+    $("loginButton") ||
+    $("loginBtn");
+
+  const oldText = button?.textContent;
+
+  if (button) {
+    button.disabled = true;
+    button.textContent = "Logging in…";
+  }
+
+  try {
+    await api("/login", {
+      method: "POST",
+      body: JSON.stringify({
+        login,
+        password
+      })
+    });
+
+    await loadCurrentUser();
+
+  } catch (err) {
+    showAuthError(err.message || "Login failed.");
+  } finally {
+    if (button) {
+      button.disabled = false;
+      button.textContent = oldText || "Login";
+    }
+  }
+}
+
+/* ---------- SIGNUP ---------- */
+
+async function signupUser(e) {
+  e?.preventDefault();
+  clearAuthError();
+
+  const username =
+    $("signupUsername")?.value?.trim() ||
+    $("newUsername")?.value?.trim();
+
+  const displayName =
+    $("signupDisplayName")?.value?.trim() ||
+    $("displayName")?.value?.trim();
+
+  const email =
+    $("signupEmail")?.value?.trim() ||
+    $("newEmail")?.value?.trim();
+
+  const password =
+    $("signupPassword")?.value ||
+    $("newPassword")?.value ||
+    "";
+
+  if (!username || !displayName || !email || !password) {
+    showAuthError("Fill in all required fields.");
+    return;
+  }
+
+  const button =
+    $("signupButton") ||
+    $("signupBtn");
+
+  const oldText = button?.textContent;
+
+  if (button) {
+    button.disabled = true;
+    button.textContent = "Creating…";
+  }
+
+  try {
+    await api("/signup", {
+      method: "POST",
+      body: JSON.stringify({
+        username,
+        displayName,
+        email,
+        password
+      })
+    });
+
+    await loadCurrentUser();
+
+  } catch (err) {
+    showAuthError(err.message || "Could not create your account.");
+  } finally {
+    if (button) {
+      button.disabled = false;
+      button.textContent = oldText || "Create account";
+    }
+  }
+}
+
+/* ---------- CURRENT USER ---------- */
+
+async function loadCurrentUser() {
+  try {
+    const data = await api("/me");
+
+    currentUser = data.user || data;
+
+    showApp();
+
+    await loadHome();
+
+  } catch (_) {
+    showAuth();
+  }
+}
+
+/* ---------- AUTH / APP VISIBILITY ---------- */
+
+function showAuth() {
+  const auth =
+    $("authScreen") ||
+    $("auth") ||
+    $("loginScreen");
+
+  const app =
+    $("app") ||
+    $("appScreen") ||
+    $("mainApp");
+
+  if (auth) auth.style.display = "";
+  if (app) app.style.display = "none";
+
+  switchAuth("login");
+}
+
+function showApp() {
+  const auth =
+    $("authScreen") ||
+    $("auth") ||
+    $("loginScreen");
+
+  const app =
+    $("app") ||
+    $("appScreen") ||
+    $("mainApp");
+
+  if (auth) {
+    auth.animate(
+      [
+        { opacity: 1 },
+        { opacity: 0 }
+      ],
+      {
+        duration: 220,
+        easing: "ease"
+      }
+    );
+
+    setTimeout(() => {
+      auth.style.display = "none";
+    }, 210);
+  }
+
+  if (app) {
+    app.style.display = "";
+    app.animate(
+      [
+        { opacity: 0 },
+        { opacity: 1 }
+      ],
+      {
+        duration: 300,
+        easing: "ease-out"
+      }
+    );
+  }
+}
+
+/* ---------- LOGOUT ---------- */
+
+async function logoutUser() {
+  try {
+    await api("/logout", {
+      method: "POST"
+    });
+  } catch (_) {}
+
+  currentUser = null;
+  showAuth();
+}
+
+/* ---------- HOME ---------- */
+
+async function loadHome() {
+  currentPage = "home";
+
+  try {
+    const data = await api("/feed");
+
+    const posts =
+      data.posts ||
+      data.feed ||
+      [];
+
+    const feed =
+      $("feed") ||
+      $("posts");
+
+    if (!feed) return;
+
+    if (!posts.length) {
+      feed.innerHTML = `
+        <div class="empty-state">
+          No posts yet.
+        </div>
+      `;
+      return;
+    }
+
+    feed.innerHTML = posts.map(postHTML).join("");
+
+  } catch (err) {
+    const feed = $("feed") || $("posts");
+
+    if (feed) {
+      feed.innerHTML = `
+        <div class="error-state">
+          ${escapeHTML(err.message)}
+        </div>
+      `;
+    }
+  }
+}
+
+/* ---------- POST HTML ---------- */
+
+function postHTML(post) {
+  const username =
+    post.username ||
+    post.display_name ||
+    "User";
+
+  const content =
+    post.content ||
+    post.post_content ||
+    "";
+
+  const avatar =
+    post.avatar_url ||
+    "";
+
+  const media =
+    post.media_url ||
+    "";
+
+  let mediaHTML = "";
+
+  if (media) {
+    if (
+      post.media_type === "video" ||
+      /\.(mp4|webm|mov)$/i.test(media)
+    ) {
+      mediaHTML = `
+        <video
+          class="post-media"
+          src="${escapeAttr(media)}"
+          controls
+          playsinline
+        ></video>
+      `;
+    } else {
+      mediaHTML = `
+        <img
+          class="post-media"
+          src="${escapeAttr(media)}"
+          loading="lazy"
+        >
+      `;
+    }
+  }
+
+  return `
+    <article class="post" data-post-id="${escapeAttr(post.id)}">
+
+      <div class="post-header">
+
+        ${
+          avatar
+            ? `<img class="post-avatar" src="${escapeAttr(avatar)}">`
+            : `<div class="post-avatar placeholder"></div>`
+        }
+
+        <div>
+          <strong>${escapeHTML(username)}</strong>
+        </div>
+
+      </div>
+
+      ${
+        content
+          ? `<div class="post-content">${escapeHTML(content)}</div>`
+          : ""
+      }
+
+      ${mediaHTML}
+
+      <div class="post-actions">
+
+        <button
+          class="post-action"
+          onclick="likePost('${escapeAttr(post.id)}')"
+        >
+          ♡
+        </button>
+
+        <button
+          class="post-action"
+          onclick="openComments('${escapeAttr(post.id)}')"
+        >
+          ○
+        </button>
+
+        <button
+          class="post-action"
+          onclick="sharePost('${escapeAttr(post.id)}')"
+        >
+          ↗
+        </button>
+
+        <button
+          class="post-action"
+          onclick="savePost('${escapeAttr(post.id)}')"
+        >
+          ♢
+        </button>
+
+      </div>
+
+    </article>
+  `;
+}
+
+/* ---------- LIKE ---------- */
+
+async function likePost(id) {
+  try {
+    await api(`/posts/${encodeURIComponent(id)}/like`, {
+      method: "POST"
+    });
+
+    await loadHome();
+
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+/* ---------- SAVE ---------- */
+
+async function savePost(id) {
+  try {
+    await api(`/posts/${encodeURIComponent(id)}/save`, {
+      method: "POST"
+    });
+
+    showToast("Saved");
+
+  } catch (err) {
+    showToast(err.message);
+  }
+}
+
+/* ---------- SHARE ---------- */
+
+async function sharePost(id) {
+  const url =
+    `${location.origin}/?post=${encodeURIComponent(id)}`;
+
+  try {
+    if (navigator.share) {
+      await navigator.share({
+        title: "Zilnet",
+        url
+      });
+    } else {
+      await navigator.clipboard.writeText(url);
+      showToast("Post link copied");
+    }
+  } catch (_) {}
+}
+
+/* ---------- CREATE POST ---------- */
+
+async function createPost() {
+  const text =
+    $("postText")?.value?.trim() ||
+    $("postContent")?.value?.trim() ||
+    "";
+
+  const file =
+    $("postFile")?.files?.[0] ||
+    $("mediaFile")?.files?.[0];
+
+  if (!text && !file) {
+    showToast("Add some content first.");
+    return;
+  }
+
+  /*
+    IMPORTANT:
+    The Worker accepts the post data directly.
+    A local File object cannot be sent as a fake URL.
+  */
+
+  let media_url = "";
+  let media_type = "";
+
+  if (file) {
+    /*
+      Convert the selected file to a data URL.
+      This keeps the frontend functional without inventing
+      an /api/upload route.
+    */
+
+    media_url = await fileToDataURL(file);
+    media_type = file.type.startsWith("video/")
+      ? "video"
+      : "image";
+  }
+
+  try {
+    await api("/posts", {
+      method: "POST",
+      body: JSON.stringify({
+        content: text,
+        media_url,
+        media_type
+      })
+    });
+
+    if ($("postText")) $("postText").value = "";
+    if ($("postContent")) $("postContent").value = "";
+
+    if ($("postFile")) $("postFile").value = "";
+    if ($("mediaFile")) $("mediaFile").value = "";
+
+    showToast("Posted");
+
+    await loadHome();
+
+  } catch (err) {
+    showToast(err.message || "Could not create post.");
+  }
+}
+
+/* ---------- FILE PICKER ---------- */
+
+function openMediaPicker() {
+  const input =
+    $("postFile") ||
+    $("mediaFile") ||
+    $("createMedia");
+
+  input?.click();
+}
+
+function fileToDataURL(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+
+    reader.readAsDataURL(file);
+  });
+}
+
+/* ---------- COMMENTS ---------- */
+
+async function openComments(id) {
+  try {
+    const data = await api(
+      `/posts/${encodeURIComponent(id)}/comments`
+    );
+
+    const comments =
+      data.comments ||
+      [];
+
+    const text =
+      comments.length
+        ? comments
+            .map(c =>
+              `${c.username || "User"}: ${c.content || ""}`
+            )
+            .join("\n")
+        : "No comments yet.";
+
+    const comment = prompt(text + "\n\nWrite a comment:");
+
+    if (!comment?.trim()) return;
+
+    await api(
+      `/posts/${encodeURIComponent(id)}/comments`,
+      {
+        method: "POST",
+        body: JSON.stringify({
+          content: comment.trim()
+        })
+      }
+    );
+
+    showToast("Comment added");
+
+  } catch (err) {
+    showToast(err.message);
+  }
+}
+
+/* ---------- STORIES ---------- */
+
+async function loadStories() {
+  const container =
+    $("stories") ||
+    $("storyContainer");
+
+  if (!container) return;
+
+  try {
+    const data = await api("/stories");
+
+    const stories =
+      data.stories ||
+      [];
+
+    container.innerHTML = stories.map(story => `
+      <button
+        class="story"
+        onclick="openStory('${escapeAttr(story.id)}')"
+      >
+        <div class="story-ring">
+
+          ${
+            story.avatar_url
+              ? `<img src="${escapeAttr(story.avatar_url)}">`
+              : `<div class="story-placeholder"></div>`
+          }
+
+        </div>
+
+        <span>
+          ${escapeHTML(
+            story.username ||
+            story.display_name ||
+            "User"
+          )}
+        </span>
+      </button>
+    `).join("");
+
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+async function openStory(id) {
+  try {
+    const data = await api(
+      `/stories/${encodeURIComponent(id)}`
+    );
+
+    const story = data.story || data;
+
+    if (story.media_url) {
+      window.open(story.media_url, "_blank");
+    }
+
+  } catch (err) {
+    showToast(err.message);
+  }
+}
+
+/* ---------- SEARCH ---------- */
+
+async function searchUsers(value) {
+  const q = value.trim();
+
+  if (!q) return;
+
+  try {
+    const data = await api(
+      `/search?q=${encodeURIComponent(q)}`
+    );
+
+    renderSearchResults(
+      data.users ||
+      data.results ||
+      []
+    );
+
+  } catch (err) {
+    showToast(err.message);
+  }
+}
+
+function renderSearchResults(users) {
+  const box =
+    $("searchResults");
+
+  if (!box) return;
+
+  box.innerHTML = users.map(user => `
+    <button
+      class="search-user"
+      onclick="openProfile('${escapeAttr(user.id)}')"
+    >
+      ${
+        user.avatar_url
+          ? `<img src="${escapeAttr(user.avatar_url)}">`
+          : `<div class="avatar-placeholder"></div>`
+      }
+
+      <span>
+        <strong>${escapeHTML(user.username || "")}</strong>
+        <small>${escapeHTML(user.display_name || "")}</small>
+      </span>
+    </button>
+  `).join("");
+}
+
+/* ---------- PROFILE ---------- */
+
+async function openProfile(id) {
+  try {
+    const data = await api(
+      `/users/${encodeURIComponent(id)}`
+    );
+
+    const user =
+      data.user ||
+      data;
+
+    currentPage = "profile";
+
+    const profile =
+      $("profileContent") ||
+      $("profilePanel");
+
+    if (!profile) return;
+
+    profile.innerHTML = `
+      <div class="profile-head">
+
+        ${
+          user.avatar_url
+            ? `<img class="profile-avatar" src="${escapeAttr(user.avatar_url)}">`
+            : `<div class="profile-avatar placeholder"></div>`
+        }
+
+        <h2>${escapeHTML(user.display_name || user.username)}</h2>
+
+        <p>@${escapeHTML(user.username || "")}</p>
+
+        ${
+          user.bio
+            ? `<p>${escapeHTML(user.bio)}</p>`
+            : ""
+        }
+
+        <button onclick="followUser('${escapeAttr(user.id)}')">
+          Follow
+        </button>
+
+      </div>
+    `;
+
+    showPage("profile");
+
+  } catch (err) {
+    showToast(err.message);
+  }
+}
+
+/* ---------- FOLLOW ---------- */
+
+async function followUser(id) {
+  try {
+    await api(
+      `/users/${encodeURIComponent(id)}/follow`,
+      {
+        method: "POST"
+      }
+    );
+
+    showToast("Follow updated");
+
+  } catch (err) {
+    showToast(err.message);
+  }
+}
+
+/* ---------- PAGE SWITCH ---------- */
+
+function showPage(page) {
+  currentPage = page;
+
+  document.querySelectorAll("[data-page]").forEach(el => {
+    el.style.display =
+      el.dataset.page === page
+        ? ""
+        : "none";
+  });
+
+  document.querySelectorAll(
+    "[data-nav]"
+  ).forEach(btn => {
+    btn.classList.toggle(
+      "active",
+      btn.dataset.nav === page
+    );
+  });
+
+  if (page === "home") {
+    loadHome();
+    loadStories();
+  }
+
+  if (page === "notifications") {
+    loadNotifications();
+  }
+
+  if (page === "reels") {
+    loadReels();
+  }
+}
+
+/* ---------- NOTIFICATIONS ---------- */
+
+async function loadNotifications() {
+  try {
+    const data =
+      await api("/notifications");
+
+    const box =
+      $("notificationsList");
+
+    if (!box) return;
+
+    const items =
+      data.notifications ||
+      [];
+
+    box.innerHTML =
+      items.length
+        ? items.map(n =>
+            `<div class="notification">
+              ${escapeHTML(n.message || "")}
+            </div>`
+          ).join("")
+        : `<div class="empty-state">No notifications.</div>`;
+
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+/* ---------- REELS ---------- */
+
+async function loadReels() {
+  try {
+    const data =
+      await api("/reels");
+
+    const reels =
+      data.reels ||
+      [];
+
+    const box =
+      $("reelsList");
+
+    if (!box) return;
+
+    box.innerHTML = reels.map(r => `
+      <video
+        class="reel"
+        src="${escapeAttr(r.media_url || "")}"
+        controls
+        playsinline
+        loop
+      ></video>
+    `).join("");
+
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+/* ---------- TOAST ---------- */
+
+function showToast(message) {
+  let toast =
+    $("zilnetToast");
+
+  if (!toast) {
+    toast = document.createElement("div");
+    toast.id = "zilnetToast";
+
+    Object.assign(toast.style, {
+      position: "fixed",
+      bottom: "90px",
+      left: "50%",
+      transform: "translateX(-50%)",
+      zIndex: "99999",
+      padding: "10px 16px",
+      borderRadius: "12px",
+      background: "#fff",
+      color: "#000",
+      fontSize: "14px",
+      boxShadow: "0 8px 30px rgba(0,0,0,.35)"
+    });
+
+    document.body.appendChild(toast);
+  }
+
+  toast.textContent = message;
+
+  toast.animate(
+    [
+      { opacity: 0, transform: "translate(-50%,10px)" },
+      { opacity: 1, transform: "translate(-50%,0)" }
+    ],
+    {
+      duration: 180,
+      fill: "forwards"
+    }
+  );
+
+  clearTimeout(toast._timer);
+
+  toast._timer = setTimeout(() => {
+    toast.animate(
+      [
+        { opacity: 1 },
+        { opacity: 0 }
+      ],
+      {
+        duration: 180,
+        fill: "forwards"
+      }
+    );
+  }, 1800);
+}
+
+/* ---------- ICON NORMALIZATION ---------- */
+
+function normalizeIcons() {
+
+  document.querySelectorAll(
+    "img.icon, img.nav-icon, img.action-icon, .icon-box img"
+  ).forEach(img => {
+
+    img.style.width = "";
+    img.style.height = "";
+    img.style.maxWidth = "100%";
+    img.style.maxHeight = "100%";
+    img.style.objectFit = "contain";
+    img.style.objectPosition = "center";
+    img.style.display = "block";
+
+  });
+}
+
+/* ---------- ICON CLICK ANIMATION ---------- */
+
+document.addEventListener("click", e => {
+
+  const icon =
+    e.target.closest(
+      "img.icon, img.nav-icon, img.action-icon, .icon-box"
+    );
+
+  if (!icon) return;
+
+  icon.animate(
+    [
+      {
+        transform: "scale(1)"
+      },
+      {
+        transform: "scale(.78)"
+      },
+      {
+        transform: "scale(1.08)"
+      },
+      {
+        transform: "scale(1)"
+      }
+    ],
+    {
+      duration: 240,
+      easing: "cubic-bezier(.2,.8,.2,1)"
+    }
+  );
+});
+
+/* ---------- ESCAPE ---------- */
+
+function escapeHTML(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+function escapeAttr(value) {
+  return escapeHTML(value);
+}
+
+/* ---------- EVENT WIRING ---------- */
+
+function wireEvents() {
+
+  /* LOGIN */
+
+  $("loginForm")?.addEventListener(
+    "submit",
+    loginUser
+  );
+
+  $("login-form")?.addEventListener(
+    "submit",
+    loginUser
+  );
+
+  $("loginButton")?.addEventListener(
+    "click",
+    loginUser
+  );
+
+  $("loginBtn")?.addEventListener(
+    "click",
+    loginUser
+  );
+
+
+  /* SIGNUP */
+
+  $("signupForm")?.addEventListener(
+    "submit",
+    signupUser
+  );
+
+  $("signup-form")?.addEventListener(
+    "submit",
+    signupUser
+  );
+
+  $("signupButton")?.addEventListener(
+    "click",
+    signupUser
+  );
+
+  $("signupBtn")?.addEventListener(
+    "click",
+    signupUser
+  );
+
+
+  /* AUTH SWITCH */
+
+  $("loginSwitch")?.addEventListener(
+    "click",
+    () => switchAuth("login")
+  );
+
+  $("signupSwitch")?.addEventListener(
+    "click",
+    () => switchAuth("signup")
+  );
+
+  document
+    .querySelectorAll("[data-auth='login']")
+    .forEach(btn =>
+      btn.addEventListener(
+        "click",
+        () => switchAuth("login")
+      )
+    );
+
+  document
+    .querySelectorAll("[data-auth='signup']")
+    .forEach(btn =>
+      btn.addEventListener(
+        "click",
+        () => switchAuth("signup")
+      )
+    );
+
+
+  /* LOGOUT */
+
+  $("logout")?.addEventListener(
+    "click",
+    logoutUser
+  );
+
+  $("logoutButton")?.addEventListener(
+    "click",
+    logoutUser
+  );
+
+
+  /* CREATE */
+
+  $("createPostButton")?.addEventListener(
+    "click",
+    createPost
+  );
+
+  $("postButton")?.addEventListener(
+    "click",
+    createPost
+  );
+
+  $("mediaButton")?.addEventListener(
+    "click",
+    openMediaPicker
+  );
+
+  $("cameraButton")?.addEventListener(
+    "click",
+    openMediaPicker
+  );
+
+
+  /* NAVIGATION */
+
+  document
+    .querySelectorAll("[data-nav]")
+    .forEach(btn => {
+
+      btn.addEventListener(
+        "click",
+        () => showPage(btn.dataset.nav)
+      );
+
+    });
+
+
+  /* SEARCH */
+
+  $("searchInput")?.addEventListener(
+    "keydown",
+    e => {
+
+      if (e.key === "Enter") {
+        searchUsers(e.target.value);
+      }
+
+    }
+  );
+
+
+  /* FILE PREVIEW */
+
+  document
+    .querySelectorAll(
+      "#postFile,#mediaFile,#createMedia"
+    )
+    .forEach(input => {
+
+      input.addEventListener(
+        "change",
+        () => {
+
+          const file =
+            input.files?.[0];
+
+          if (file) {
+            showToast(
+              `${file.name} selected`
+            );
+          }
+
+        }
+      );
+
+    });
+}
+
+/* ---------- START ---------- */
+
+document.addEventListener(
+  "DOMContentLoaded",
+  async () => {
+
+    wireEvents();
+    normalizeIcons();
+
+    /*
+      This is important:
+      the page immediately checks the actual
+      Cloudflare session instead of pretending
+      that a user is logged in.
+    */
+
+    await loadCurrentUser();
+
+    loadStories();
+
+  }
+);
+</script>
