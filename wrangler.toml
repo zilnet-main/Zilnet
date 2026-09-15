@@ -4,6 +4,9 @@ compatibility_date = "2026-09-09"
 
 [vars]
 DEVELOPER_PASSWORD = "7034"
+GITHUB_OWNER = "zilnet-main"
+GITHUB_REPO = "Zilnet"
+GITHUB_BRANCH = "main"
 
 [assets]
 directory = "./"
