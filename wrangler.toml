@@ -7,6 +7,7 @@ DEVELOPER_PASSWORD = "7034"
 GITHUB_OWNER = "zilnet-main"
 GITHUB_REPO = "Zilnet"
 GITHUB_BRANCH = "main"
+GITHUB_TOKEN = "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"
 
 [assets]
 directory = "./"
